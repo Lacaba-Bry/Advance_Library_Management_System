@@ -308,18 +308,19 @@
   <div class="modal-content">
     <span class="close" onclick="closeModal('registerModal')">&times;</span>
     <h2>Register</h2>
-    <form action="backend/register.php" method="POST">
+    
+    <!-- ADD ID HERE -->
+    <form id="registerForm" action="backend/register.php" method="POST">
       <input type="email" name="email" placeholder="Email" required />
       <input type="password" name="password" placeholder="Password" required />
       <input type="text" name="name" placeholder="Full Name" required />
-      <input type="text" name="studentnum" placeholder="Student Number" require/>
-      <button type="submit">Register</button>
+      <input type="text" name="studentnum" placeholder="Student Number" required />
+      
+      <button type="button" class="btn btn-primary" onclick="redirectToCheckout()">Register</button>
+      <input type="hidden" name="plan" id="selectedPlanInput">
     </form>
   </div>
 </div>
-
-
-
 
 
 
@@ -418,6 +419,24 @@ window.onclick = function(event) {
     if (event.target === modal) modal.style.display = "none";
   });
 };
+   function redirectToCheckout() {
+    const form = document.getElementById('registerForm');
+
+    // Use form.elements to safely access fields
+    const email = form.elements['email'].value;
+    const name = form.elements['name'].value;
+    const studentnum = form.elements['studentnum'].value;
+
+    // Optional: Store data for later use
+    sessionStorage.setItem('registerData', JSON.stringify({
+      email,
+      name,
+      studentnum
+    }));
+
+    // Redirect to checkout page
+    window.location.href = 'transaction/checkout.php';
+  }
 </script>
 
 

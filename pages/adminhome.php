@@ -1,3 +1,9 @@
+<?php
+require_once('backend/config/config.php');
+
+?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,6 +12,8 @@
    <link rel="stylesheet" href="css/adminhomex.css">
    <link rel="stylesheet" href="css/adminheader.css">
    <script type="text/javascript" src="javascript/adminhome.js" defer></script>
+   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
+
    
   <title>Document</title>
   <style>
@@ -27,14 +35,10 @@
         </div>
 
         <div class="user-info">
-          <div class="notifications">
-            <span class="notification-icon">&#128276;</span>
-            <span class="notification-count">12</span>
-          </div>
           <div class="user-profile">
-            <img src="profile-pic.jpg" alt="Profile picture of Arafat Hossain" class="profile-img">
-            <span class="user-name">Arafat Hossain</span>
-            <span class="user-role">Librarian</span>
+            <img src="./sample1.jpg" alt="Profile picture of Arafat Hossain" class="profile-img">
+            <span class="user-name">Bryan Lacaba</span>
+
           </div>
         </div>
       </header>
@@ -111,11 +115,8 @@
         <h5 class="modal-title" id="addBookModalLabel">Add New Book</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <form id="addBookForm">
+     <form id="addBookForm" enctype="multipart/form-data" method="post">
         <div class="modal-body">
-          <div class="mb-3">
-            <input type="text" class="form-control" name="Book_ID" placeholder="Book ID" required>
-          </div>
           <div class="mb-3">
             <input type="text" class="form-control" name="Title" placeholder="Title" required>
           </div>
@@ -180,7 +181,37 @@
   </div>
 </div>
 
+<script>
 
+
+document.addEventListener('DOMContentLoaded', () => {
+  const addBookForm = document.getElementById('addBookForm');
+
+  addBookForm.addEventListener('submit', async function (e) {
+    e.preventDefault(); // Prevent default form submission
+
+    const formData = new FormData(addBookForm);
+
+    try {
+    const response = await fetch('process/addnewbook.php', {
+        method: 'POST',
+        body: formData
+      });
+
+      const result = await response.text(); // Expecting plain text response
+      alert(result); // Show success or error message
+
+      addBookForm.reset(); // Optional: clear form after submission
+      const modal = bootstrap.Modal.getInstance(document.getElementById('addBookModal'));
+      modal.hide(); // Hide the modal
+    } catch (error) {
+      alert("Error submitting form: " + error.message);
+    }
+  });
+});
+
+
+</script>
 
 </body>
 </html>

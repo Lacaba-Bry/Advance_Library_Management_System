@@ -191,15 +191,11 @@
     </div>
 
     <div class="user-info">
-      <div class="notifications">
-        <span class="notification-icon">&#128276;</span>
-        <span class="notification-count">12</span>
-      </div>
-      <div class="user-profile">
-        <img src="profile-pic.jpg" alt="Profile picture of Arafat Hossain" class="profile-img">
-        <span class="user-name">Arafat Hossain</span>
-        <span class="user-role">Librarian</span>
-      </div>
+       <div class="user-profile">
+            <img src="./sample1.jpg" alt="Profile picture of Arafat Hossain" class="profile-img">
+            <span class="user-name">Bryan Lacaba</span>
+
+          </div>
     </div>
   </header>
 

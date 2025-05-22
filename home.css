@@ -4,62 +4,110 @@ body {
   margin: 0;
   background-color: #f9f9f9;
 }
-
-header {
+.top-nav {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 15px 20px;
-  color: white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  justify-content: space-between;
+  padding: 10px 20px;
+  background-color: white;
+  border-bottom: 1px solid #ddd;
+  font-family: sans-serif;
+}
+
+.left-section, .right-section {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.center-section {
+  flex: 1;
+  display: flex;
+  justify-content: center;
 }
 
 .logo {
-  font-size: 28px;
-  font-weight: bold;
+  width: 50px;
+  height: auto;
 }
 
-.search-container {
+.nav-links .dropdown {
+  position: relative;
+}
+.dropbtn {
   display: flex;
   align-items: center;
-  gap: 12px;
+  background: none;
+  border: none;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 5px 10px;
+  font-weight: 500;
+  gap: 4px; /* spacing between text and icon */
 }
+
+.material-icons.dropdown-icon {
+  font-size: 20px;
+  vertical-align: middle;
+}
+
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  top: 100%;
+  background: white;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  z-index: 10;
+}
+
+.dropdown:hover .dropdown-content {
+  display: block;
+}
+
+
+
+
+
 
 .search-bar {
-  padding: 8px;
-  width: 250px;
-  border-radius: 5px;
-  border: 1px solid #ddd;
-  outline: none;
-  transition: border-color 0.3s;
+  width: 300px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
 }
 
-.search-bar:focus {
-  border-color: #444;
-}
-
-.search-icon {
-  padding: 8px 12px;
+.premium-btn {
+  background-color: #f1e8ff;
+  color: #4b0082;
   border: none;
-  color: white;
-  border-radius: 5px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-weight: bold;
   cursor: pointer;
 }
-.auth-buttons {
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.profile {
+  position: relative;
+}
+.user-info {
   display: flex;
   align-items: center;
+  gap: 8px;
+  cursor: pointer;
 }
 
-.icon-btn {
-  font-size: 20px; /* Adjust icon size */
-  color: #4e3bcf;
-  transition: color 0.3s ease;
+.user-type {
+  font-size: 14px;
+  color: #555;
 }
-
-.icon-btn:hover {
-  color: #2a1f9d; /* Hover effect */
-}
-
 
 
 

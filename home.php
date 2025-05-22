@@ -22,33 +22,47 @@ $stmt->close();
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer" />
-
-  <link rel="stylesheet" href="bookhome.css">
+ <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link rel="stylesheet" href="home.css">
   <title>Haven Library - User Dashboard</title>
 </head>
 <body>
 
-<header>
-  <div class="logo">Haven Library</div>
-  <div class="search-container">
-    <div class="dropdown">
-      <button class="dropbtn">☰ Menu</button>
-      <div class="dropdown-content">
-        <a href="#">Home</a>
-        <a href="#">Categories</a>
-        <a href="#">About</a>
+<header class="top-nav">
+  <div class="left-section">
+    <img src="Logo.jpg" class="logo" alt="Logo" />
+    <nav class="nav-links">
+      <div class="dropdown">
+        <button class="dropbtn">
+  Browse 
+  <span class="material-icons dropdown-icon">arrow_drop_down</span>
+</button>
+        <div class="dropdown-content">
+          <a href="#">Home</a>
+          <a href="#">Genres</a>
+        </div>
       </div>
-    </div>
-    <input type="text" placeholder="Search for books, titles, authors..." class="search-bar">
-    <button class="search-icon">🔍</button>
+    </nav>
   </div>
 
-  <div class="auth-buttons">
-    <a href="#" class="icon-btn" title="Favorites"><i class="fas fa-heart"></i></a>
-    <a href="#" class="icon-btn" title="Cart"><i class="fas fa-shopping-cart"></i></a>
-    <a href="#" class="icon-btn" title="Profile"><i class="fas fa-user-circle"></i></a>
-    <a href="logout.php" class="btn">Logout</a>
+  <div class="center-section">
+    <input type="text" class="search-bar" placeholder="Search" />
   </div>
+
+<div class="right-section">
+  <button class="premium-btn">⚡ Try Premium</button>
+
+  <div class="profile dropdown">
+    <div class="user-info">
+      <img src="sample1.jpg" class="avatar" alt="User" />
+    </div>
+    <div class="dropdown-content">
+      <a href="#">Profile</a>
+      <a href="#">Logout</a>
+    </div>
+  </div>
+   <span class="user-type">Free User</span>
+</div>
 </header>
 
 
@@ -305,6 +319,7 @@ $stmt->close();
       <h2>Haven Library</h2>
       <p>Advanced Library Management System</p>
     </div>
+    
  <div class="footer-right">
       <h3>Follow Us</h3>
       <div class="social-media">

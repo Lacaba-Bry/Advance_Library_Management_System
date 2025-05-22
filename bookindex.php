@@ -60,13 +60,15 @@
       position: relative;
       border-radius: 10px;
       overflow: hidden;
-      background: white;
+      background: linear-gradient(to bottom, #ffffff, #f6f9fc);
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-      transition: transform 0.2s ease;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      margin-bottom: 20px;
     }
 
     .book-card:hover {
-      transform: scale(1.02);
+      transform: translateY(-4px);
+      box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
     }
 
     .favorite-icon {
@@ -79,6 +81,10 @@
       z-index: 10;
       color: #666;
       cursor: pointer;
+    }
+
+    .favorite-icon:hover {
+      color: #e74c3c;
     }
 
     .book-img {
@@ -101,8 +107,9 @@
     }
 
     .sidebar h6 {
-      font-weight: bold;
+      font-weight: 600;
       margin-bottom: 10px;
+      font-family: 'Segoe UI', sans-serif;
     }
 
     .sidebar .form-check {
@@ -116,31 +123,16 @@
 <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
   <div class="container-fluid">
     <a class="navbar-brand fw-bold" href="#">Haven Library</a>
-    
-    <!-- Search Bar -->
+
     <form class="d-flex mx-auto w-50">
       <input class="form-control me-2" type="search" placeholder="Search for books, titles, authors..." aria-label="Search">
       <button class="search-icon btn btn-outline-dark ms-2">🔍</button>
     </form>
-    
-    <!-- Auth Buttons: Heart, Cart, Profile, Logout -->
+
     <div class="d-flex">
-      <!-- Favorite Icon -->
-      <a href="#" class="me-3 text-dark">
-        <i class="fa-regular fa-heart fa-lg"></i>
-      </a>
-      
-      <!-- Cart Icon -->
-      <a href="#" class="me-3 text-dark">
-        <i class="fa-solid fa-cart-shopping fa-lg"></i>
-      </a>
-      
-      <!-- Profile Icon -->
-      <a href="#" class="me-3 text-dark">
-        <img src="https://via.placeholder.com/32" class="rounded-circle" alt="Profile">
-      </a>
-      
-      <!-- Logout Button -->
+      <a href="#" class="me-3 text-dark"><i class="fa-regular fa-heart fa-lg"></i></a>
+      <a href="#" class="me-3 text-dark"><i class="fa-solid fa-cart-shopping fa-lg"></i></a>
+      <a href="#" class="me-3 text-dark"><img src="https://via.placeholder.com/32" class="rounded-circle" alt="Profile"></a>
       <button class="btn btn-outline-dark">Logout</button>
     </div>
   </div>
@@ -149,7 +141,7 @@
 <!-- Main Content -->
 <div class="container-fluid py-4">
   <div class="row">
-    
+
     <!-- Left Sidebar -->
     <div class="col-md-3 mb-4">
       <div class="sidebar">
@@ -197,17 +189,15 @@
           <input class="form-check-input" type="checkbox" id="cat4">
           <label class="form-check-label" for="cat4">Fantasy</label>
         </div>
-        <!-- Add more categories as needed -->
       </div>
     </div>
 
     <!-- Books Grid -->
     <div class="col-md-9">
       <div class="row g-4">
-        <!-- Example Book -->
-        <div class="col-md-4">
+        <div class="col-lg-4 col-md-6 col-sm-12">
           <div class="book-card p-2">
-            <span class="favorite-icon"><i class="fa-regular fa-heart"></i></span>
+            <span class="favorite-icon" title="Add to Favorites"><i class="fa-regular fa-heart"></i></span>
             <img src="https://via.placeholder.com/300x400?text=Thunder+Stunt" class="book-img" alt="Book Cover">
             <div class="p-2">
               <h6 class="mb-1">Thunder Stunt</h6>
@@ -217,16 +207,45 @@
                 <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="far fa-star"></i>
               </div>
               <button class="btn btn-primary btn-sm w-100 mt-2"><i class="fa-solid fa-cart-plus"></i> Add to Cart</button>
+              <button class="btn btn-outline-secondary btn-sm w-100 mt-2" data-bs-toggle="modal" data-bs-target="#quickViewModal">Quick View</button>
             </div>
           </div>
         </div>
-
-        <!-- Duplicate this block for more books -->
       </div>
-    </div>
 
+      <!-- Pagination -->
+      <nav class="mt-4">
+        <ul class="pagination justify-content-center">
+          <li class="page-item disabled"><a class="page-link" href="#">Previous</a></li>
+          <li class="page-item active"><a class="page-link" href="#">1</a></li>
+          <li class="page-item"><a class="page-link" href="#">2</a></li>
+          <li class="page-item"><a class="page-link" href="#">Next</a></li>
+        </ul>
+      </nav>
+    </div>
   </div>
 </div>
+
+<!-- Quick View Modal -->
+<div class="modal fade" id="quickViewModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content p-4">
+      <h5>Thunder Stunt</h5>
+      <p>Author: Jane Doe • Genre: Adventure, Science • Price: $54.78</p>
+      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed euismod, nunc ut.</p>
+      <button class="btn btn-primary"><i class="fa-solid fa-cart-plus"></i> Add to Cart</button>
+    </div>
+  </div>
+</div>
+
+<!-- Filtering placeholder script -->
+<script>
+  document.querySelectorAll('.form-check-input').forEach(input => {
+    input.addEventListener('change', () => {
+      alert('Category filtering not yet implemented');
+    });
+  });
+</script>
 
 </body>
 </html>

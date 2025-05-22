@@ -72,13 +72,20 @@
         </ul>
       </li>
       <li>
-        <a href="calendar.html">
-          <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8eaed"><path d="M200-80q-33 0-56.5-23.5T120-160v-560q0-33 23.5-56.5T200-800h40v-40q0-17 11.5-28.5T280-880q17 0 28.5 11.5T320-840v40h320v-40q0-17 11.5-28.5T680-880q17 0 28.5 11.5T720-840v40h40q33 0 56.5 23.5T840-720v560q0 33-23.5 56.5T760-80H200Zm0-80h560v-400H200v400Zm0-480h560v-80H200v80Zm0 0v-80 80Zm280 240q-17 0-28.5-11.5T440-440q0-17 11.5-28.5T480-480q17 0 28.5 11.5T520-440q0 17-11.5 28.5T480-400Zm-160 0q-17 0-28.5-11.5T280-440q0-17 11.5-28.5T320-480q17 0 28.5 11.5T360-440q0 17-11.5 28.5T320-400Zm320 0q-17 0-28.5-11.5T600-440q0-17 11.5-28.5T640-480q17 0 28.5 11.5T680-440q0 17-11.5 28.5T640-400ZM480-240q-17 0-28.5-11.5T440-280q0-17 11.5-28.5T480-320q17 0 28.5 11.5T520-280q0 17-11.5 28.5T480-240Zm-160 0q-17 0-28.5-11.5T280-280q0-17 11.5-28.5T320-320q17 0 28.5 11.5T360-280q0 17-11.5 28.5T320-240Zm320 0q-17 0-28.5-11.5T600-280q0-17 11.5-28.5T640-320q17 0 28.5 11.5T680-280q0 17-11.5 28.5T640-240Z"/></svg>
-          <span>Transaction</span>
+        <a href="?page=transaction">
+       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+  <g data-name="Transaction">
+    <path d="M36 14l6 5-6 5v-3H24v-4h12z"/>
+    <path d="M12 34l-6-5 6-5v3h12v4H12z"/>
+    <path d="M4 4h40a1 1 0 0 1 1 1v38a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1zm1 2v36h38V6z"/>
+  </g>
+</svg>
+
+  <span>Transaction</span>
         </a>
       </li>
       <li>
-        <a href="profile.html">
+        <a href="?page=logs">
        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path d="M8.38 11.65a1 1 0 0 0 .76.35 1 1 0 0 0 .77-.42l2.85-4a1 1 0 0 0-1.62-1.16l-2.12 3L8.76 9a1 1 0 1 0-1.52 1.3zM8.38 17.65a1 1 0 0 0 .76.35 1 1 0 0 0 .77-.42l2.85-4a1 1 0 0 0-1.62-1.16l-2.12 3-.26-.42a1 1 0 1 0-1.52 1.3zM10.19 19.62a3.19 3.19 0 1 0 3.19 3.19 3.19 3.19 0 0 0-3.19-3.19zm0 4.38a1.19 1.19 0 1 1 0-2.38 1.19 1.19 0 1 1 0 2.38zM24 8.08h-8a1 1 0 0 0 0 2h8a1 1 0 0 0 0-2zM24 15h-8a1 1 0 0 0 0 2h8a1 1 0 0 0 0-2zM24 21.92h-8a1 1 0 0 0 0 2h8a1 1 0 0 0 0-2z"/><path d="M26.15 2H5.85A3.86 3.86 0 0 0 2 5.85v20.3A3.86 3.86 0 0 0 5.85 30h20.3A3.86 3.86 0 0 0 30 26.15V5.85A3.86 3.86 0 0 0 26.15 2zM28 26.15A1.85 1.85 0 0 1 26.15 28H5.85A1.85 1.85 0 0 1 4 26.15V5.85A1.85 1.85 0 0 1 5.85 4h20.3A1.85 1.85 0 0 1 28 5.85z"/></svg>
           <span>Logs</span>
         </a>
@@ -95,7 +102,7 @@
   <!-- Main content area -->
  <?php
   $page = $_GET['page'] ?? 'adminhome';
-  $allowed_pages = ['dashboard', 'adminhome','memberlist','banlist','booklist','bookfeatures'];
+  $allowed_pages = ['dashboard', 'adminhome','memberlist','banlist','booklist','bookfeatures','transaction','logs'];
 
   if (in_array($page, $allowed_pages)) {
       $filepath = __DIR__ . "/pages/{$page}.php";
