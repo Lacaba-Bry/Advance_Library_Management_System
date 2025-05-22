@@ -1,0 +1,843 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f8f9fd;
+    color: #333;
+  }
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 40px;
+    background-color: #ffffff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  }
+
+  .logo {
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: #4e3bcf;
+  }
+
+  nav a {
+    margin: 0 15px;
+    text-decoration: none;
+    color: #555;
+    font-weight: 500;
+  }
+
+  .btn {
+     background-color: #f2f0fe;
+    color: #4e3bcf; /* Change this to your desired color */
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  .btn:first-child {
+    border: 2px;
+    background-color: #4e3bcf;
+    color: white;
+    
+  }
+
+  .auth-buttons {
+    display: flex;
+    gap: 10px;
+  }
+  .auth-buttons a{
+    text-decoration: none;
+    color:  #f2f0fe;
+  }
+
+  .search-container {
+    display: flex;
+    align-items: center;
+    background-color: #fff;
+    border-radius: 999px;
+    padding: 6px 10px;
+    border: 1px solid #ddd;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  }
+
+  .search-bar {
+    border: none;
+    outline: none;
+    padding: 10px 12px;
+    font-size: 0.95rem;
+    border-radius: 999px;
+    width: 280px;
+  }
+
+  .search-icon {
+    background: none;
+    border: none;
+    font-size: 1.1rem;
+    color: #7d6ce3;
+    cursor: pointer;
+    padding-right: 10px;
+  }
+
+  .dropdown {
+    position: relative;
+    display: inline-block;
+  }
+
+  .dropbtn {
+    background-color: transparent;
+    color: #7d6ce3;
+    padding: 10px 16px;
+    font-size: 1rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+  }
+
+  .dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #fff;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px rgba(0,0,0,0.05);
+    z-index: 1;
+    border-radius: 8px;
+    overflow: hidden;
+    top: 110%;
+  }
+
+  .dropdown-content a {
+    color: #333;
+    padding: 10px 16px;
+    text-decoration: none;
+    display: block;
+  }
+
+  .dropdown-content a:hover {
+    background-color: #f1f2fa;
+  }
+
+  .dropdown:hover .dropdown-content {
+    display: block;
+  }
+
+  .hero {
+    display: flex;
+    margin-left: 100px;
+  }
+  .hero-content {
+    margin-top: 20px;
+    background-image: url('../IndexImage/index.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    height: 600px;
+    width: 1200px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 40px;
+    flex-wrap: wrap;
+    padding: 20px;
+    box-sizing: border-box;
+    margin-bottom: 20px;
+    border-radius: 25px;
+  }
+  
+  
+  .hero-text {
+    flex: 1;
+    min-width: 300px;
+  }
+  
+  .hero-text h4 {
+    color: #7d6ce3;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  
+  .hero-text h1 {
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+    line-height: 1.2;
+  }
+  
+  .hero-text p {
+    font-size: 1rem;
+    color: #666;
+    margin-bottom: 30px;
+    max-width: 500px;
+  }
+  
+  .hero-buttons {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+  }
+  
+  .btn-outline {
+    background-color: transparent;
+    color: #4e3bcf;
+    border: 2px solid #4e3bcf;
+  }
+  .best-seller {
+    background-image: url(../IndexImage/Rain.jpg);
+    position: relative;
+    margin: 20px 0 20px 50px;
+    height: 600px;
+    width: 500px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 40px;
+    flex-wrap: wrap;
+    padding: 20px;
+    box-sizing: border-box;
+    border-radius: 25px;
+    overflow: hidden;
+    z-index: 1;
+    background-color: rgba(255, 255, 255, 0.6); /* optional: adds a frosted effect */
+  }
+  
+  .best-seller::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    background-image: url(../IndexImage/Rain.jpg);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    filter: blur(8px); /* controls how blurry it is */
+    opacity: 1; /* full visibility, since we're blurring not fading */
+    z-index: 0;
+  }
+  
+  .best-seller > * {
+    position: relative;
+    z-index: 2;
+  }
+  .best-seller img {
+    display: block;
+    margin: 20px auto; /* Center image horizontally */
+    width: 50%;        /* Responsive sizing */
+    max-width: 300px;  /* Limit max size */
+    height: 300px;
+    border-radius: 12px;
+  }
+  
+  .seller-text {
+    text-align: center;
+    color: white; /* Ensure contrast with blurred background */
+    width: 100%;
+  }
+  
+  .seller-buttons .btn {
+    padding: 10px 20px;
+    background-color: #222;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+  }
+  
+  .seller-buttons .btn:hover {
+    background-color: #444;
+  }
+  
+  .features {
+    display: flex;
+    justify-content: space-around;
+    padding: 40px 20px;
+    background-color: #ffffff;
+    border-top: 1px solid #e5e5e5;
+    flex-wrap: wrap;
+  }
+  
+  .feature-item {
+    max-width: 300px;
+    flex: 1;
+    margin: 10px;
+  }
+  
+  .feature-title {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+  
+  .feature-title img {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    object-fit: cover;
+  }
+  
+  .text-block {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 80px;
+    text-align: left;
+  }
+  
+  .text-block h4 {
+    margin: 0;
+    height: 40px;
+    line-height: 40px;
+    font-size: 1rem;
+    color: #4e3bcf;
+  }
+  
+  .text-block p {
+    margin: 0;
+    height: 40px;
+    line-height: 40px;
+    font-size: 0.95rem;
+    color: #555;
+  }
+
+  .card {
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    padding: 20px;
+    max-width: 300px;
+    margin: 40px auto;
+    text-align: center;
+  }
+
+  .card img {
+    width: 100%;
+    border-radius: 10px;
+    margin-bottom: 15px;
+  }
+
+  .card h3 {
+    margin: 10px 0;
+  }
+
+  .price {
+    color: #4e3bcf;
+    font-weight: bold;
+    font-size: 1.2rem;
+  }
+
+  .recommend-popular {
+    width: 100%;
+    max-width: 1600px; /* Max width to prevent it from stretching too far on large screens */
+    margin: 0 auto; /* Centers the content horizontally */
+    display: flex;
+    justify-content: space-between;
+    gap: 40px;
+    padding: 60px 20px; /* Add some padding on the sides */
+    flex-wrap: wrap;
+    box-sizing: border-box; /* Ensure padding doesn't affect the width */
+  }
+  
+  .carousel-section.recommended {
+    background-image: url('../IndexImage/RecommendBg.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    padding: 40px 20px; /* Adjust padding as needed */
+  }
+  
+  .carousel-section.popular {
+    background-image: url('../IndexImage/PopularBg.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    padding: 40px 20px; /* Adjust padding as needed */
+  }
+  
+  .carousel-section {
+    flex: 1;
+    min-width: 300px;
+  }
+  
+  .carousel-section h2 {
+    font-size: 1.5rem;
+    margin-bottom: 5px;
+  }
+  
+  .carousel-section p {
+    color: #777;
+    margin-bottom: 15px;
+  }
+  
+  .carousel-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  
+  .book-row {
+    display: flex;
+    gap: 24px;
+    flex-grow: 1; /* Allows the book row to take the remaining space */
+    justify-content: flex-start; /* Aligns the books to the left */
+}
+
+.book-card {
+    flex: 0 0 120px;
+    height: 180px;
+    border-radius: 12px;
+    color: white;
+    font-weight: bold;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding: 10px;
+    font-size: 0.95rem;
+    overflow: hidden; /* Prevent images from overflowing the card */
+}
+
+.book-cover {
+    width: 100%; /* Make the image fill the card */
+    height: 100%; /* Ensure the image takes up the full height of the card */
+    object-fit: cover; /* Maintain the aspect ratio and cover the entire area */
+    border-radius: 8px; /* Optional: for rounded corners */
+}
+
+.carousel-btn {
+    background-color: #fff;
+    border: none;
+    font-size: 1.5rem;
+    padding: 8px;
+    cursor: pointer;
+    color: #4e3bcf;
+    border-radius: 50%;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.carousel-btn:hover {
+    background-color: #f1f1f1;
+}
+  
+  .sale-feature-section {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 40px;
+  }
+  
+  .sale, .featured {
+    flex: 1;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+  
+  .sale h3, .featured h3 {
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+  }
+  
+  .sale p, .featured p {
+    font-size: 1.1rem;
+    color: #555;
+  }
+
+.viewLibrary{
+  text-align: center;
+}
+.viewLibrary button{
+  padding: 10px 20px;
+border: none;
+background-color: #4e3bcf;
+color: white;
+font-size: 1rem;
+cursor: pointer;
+border-radius: 8px;
+}.subscribe-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 30px;
+  background-color: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  max-width: 500px;
+  margin: 60px auto;
+  text-align: center;
+}
+
+.subscribe-form h2 {
+  color: #4e3bcf;
+  font-size: 1.8rem;
+  margin-bottom: 10px;
+}
+
+.subscribe-form p {
+  color: #666;
+  font-size: 1rem;
+  margin-bottom: 30px;
+  max-width: 400px;
+}
+
+.input-wrapper {
+  display: flex;
+  width: 100%;
+  max-width: 400px;
+}
+
+.subscribe-form input[type="email"] {
+  padding: 12px 16px;
+  border-radius: 10px 0 0 10px;
+  border: 1px solid #ccc;
+  width: 100%;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+.subscribe-form input[type="email"]:hover,
+.subscribe-form input[type="email"]:focus {
+  border-color: #4e3bcf;
+  outline: none;
+}
+
+.subscribe-form button {
+  padding: 12px 24px;
+  border: none;
+  background-color: #4e3bcf;
+  color: white;
+  font-size: 1rem;
+  cursor: pointer;
+  border-radius: 0 10px 10px 0;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+}
+
+.subscribe-form button:hover {
+  background-color: #3a2eb1;
+}
+/* Footer Styles */
+.footer {
+background-color: #4e3bcf;
+color: white;
+padding: 40px 20px;
+text-align: center;
+display: flex;
+flex-direction: column;
+align-items: center;
+gap: 20px;
+}
+
+.footer-links {
+display: flex;
+gap: 20px;
+justify-content: center;
+}
+
+.footer-links a {
+color: white;
+text-decoration: none;
+font-weight: 500;
+}
+
+.footer-links a:hover {
+text-decoration: underline;
+}
+
+.footer-social {
+display: flex;
+gap: 20px;
+justify-content: center;
+}
+
+.footer-social .social-icon {
+color: white;
+text-decoration: none;
+font-weight: 600;
+}
+
+.footer-social .social-icon:hover {
+color: #f7c948; /* Change to a hover color of your choice */
+}
+
+.footer-text {
+font-size: 0.9rem;
+color: #dcdcdc;
+}
+
+/* Genre Section */
+.genres {
+  background-color: #f4f4f4;
+  padding: 50px 20px;
+  text-align: center;
+}
+
+.genres h2 {
+  font-size: 2.5em;
+  color: #4e3bcf;
+  margin-bottom: 20px;
+}
+
+.genres p {
+  font-size: 1.2em;
+  color: #777;
+  margin-bottom: 40px;
+}
+
+/* Genre Cards */
+.genre-cards {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px;
+}
+
+.genre-card {
+  background-color: #fff;
+  width: 220px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: transform 0.3s ease-in-out;
+}
+
+.genre-card:hover {
+  transform: scale(1.05);
+}
+
+.genre-card img {
+  width: 100%;
+  height: 250px;
+  object-fit: cover;
+}
+
+.genre-card h4 {
+  font-size: 1.5em;
+  color: #333;
+  padding: 15px;
+  background-color: #f7f7f7;
+  margin: 0;
+  text-align: center;
+  font-weight: bold;
+}
+
+.genre-card .genre-name {
+  font-size: 1.2em;
+  color: #555;
+  padding: 10px;
+  text-align: center;
+  font-weight: 600;
+}
+
+.genre-card:hover .genre-name {
+  color: #007BFF;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .genre-cards {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .genre-card {
+    width: 85%;
+    margin-bottom: 20px;
+  }
+}
+
+.gamified-features {
+  align-items: center;
+  padding: 80px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 200px;
+  color: #fff;
+}
+
+.feature-block {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 100px;
+}
+
+.feature-block.reverse {
+  flex-direction: row-reverse;
+}
+
+.feature-text {
+  flex: 1 1 45%;
+  max-width: 500px;
+}
+
+.feature-text h2 {
+  font-size: 2rem;
+  margin-bottom: 10px;
+  color: #4e3bcf;
+}
+
+.feature-text p {
+  font-size: 1.1rem;
+  color: #666666;
+}
+
+.feature-image {
+  flex: 1 1 45%;
+  display: flex;
+  justify-content: center;
+}
+
+
+.feature-image img {
+  width: 100%;
+  max-width: 400px; /* Set a max width */
+  height: auto;     /* Maintain aspect ratio */
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}/* Modal container */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+  padding-top: 60px; /* Space from top */
+}
+
+/* Modal content */
+.modal-content {
+  background-color: #fff;
+  margin: 5% auto;
+  padding: 20px;
+  border: 1px solid #ddd;
+  width: 80%;
+  max-width: 400px; /* Ensure modal does not become too wide */
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  animation: modalFadeIn 0.3s ease-in-out;
+}
+
+/* Modal header (close button) */
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* Close button hover effect */
+.close:hover,
+.close:focus {
+  color: #333;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* Form styling */
+.modal form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px; /* Add gap between form elements */
+}
+
+.modal input[type="email"],
+.modal input[type="password"],
+.modal input[type="text"] {
+  padding: 12px;
+  margin: 0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 16px;
+  width: 100%;
+  box-sizing: border-box; /* Prevent overflow */
+}
+
+.modal button {
+  padding: 12px;
+  background-color: #5c6bc0; /* A pleasant blue color */
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+  width: 100%; /* Make the button span the full width */
+}
+
+.modal button:hover {
+  background-color: #3f4a8a; /* Slightly darker blue on hover */
+}
+
+/* Title Styling */
+.modal h2 {
+  text-align: center;
+  color: #333;
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+/* Add Remember Me checkbox styling */
+.remember-me {
+  display: flex;
+  align-items: center; /* Align checkbox and label vertically */
+  justify-content: space-between; /* Push checkbox/label to the left and link to the right */
+  width: 100%; /* Ensure full width for correct positioning */
+  gap: 5px;
+}
+
+/* Link styling */
+.remember-me a {
+  font-size: 14px;
+  color: #5c6bc0;
+  text-decoration: none;
+  margin-left: auto; /* Push link to the right side */
+}
+
+.remember-me a:hover {
+  text-decoration: underline;
+}
+
+/* Remove default margin and width from checkbox */
+.remember-me input {
+  margin: 0;
+  width: auto;
+}
+
+/* Forgot Password & Sign Up Footer Styling */
+.login-footer {
+  display: flex;
+  justify-content: center;
+  font-size: 14px;
+}
+
+.login-footer p {
+  color: #333;
+}
+
+.login-footer a {
+  color: #5c6bc0;
+  text-decoration: none;
+}
+
+.login-footer a:hover {
+  text-decoration: underline;
+}
+
+/* Animation for modal fade-in effect */
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

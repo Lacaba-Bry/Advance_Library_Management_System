@@ -1,0 +1,256 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+:root {
+  --base-clr: #ffffff;
+  --text-clr: #333333;
+  --accent-clr: #5e63ff;
+  --secondary-text-clr: #b0b3c1;
+  --line-clr: #ddd;
+  --dark-clr: #2a2a2a;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 1.5rem;
+}
+
+body {
+  min-height: 100vh;
+  background-color: var(--base-clr);
+  color: var(--text-clr);
+  display: grid;
+  grid-template-columns: auto 1fr;
+}
+
+
+.logo-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5em;
+  gap: 1em;
+}
+
+.LOGOS {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  margin-right: -40px;
+}
+
+.logo {
+  font-size: 20px;
+  font-weight: bold;
+  color: var(--text-clr);
+  flex-grow: 1;
+}
+
+#toggle-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5em;
+  display: flex;
+  align-items: center;
+  margin-right: -10px;
+}
+.sidebar-toggle {
+  font-size: 24px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+
+.container {
+  display: flex;
+}
+
+#sidebar {
+  height: 100vh;
+  width: 280px;
+  padding: 10px 1em;
+  background-color: var(--base-clr);
+  border-right: 1px solid var(--line-clr);
+  position: sticky;
+  top: 0;
+  align-self: start;
+  transition: 300ms ease-in-out;
+  overflow: hidden;
+  text-wrap: nowrap;
+}
+
+#sidebar.close {
+  padding: 10px 1em;
+  width: 70px;
+}
+
+#sidebar ul {
+  list-style: none;
+}
+
+#sidebar > ul > li:first-child {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 10px;
+}
+
+#sidebar ul li.active a {
+  color: var(--accent-clr);
+}
+
+#sidebar a,
+#sidebar .dropdown-btn,
+#sidebar .logo {
+  border-radius: .5em;
+  padding: .85em;
+  text-decoration: none;
+  color: var(--text-clr);
+  display: flex;
+  align-items: center;
+  gap: 1em;
+}
+
+.dropdown-btn {
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  font: inherit;
+  cursor: pointer;
+}
+
+
+#sidebar svg {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  fill: var(--text-clr);
+  margin-left: -40px;
+}
+
+#sidebar a span,
+#sidebar .dropdown-btn span {
+  flex-grow: 1;
+}
+
+#sidebar a:hover,
+#sidebar .dropdown-btn:hover {
+  background-color: var(--hover-clr);
+}
+
+#sidebar .dropdown-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+#sidebar .sub-menu {
+  display: none;
+  transition: 300ms ease-in-out;
+}
+
+#sidebar .sub-menu.show {
+  display: block;
+}
+
+#sidebar .dropdown-btn svg {
+  transition: 200ms ease;
+}
+
+#sidebar .rotate svg:last-child {
+  transform: rotate(180deg);
+}
+
+.rotate svg:last-child {
+  rotate: 180deg;
+}
+
+#sidebar .sub-menu a {
+  padding-left: 2em;
+}
+
+#sidebar .sub-menu.show {
+  background-color: var(--hover-clr);
+  border-top: 1px solid var(--line-clr);
+}
+
+#toggle-btn {
+  margin-left: auto;
+  padding: 1em;
+  border: none;
+  border-radius: .5em;
+  background: none;
+  cursor: pointer;
+}
+/* 
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--base-clr, #f5f5f5);
+  padding: 10px 30px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  height: 80px;
+}
+
+.search-bar input {
+  padding: 8px;
+  width: 300px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.notifications {
+  position: relative;
+}
+
+.notification-icon {
+  font-size: 24px;
+}
+
+.notification-count {
+  position: absolute;
+  top: -5px;
+  right: -10px;
+  background-color: red;
+  color: white;
+  font-size: 12px;
+  padding: 2px 6px;
+  border-radius: 50%;
+}
+
+.user-profile {
+  display: flex;
+  align-items: center;
+}
+
+.profile-img {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+.user-name {
+  font-weight: bold;
+}
+
+.user-role {
+  font-size: 12px;
+  color: #777;
+}
+
+*/
