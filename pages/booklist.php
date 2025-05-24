@@ -264,7 +264,7 @@
             <th>Publisher</th>
             <th>ISBN</th>
             <th>Genre</th>
-            <th>Status</th>
+            <th>Plan</th>
             <th>Stock</th>
             <th>Actions</th> <!-- Added Actions Column -->
           </tr>

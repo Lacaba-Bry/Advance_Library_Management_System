@@ -133,9 +133,9 @@ require_once('backend/config/config.php');
             <input type="text" class="form-control" name="Genre" placeholder="Genre">
           </div>
          <div class="mb-3">
-  <label for="statusSelect" class="form-label">Status</label>
-  <select class="form-select" id="statusSelect" name="Status" required>
-    <option value="" disabled selected>Select status</option>
+  <label for="PlanSelect" class="form-label">Plan_type</label>
+  <select class="form-select" id="PlanSelect" name="Plan_type" required>
+    <option value="" disabled selected>Plan Type</option>
     <option value="Free">Free</option>
     <option value="Premium">Premium</option>
   </select>

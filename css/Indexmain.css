@@ -43,11 +43,13 @@ body {
     
   }
 
+
   .auth-buttons {
     display: flex;
     gap: 10px;
   }
-  .auth-buttons a{
+ 
+  .auth-buttons button a{
     text-decoration: none;
     color:  #f2f0fe;
   }

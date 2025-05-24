@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <link rel="stylesheet" href="css/Index.css">
+  <link rel="stylesheet" href="css/Indexmain.css">
+  <link rel="stylesheet" href="css/plan.css">
   <title>Book Store - Student Offer</title>
 </head>
 <body>
@@ -24,10 +25,10 @@
       <button class="search-icon">🔍</button>
     </div>
 
-    <div class="auth-buttons">
+   <div class="auth-buttons">
       <a href="pricing.php"><button class="btn">Pricing</button></a>
     <button class="btn" onclick="openModal('loginModal')">Login</button>
-    <button class="btn" onclick="openModal('registerModal')">Sign Up</button>
+    <a href="register.php"><button class="btn">Sign Up</button></a>
     </div>
   </header>
 
@@ -303,26 +304,6 @@
 </div>
 
 
-<!-- Register Modal -->
-<div id="registerModal" class="modal">
-  <div class="modal-content">
-    <span class="close" onclick="closeModal('registerModal')">&times;</span>
-    <h2>Register</h2>
-    
-    <!-- ADD ID HERE -->
-    <form id="registerForm" action="backend/register.php" method="POST">
-      <input type="email" name="email" placeholder="Email" required />
-      <input type="password" name="password" placeholder="Password" required />
-      <input type="text" name="name" placeholder="Full Name" required />
-      <input type="text" name="studentnum" placeholder="Student Number" required />
-      
-      <button type="button" class="btn btn-primary" onclick="redirectToCheckout()">Register</button>
-      <input type="hidden" name="plan" id="selectedPlanInput">
-    </form>
-  </div>
-</div>
-
-
 
 
 
@@ -330,69 +311,54 @@
 
 
 <script>
-  const recommendedBooks = [
-    'Books/cpp.jpg', 'Books/Java.jpg', 'Books/Python.jpeg', 'Books/Csharp.jpg', 'Books/Ruby.jpg'
-  ];
+const recommendedBooks = [
+  'Books/cpp.jpg', 'Books/Java.jpg', 'Books/Python.jpeg', 'Books/Csharp.jpg', 'Books/Ruby.jpg'
+];
 
-  const popularBooks = [
-    'Books/Popular2025/Php.jpg', 'Books/Popular2025/Data.jpg', 'Books/Popular2025/Sql.jpg', 'Books/Popular2025/Ubuntu.jpg', 'Books/Popular2025/Git.jpg'
-  ];
+const popularBooks = [
+  'Books/Popular2025/Php.jpg', 'Books/Popular2025/Data.jpg', 'Books/Popular2025/Sql.jpg', 'Books/Popular2025/Ubuntu.jpg', 'Books/Popular2025/Git.jpg'
+];
 
-  let recommendedIndex = 0;
-  let popularIndex = 0;
+let recommendedIndex = 0;
+let popularIndex = 0;
 
-  function renderBooks(containerId, books, index) {
-    const container = document.getElementById(containerId);
-    container.innerHTML = ''; // Clear current content
-    const current = books.slice(index, index + 4); // Get a slice of 4 books
-    current.forEach((imgSrc, i) => {
-      const div = document.createElement('div');
-      div.className = 'book-card ' + ['red', 'blue', 'yellow', 'pink'][i % 4];
+function renderBooks(containerId, books, index) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = ''; // Clear current content
+  const current = books.slice(index, index + 4); // Get a slice of 4 books
+  current.forEach((imgSrc, i) => {
+    const div = document.createElement('div');
+    div.className = 'book-card ' + ['red', 'blue', 'yellow', 'pink'][i % 4];
 
-      // Create an image element for the book cover
-      const img = document.createElement('img');
-      img.src = imgSrc; // Set the image source to the current book cover
-      img.alt = 'Book Cover'; // Alt text for accessibility
-      img.className = 'book-cover'; // Optional: Add a class for styling
+    // Create an image element for the book cover
+    const img = document.createElement('img');
+    img.src = imgSrc; // Set the image source to the current book cover
+    img.alt = 'Book Cover'; // Alt text for accessibility
+    img.className = 'book-cover'; // Optional: Add a class for styling
 
-      div.appendChild(img); // Append the image to the div
-      container.appendChild(div); // Append the div to the container
-    });
-  }
-
-  function changeSet(type, direction) {
-    const books = type === 'recommended' ? recommendedBooks : popularBooks;
-    const maxIndex = Math.max(0, books.length - 4);
-    if (type === 'recommended') {
-      recommendedIndex = Math.min(Math.max(0, recommendedIndex + direction * 4), maxIndex);
-      renderBooks('recommended-set', books, recommendedIndex);
-    } else {
-      popularIndex = Math.min(Math.max(0, popularIndex + direction * 4), maxIndex);
-      renderBooks('popular-set', books, popularIndex);
-    }
-  }
-
-  document.addEventListener('DOMContentLoaded', () => {
-    renderBooks('recommended-set', recommendedBooks, recommendedIndex);
-    renderBooks('popular-set', popularBooks, popularIndex);
+    div.appendChild(img); // Append the image to the div
+    container.appendChild(div); // Append the div to the container
   });
-  function openModal(id) {
-    document.getElementById(id).style.display = 'block';
+}
+
+function changeSet(type, direction) {
+  const books = type === 'recommended' ? recommendedBooks : popularBooks;
+  const maxIndex = Math.max(0, books.length - 4);
+  if (type === 'recommended') {
+    recommendedIndex = Math.min(Math.max(0, recommendedIndex + direction * 4), maxIndex);
+    renderBooks('recommended-set', books, recommendedIndex);
+  } else {
+    popularIndex = Math.min(Math.max(0, popularIndex + direction * 4), maxIndex);
+    renderBooks('popular-set', books, popularIndex);
   }
+}
 
-  function closeModal(id) {
-    document.getElementById(id).style.display = 'none';
-  }
+document.addEventListener('DOMContentLoaded', () => {
+  renderBooks('recommended-set', recommendedBooks, recommendedIndex);
+  renderBooks('popular-set', popularBooks, popularIndex);
+});
 
-  // Close modal on outside click
-  window.onclick = function(event) {
-    ['loginModal', 'registerModal'].forEach(id => {
-      const modal = document.getElementById(id);
-      if (event.target === modal) modal.style.display = "none";
-    });
-  };
-
-  function openModal(id) {
+function openModal(id) {
   document.getElementById(id).style.display = 'block';
 }
 
@@ -400,43 +366,19 @@ function closeModal(id) {
   document.getElementById(id).style.display = 'none';
 }
 
-// Function to switch to Register Modal
-function switchToRegisterModal() {
-  closeModal('loginModal');
-  openModal('registerModal');
-}
+// Close modal on outside click
+window.onclick = function(event) {
+  ['loginModal', 'forgotPasswordModal'].forEach(id => {
+    const modal = document.getElementById(id);
+    if (event.target === modal) modal.style.display = "none";
+  });
+};
 
 // Function to open the Forgot Password modal
 function openForgotPasswordModal() {
   closeModal('loginModal');
   openModal('forgotPasswordModal');
 }
-
-// Close modals on outside click
-window.onclick = function(event) {
-  ['loginModal', 'registerModal', 'forgotPasswordModal'].forEach(id => {
-    const modal = document.getElementById(id);
-    if (event.target === modal) modal.style.display = "none";
-  });
-};
-   function redirectToCheckout() {
-    const form = document.getElementById('registerForm');
-
-    // Use form.elements to safely access fields
-    const email = form.elements['email'].value;
-    const name = form.elements['name'].value;
-    const studentnum = form.elements['studentnum'].value;
-
-    // Optional: Store data for later use
-    sessionStorage.setItem('registerData', JSON.stringify({
-      email,
-      name,
-      studentnum
-    }));
-
-    // Redirect to checkout page
-    window.location.href = 'transaction/checkout.php';
-  }
 </script>
 
 
