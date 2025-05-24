@@ -1,5 +1,6 @@
 <?php
 require_once('../../../backend/config/config.php');
+include '../../../reusable/header.php';
 
 $isbn = '978-3-16-148410-0';
 $stmt = $conn->prepare("SELECT * FROM books WHERE ISBN = ?");
@@ -12,6 +13,9 @@ $conn->close();
 if (!$book) {
     die("Book not found.");
 }
+
+// Extract Plan_type from the database record
+$Plan_type = $book['Plan_type'];
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -24,7 +28,8 @@ if (!$book) {
 <body>
 <div class="book-preview">
   <div class="preview-header">
-    <img src="<?= htmlspecialchars($book['Book_Cover']) ?>" alt="Book Cover" class="book-cover">
+    <!-- Use the correct image path here -->
+    <img src="http://localhost/BryanCodeX/Book/<?= $Plan_type ?>/Book_Cover/<?= basename(htmlspecialchars($book['Book_Cover'])) ?>" alt="Book Cover" class="book-cover">
     <div class="book-info">
       <h2 class="book-title"><?= htmlspecialchars($book['Title']) ?></h2>
       <div class="book-stats">

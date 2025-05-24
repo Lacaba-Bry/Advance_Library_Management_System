@@ -1,4 +1,4 @@
-<?php
+<?php 
 
 require_once('../backend/config/config.php');
 
@@ -75,68 +75,163 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $preview_filename = $preview_folder . $isbn . ".php";
 
     $preview_template = <<<PHP
-    <?php
-    require_once('../../../backend/config/config.php');
-    
-    \$isbn = '$isbn';
-    \$stmt = \$conn->prepare("SELECT * FROM books WHERE ISBN = ?");
-    \$stmt->bind_param("s", \$isbn);
-    \$stmt->execute();
-    \$book = \$stmt->get_result()->fetch_assoc();
-    \$stmt->close();
-    \$conn->close();
+<?php
+require_once('../../../backend/config/config.php');
+include '../../../reusable/header.php';
 
-    if (!\$book) {
-        die("Book not found.");
-    }
-    ?>
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-      <meta charset="UTF-8">
-      <title>Preview: <?= htmlspecialchars(\$book['Title']) ?></title>
-      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-      <link rel="stylesheet" href="../../../css/autogenerate/preview.css">
-    </head>
-    <body>
-    <div class="book-preview">
-      <div class="preview-header">
-        <img src="<?= htmlspecialchars(\$book['Book_Cover']) ?>" alt="Book Cover" class="book-cover">
-        <div class="book-info">
-          <h2 class="book-title"><?= htmlspecialchars(\$book['Title']) ?></h2>
-          <div class="book-stats">
-            <span><i class="fas fa-eye"></i> <strong>0</strong> Reads</span>
-            <span><i class="fas fa-star"></i> <strong>0</strong> Votes</span>
-            <span><i class="fas fa-list"></i> <strong>1</strong> Parts</span>
-            <span><i class="fas fa-clock"></i> <strong>N/A</strong> Time</span>
-          </div>
-          <div class="start-reading">
-            <button class="start-btn">▶ Start reading</button>
-          </div>
-        </div>
+\$isbn = '$isbn';
+\$stmt = \$conn->prepare("SELECT * FROM books WHERE ISBN = ?");
+\$stmt->bind_param("s", \$isbn);
+\$stmt->execute();
+\$book = \$stmt->get_result()->fetch_assoc();
+\$stmt->close();
+\$conn->close();
+
+if (!\$book) {
+    die("Book not found.");
+}
+
+// Extract Plan_type from the database record
+\$Plan_type = \$book['Plan_type'];
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Preview: <?= htmlspecialchars(\$book['Title']) ?></title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="../../../css/autogenerate/preview.css">
+</head>
+<body>
+<div class="book-preview">
+  <div class="preview-header">
+    <!-- Use the correct image path here -->
+    <img src="http://localhost/BryanCodeX/Book/<?= \$Plan_type ?>/Book_Cover/<?= basename(htmlspecialchars(\$book['Book_Cover'])) ?>" alt="Book Cover" class="book-cover">
+    <div class="book-info">
+      <h2 class="book-title"><?= htmlspecialchars(\$book['Title']) ?></h2>
+      <div class="book-stats">
+        <span><i class="fas fa-eye"></i> <strong>0</strong> Reads</span>
+        <span><i class="fas fa-star"></i> <strong>0</strong> Votes</span>
+        <span><i class="fas fa-list"></i> <strong>1</strong> Parts</span>
+        <span><i class="fas fa-clock"></i> <strong>N/A</strong> Time</span>
       </div>
-
-      <div class="book-content">
-        <h3>Story Snippet</h3>
-        <p><?= nl2br(htmlspecialchars(\$book['Story_Snippet'])) ?></p>
-
-        <h3>Description</h3>
-        <p><?= nl2br(htmlspecialchars(\$book['Description'])) ?></p>
-      </div>
-
-      <div class="reviews-section">
-        <h3>Reviews</h3>
-        <div class="review">
-          <strong>Anonymous</strong>
-          <p>Be the first to leave a review!</p>
-        </div>
+      <div class="start-reading">
+        <button class="start-btn">▶ Start reading</button>
       </div>
     </div>
-    </body>
-    </html>
-    PHP;
+  </div>
+
+  <div class="book-content">
+    <h3>Story Snippet</h3>
+    <p><?= nl2br(htmlspecialchars(\$book['Story_Snippet'])) ?></p>
+
+    <h3>Description</h3>
+    <p><?= nl2br(htmlspecialchars(\$book['Description'])) ?></p>
+  </div>
+
+  <div class="reviews-section">
+    <h3>Reviews</h3>
+    <div class="review">
+      <strong>Anonymous</strong>
+      <p>Be the first to leave a review!</p>
+    </div>
+  </div>
+</div>
+</body>
+</html>
+PHP;
 
     file_put_contents($preview_filename, $preview_template);
+
+    // ✅ Auto-generate Story page
+    $story_folder = "../Book/$Plan_type/Story/"; // Plan-based folder for story
+    if (!is_dir($story_folder)) {
+        mkdir($story_folder, 0777, true);
+    }
+    $story_filename = $story_folder . $isbn . "_story.php";
+
+   $story_template = <<<PHP
+<?php
+require_once('../../../backend/config/config.php');
+include '../../../reusable/header.php';
+
+\$isbn = '$isbn';
+\$stmt = \$conn->prepare("SELECT * FROM books WHERE ISBN = ?");
+\$stmt->bind_param("s", \$isbn);
+\$stmt->execute();
+\$book = \$stmt->get_result()->fetch_assoc();
+\$stmt->close();
+\$conn->close();
+
+if (!\$book) {
+    die("Book not found.");
+}
+
+\$coverPath = "../../../Book/" . \$book['Plan_type'] . "/Book_Cover/" . basename(\$book['Book_Cover']);
+\$title = htmlspecialchars(\$book['Title']);
+\$author = htmlspecialchars(\$book['Author']);
+\$story = nl2br(htmlspecialchars(\$book['Story']));
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Story - <?= \$title ?></title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="../../../css/autogenerate/story.css">
+   <style>
+
+.photos-container::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+ background: url('<?= $coverPath ?>') no-repeat center center;
+  background-size: cover;
+  filter: blur(20px);
+  transform: scale(1.1); /* Prevent blur edges from cutting off */
+  z-index: 0;
+}
+</style>
+</head>
+<body>
+
+<!-- STORY HEADER -->
+<div class="story-header">
+  <div class="story-info">
+    <img src="<?= \$coverPath ?>" alt="<?= \$title ?> Cover">
+    <div class="story-meta">
+      <span class="title"><?= \$title ?></span>
+      <span class="author">by <?= \$author ?></span>
+    </div>
+  </div>
+
+  <div class="story-actions">
+    <button>+</button>
+    <span class="vote"><i class="fas fa-star"></i> Vote</span>
+  </div>
+</div>
+
+<div class="photos-container">
+  <img src="<?= \$coverPath ?>" alt="<?= \$title ?> Cover" class="book-cover-lg">
+</div>
+
+<div class="story-container">
+  <div class="story-text">
+    <center>Chapter 1</center>
+    <p><?= \$story ?></p>
+  </div>
+
+  <div class="continue-btn">
+    <button onclick="location.href='next-part.php'">Continue to Next Part</button>
+  </div>
+</div>
+
+</body>
+</html>
+PHP;
+
+
+    file_put_contents($story_filename, $story_template);
 
     $stmt->close();
 }
