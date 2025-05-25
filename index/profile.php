@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once __DIR__ . '/../backend/config/config.php';
+include '../reusable/header.php';
 
 if (!isset($_SESSION['user_id'])) {
     header("Location: index.php");
@@ -9,9 +10,9 @@ if (!isset($_SESSION['user_id'])) {
 
 $accountId = $_SESSION['user_id'];
 
-// Fetch profile data
+// Fetch profile data including pronouns, website, and location
 $stmt = $conn->prepare("
-    SELECT r.Fullname, r.Email, r.Date_Created, p.Plan_Name, pr.Description, pr.Avatar
+    SELECT r.Fullname, r.Email, r.Date_Created, p.Plan_Name, pr.Description, pr.Avatar, pr.Pronouns, pr.Website, pr.Location
     FROM accountlist a
     JOIN register r ON a.Register_ID = r.Register_ID
     LEFT JOIN plans p ON a.Plan_ID = p.Plan_ID
@@ -20,12 +21,15 @@ $stmt = $conn->prepare("
 ");
 $stmt->bind_param("i", $accountId);
 $stmt->execute();
-$stmt->bind_result($fullname, $email, $dateCreated, $planName, $description, $avatar);
+$stmt->bind_result($fullname, $email, $dateCreated, $planName, $description, $avatar, $pronouns, $website, $location);
 $stmt->fetch();
 $stmt->close();
 
-// Default values
+// Set default values if variables are not set (null values from DB)
 $avatar = $avatar ?: 'defaultprofile.jpg';
+$pronouns = $pronouns ?: '';  // Default to empty string if pronouns are not set
+$website = $website ?: '';    // Default to empty string if website is not set
+$location = $location ?: '';  // Default to empty string if location is not set
 $planName = $planName ?: 'Free';
 $description = $description ?: 'Help people get to know you';
 
@@ -37,12 +41,13 @@ if (strcasecmp($planName, 'Premium') === 0) {
     $planBorderClass = 'border-vip';
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title><?php echo htmlspecialchars($fullname); ?>'s Profile</title>
-    <link rel="stylesheet" href="../css/index/profile.css">
+    <link rel="stylesheet" href="../css/index/profilex.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 </head>
 <body>
@@ -84,7 +89,7 @@ if (strcasecmp($planName, 'Premium') === 0) {
     </div>
     <div class="profile-actions">
         <div class="plan-bubble"><p>⚡ Upgrade plan</p></div>
-        <button class="edit-profile-btn">Edit Profile</button>
+     <button id="editProfileBtn" class="edit-profile-btn">Edit Profile</button>
     </div>
 </div>
 <hr class="tab-underline" />
@@ -143,6 +148,77 @@ if (strcasecmp($planName, 'Premium') === 0) {
     </div>
 </div>
 
+
+<!-- Modal for Editing Profile -->
+<div class="modal" id="editProfileModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Currently editing your profile</h2>
+            <div class="button-group">
+            <button type="submit" class="btn-save">Save Changes</button>
+            <span class="modal-close" id="closeModal"><a href="profile.php" class="btn-cancel">Cancel</a></span>
+               </div>
+        </div>
+        <form action="save_profile.php" method="POST" enctype="multipart/form-data">
+    
+
+        
+            <div class="form-group profile-pic-container">
+                <label for="profilePicture" class="profile-picture-label">
+                    <img src="../image/default-avatar.png" id="profilePicPreview" class="profile-pic-preview">
+                </label>
+                <input type="file" id="profilePicture" name="profilePicture" style="display: none;" accept="image/*">
+            </div>
+ 
+            <div class="Fname">
+                <input type="text" id="fullname" name="fullname" value="<?php echo htmlspecialchars($fullname); ?>" required>
+            </div>
+                <div class="below">
+                    <div class="belowcontainer">
+                        <p>The information you enter here, including username, profile photo, will be visible to other users.</p?>
+                    <div class="form-row">
+                        <label for="pronouns">Pronouns</label>
+                        <input type="text" id="pronouns" name="pronouns" value="<?php echo htmlspecialchars($pronouns); ?>">
+                    </div>
+
+                    <div class="form-row">
+                        <label for="about">About</label>
+                        <textarea id="about" name="about"><?php echo htmlspecialchars($description); ?></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <label for="website">My Website</label>
+                        <input type="url" id="website" name="website" value="<?php echo htmlspecialchars($website); ?>">
+                    </div>
+
+                    <div class="form-row">
+                        <label for="location">Location</label>
+                        <input type="text" id="location" name="location" value="<?php echo htmlspecialchars($location); ?>">
+                    </div>
+                    </div>
+                </div>
+
+        </form>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 <!-- JS Tab Navigation -->
 <script>
 const tabs = document.querySelectorAll('.tab');
@@ -157,6 +233,29 @@ tabs.forEach(tab => {
         document.getElementById(tab.dataset.tab).style.display = 'flex';
     });
 });
+// Get the modal and buttons
+const modal = document.getElementById("editProfileModal");
+const editProfileBtn = document.getElementById("editProfileBtn");
+const closeModal = document.getElementById("closeModal");
+
+// Open the modal when the "Edit Profile" button is clicked
+editProfileBtn.addEventListener("click", function() {
+    modal.style.display = "flex";
+});
+
+// Close the modal when the "X" is clicked
+closeModal.addEventListener("click", function() {
+    modal.style.display = "none";
+});
+
+// Close the modal if the user clicks outside of it
+window.addEventListener("click", function(event) {
+    if (event.target === modal) {
+        modal.style.display = "none";
+    }
+});
+
+
 </script>
 
 </body>

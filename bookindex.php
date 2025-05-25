@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Book Store</title>
 
-  <!-- Bootstrap CSS -->
+
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
@@ -119,7 +119,7 @@
 </head>
 <body>
 
-<!-- Header -->
+
 <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
   <div class="container-fluid">
     <a class="navbar-brand fw-bold" href="#">Haven Library</a>
@@ -138,11 +138,11 @@
   </div>
 </nav>
 
-<!-- Main Content -->
+
 <div class="container-fluid py-4">
   <div class="row">
 
-    <!-- Left Sidebar -->
+  
     <div class="col-md-3 mb-4">
       <div class="sidebar">
         <h6>Editor Picks</h6>
@@ -192,7 +192,7 @@
       </div>
     </div>
 
-    <!-- Books Grid -->
+    
     <div class="col-md-9">
       <div class="row g-4">
         <div class="col-lg-4 col-md-6 col-sm-12">
@@ -213,7 +213,7 @@
         </div>
       </div>
 
-      <!-- Pagination -->
+    
       <nav class="mt-4">
         <ul class="pagination justify-content-center">
           <li class="page-item disabled"><a class="page-link" href="#">Previous</a></li>
@@ -226,7 +226,7 @@
   </div>
 </div>
 
-<!-- Quick View Modal -->
+
 <div class="modal fade" id="quickViewModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content p-4">
@@ -238,7 +238,7 @@
   </div>
 </div>
 
-<!-- Filtering placeholder script -->
+
 <script>
   document.querySelectorAll('.form-check-input').forEach(input => {
     input.addEventListener('change', () => {

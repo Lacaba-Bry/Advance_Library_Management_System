@@ -13,21 +13,25 @@ $userEmail = $_SESSION['user_email'] ?? 'Unknown';
 $userType = $_SESSION['user_type'] ?? 'Free'; // Plan name: Free, Premium, or VIP
 $userName = $_SESSION['fullname'] ?? 'User';
 
+// Query to get the user's plan and avatar from the profiles table
 $stmt = $conn->prepare("
-    SELECT p.Plan_Name 
+    SELECT p.Plan_Name, pr.Avatar
     FROM accountlist a
     LEFT JOIN plans p ON a.Plan_ID = p.Plan_ID
+    LEFT JOIN profiles pr ON a.Account_ID = pr.Account_ID
     WHERE a.Account_ID = ?
 ");
 $stmt->bind_param("i", $accountId);
 $stmt->execute();
-$stmt->bind_result($userType);
+$stmt->bind_result($userType, $avatar); // Retrieve userType and avatar
 $stmt->fetch();
 $stmt->close();
 
 // Update session (optional, to keep in sync)
 $_SESSION['user_type'] = $userType ?? 'Free';
 
+// Check if the avatar image is set, otherwise use default
+$avatar = $avatar ?: 'image/profile/defaultprofile.jpg'; // Set default image if $avatar is empty
 ?>
 
 <!DOCTYPE html>
@@ -37,7 +41,7 @@ $_SESSION['user_type'] = $userType ?? 'Free';
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer" />
  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <link rel="stylesheet" href="home.css">
+  <link rel="stylesheet" href="./css/home.css">
   <title>Haven Library - User Dashboard</title>
 </head>
 <body>
@@ -68,7 +72,7 @@ $_SESSION['user_type'] = $userType ?? 'Free';
 
     <div class="profile dropdown">
       <div class="user-info">
-        <img src="<?php echo htmlspecialchars($profileImage); ?>" class="avatar" alt="User" />
+    <img src="<?php echo htmlspecialchars($avatar); ?>" class="avatar" alt="User" />
       </div>
       <div class="dropdown-content">
         <a href="index/profile.php">Profile</a>
