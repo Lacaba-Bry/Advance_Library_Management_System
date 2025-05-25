@@ -8,244 +8,8 @@ $price = isset($_GET['price']) ? $_GET['price'] : 0.00;
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="stylesheet" href="css/index/register.css">
   <title>Plan Checkout</title>
-  <style>
-    /* Your existing CSS here */
-    :root {
-      --base-clr: #ffffff;
-      --text-clr: #333333;
-      --accent-clr: #5e63ff;
-      --secondary-text-clr: #6c6f80;
-      --line-clr: #ddd;
-      --hover-clr: #f4f4f4;
-    }
-
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      margin: 0;
-      padding: 0;
-      background: #f9f9f9;
-    }
-
-    .container {
-      max-width: 900px;
-      margin: 40px auto;
-      padding: 20px;
-      text-align: center;
-    }
-
-    .pricing-cards {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 30px;
-      justify-content: center;
-    }
-
-    .card {
-      background: #fff;
-      border: 1px solid var(--line-clr);
-      border-radius: 12px;
-      padding: 30px;
-      width: 280px;
-      text-align: center;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-      transition: transform 0.3s ease;
-    }
-
-    .card:hover {
-      transform: translateY(-5px);
-    }
-
-    .card.popular {
-      border: 2px solid var(--accent-clr);
-      box-shadow: 0 6px 12px rgba(94, 99, 255, 0.3);
-    }
-
-    .card.vip-card {
-      border: 2px solid #d4af37;
-      background-color: #fffbea;
-      box-shadow: 0 6px 12px rgba(212, 175, 55, 0.3);
-    }
-
-    .card h2 {
-      font-size: 20px;
-      margin-bottom: 10px;
-      color: var(--accent-clr);
-    }
-
-    .card.vip-card h2 {
-      color: #c49b28;
-    }
-
-    .price {
-      font-size: 24px;
-      font-weight: 600;
-      margin: 10px 0 20px;
-    }
-
-    .price span {
-      font-size: 14px;
-      color: var(--secondary-text-clr);
-    }
-
-    .features {
-      margin-top: 15px;
-      font-size: 14px;
-      color: var(--secondary-text-clr);
-      line-height: 1.6;
-    }
-
-    .card button {
-      padding: 12px 20px;
-      font-size: 14px;
-      font-weight: 600;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: background 0.3s ease;
-    }
-
-    .free-btn {
-      background: transparent;
-      color: var(--accent-clr);
-      border: 1px solid var(--accent-clr);
-    }
-
-    .free-btn:hover {
-      background: var(--accent-clr);
-      color: white;
-    }
-
-    .premium-btn {
-      background: var(--accent-clr);
-      color: white;
-    }
-
-    .premium-btn:hover {
-      background: #4a4eff;
-    }
-
-    .vip-btn {
-      background: #d4af37;
-      color: white;
-    }
-
-    .vip-btn:hover {
-      background: #c49b28;
-    }
-
-    /* Checkout Modal */
-    #checkoutModal {
-      display: none;
-      max-width: 400px;
-      margin: 40px auto;
-      padding: 50px;
-      background: white;
-      border-radius: 10px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      z-index: 999;
-    }
-
-    #checkoutModal.active {
-      display: block;
-    }
-
-    .checkout-field {
-      margin-bottom: 15px;
-      text-align: left;
-    }
-
-    .checkout-field label {
-      display: block;
-      margin-bottom: 5px;
-    }
-
-    .checkout-field input {
-      width: 100%;
-      padding: 10px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-    }
-
-    .total {
-      font-size: 18px;
-      font-weight: bold;
-      margin-top: 15px;
-    }
-
-    .checkout-submit {
-      margin-top: 20px;
-      background: #22c55e;
-      color: white;
-      padding: 10px 25px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-
-    /* Form Page Styles */
-    form {
-      max-width: 400px;
-      margin: 0 auto;
-      background-color: #fff;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-    }
-
-    form h2 {
-      text-align: center;
-      color: var(--accent-clr);
-      margin-bottom: 20px;
-    }
-
-    form input {
-      width: 100%;
-      padding: 12px;
-      border: 1px solid var(--line-clr);
-      border-radius: 8px;
-      margin-bottom: 15px;
-      font-size: 14px;
-    }
-
-    form button {
-      width: 100%;
-      padding: 12px;
-      background-color: var(--accent-clr);
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 16px;
-      cursor: pointer;
-      font-weight: 600;
-      transition: background-color 0.3s ease;
-    }
-
-    form button:hover {
-      background-color: #4a4eff;
-    }
-
-    /* Background blur when modal is active */
-    #overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.5);
-      backdrop-filter: blur(5px);
-      display: none;
-      z-index: 998;
-    }
-
-    #overlay.active {
-      display: block;
-    }
-  </style>
 </head>
 <body>
 <!-- Registration Form -->
@@ -255,7 +19,7 @@ $price = isset($_GET['price']) ? $_GET['price'] : 0.00;
     <p>Total: <strong id="selectedPrice">₱<?php echo number_format($price, 2); ?></strong></p>
 
     <!-- Registration Form -->
-    <form id="registerForm" action="backend/registerBack.php" method="POST" onsubmit="return false;">
+    <form id="registerForm" action="backend/registerBack.php" method="POST">
       <input type="email" name="email" placeholder="Email" required />
       <input type="password" name="password" placeholder="Password" required />
       <input type="text" name="name" placeholder="Full Name" required />
@@ -265,7 +29,6 @@ $price = isset($_GET['price']) ? $_GET['price'] : 0.00;
 
       <button type="submit" id="submitButton" disabled>Register and Pay</button>
     </form>
-
   </div>
 
   <!-- Pricing Cards for Plan Selection -->
@@ -286,14 +49,14 @@ $price = isset($_GET['price']) ? $_GET['price'] : 0.00;
       </div>
     </div>
 
-    <!-- Premium Plan -->
+    <!-- Premium Plan (was Club) -->
     <div class="card popular">
-      <h2>CLUB</h2>
+      <h2>Premium</h2>
       <div class="price">₱199 / month</div>
-      <button class="premium-btn" onclick="selectPlan('Club', 199)">Join Club</button>
+      <button class="premium-btn" onclick="selectPlan('Premium', 199)">Join Premium</button>
       <div class="features">
         ✓ Everything in Explorer, plus...<br/>
-        ✓ Full access to Club-only content<br/>
+        ✓ Full access to Premium-only content<br/>
         ✓ One-on-one support from experts
       </div>
     </div>
@@ -304,13 +67,12 @@ $price = isset($_GET['price']) ? $_GET['price'] : 0.00;
       <div class="price">₱1,599 one-time</div>
       <button class="vip-btn" onclick="selectPlan('VIP', 1599)">Join VIP</button>
       <div class="features">
-        ✓ Everything in CLUB, plus...<br/>
+        ✓ Everything in PREMIUM, plus...<br/>
         ✓ Exclusive workshops & mentorship<br/>
         ✓ Personalized career roadmap
       </div>
     </div>
   </div>
-
 
   <!-- Overlay for blur effect -->
   <div id="overlay"></div>
@@ -334,69 +96,97 @@ $price = isset($_GET['price']) ? $_GET['price'] : 0.00;
   <button class="checkout-submit" onclick="submitCheckout()">Pay Now</button>
 </div>
 
-
 <script>
-  function selectPlan(plan, price) {
-  // Update the plan and price when the user selects a plan
-  document.getElementById('selectedPlan').innerText = plan;
-  document.getElementById('selectedPrice').innerText = `₱${price.toLocaleString()}`;
-
-  // Set the hidden plan_id in the form
-  const planId = (plan === 'Explorer') ? 1 : (plan === 'Club') ? 2 : 3; // Assign proper plan ID
-  document.getElementById('plan_id').value = planId;
-
-  // If price > 0, show the modal when clicking Register and Pay
-  if (price > 0) {
-    openCheckoutModal(plan, price);
-  } else {
-    // If it's a free plan, just allow registration
+  // Wait for the DOM to fully load before executing the script
+  document.addEventListener("DOMContentLoaded", function() {
+    // Select the free plan by default when the page loads
+    selectPlan('Explorer', 0);  // Default to Explorer (free plan)
+    // Ensure the submitButton is enabled for the free plan
     document.getElementById('submitButton').disabled = false;
+
+    // Handle form submission
+    document.getElementById('submitButton').addEventListener('click', function() {
+      const planId = document.getElementById('plan_id').value;
+      const price = parseInt(document.getElementById('selectedPrice').innerText.replace('₱', '').replace(',', ''));
+      if (price > 0) {
+        openCheckoutModal(getPlanName(planId), price);
+      } else {
+        document.getElementById('registerForm').submit();
+      }
+    });
+  });
+
+  // Function to get plan name from plan ID
+  function getPlanName(planId) {
+    switch(planId) {
+      case '1':
+        return 'Explorer';
+      case '2':
+        return 'Premium';
+      case '3':
+        return 'VIP';
+    }
   }
-}
 
-function openCheckoutModal(plan, price) {
-  // Open the modal when the user selects a plan with price > 0
-  document.getElementById('checkoutModal').classList.add('active');
-  document.getElementById('overlay').classList.add('active');
+  function selectPlan(plan, price) {
+    console.log(`Plan Selected: ${plan}, Price: ${price}`);
 
-  // Update the checkout modal with the selected plan and price
-  document.getElementById('checkoutTitle').innerText = `Checkout - ${plan} Plan`;
-  document.getElementById('checkoutTotal').innerText = `Total: ₱${price.toLocaleString()}`;
-}
+    // Update the plan and price when the user selects a plan
+    document.getElementById('selectedPlan').innerText = plan;
+    document.getElementById('selectedPrice').innerText = `₱${price.toLocaleString()}`;
 
-function submitCheckout() {
-  const name = document.getElementById('name').value;
-  const card = document.getElementById('card').value;
-  const email = document.getElementById('email').value;
+    // Set the hidden plan_id in the form
+    const planId = (plan === 'Explorer') ? 1 : (plan === 'Premium') ? 2 : 3; // Assign proper plan ID
+    document.getElementById('plan_id').value = planId;
 
-  // Validate that all fields are filled
-  if (!name || !card || !email) {
-    alert("All fields are required!");
-    return; // Don't proceed if fields are empty
+    // Enable the registration button for free plan
+    document.getElementById('submitButton').disabled = (price > 0); // Disable for paid plans, enable for free plan
+
+    // If price > 0, show the modal when clicking Register and Pay
+    if (price > 0) {
+      console.log("Disabling register button for payment");
+      // Open the payment modal for paid plans
+      openCheckoutModal(plan, price);
+    }
   }
 
-  // Simulate a successful payment process
-  alert("Payment Successful!");
+  function openCheckoutModal(plan, price) {
+    document.getElementById('checkoutModal').classList.add('active');
+    document.getElementById('overlay').classList.add('active');
 
-  // Change the registration form to show the successful payment
-  document.getElementById('selectedPrice').style.color = 'green';  // Make the total green after success
+    document.getElementById('checkoutTitle').innerText = `Checkout - ${plan} Plan`;
+    document.getElementById('checkoutTotal').innerText = `Total: ₱${price.toLocaleString()}`;
+  }
 
-  // Close the modal and proceed to registration
-  document.getElementById('checkoutModal').classList.remove('active');
-  document.getElementById('overlay').classList.remove('active');
+  function submitCheckout() {
+    const name = document.getElementById('name').value;
+    const card = document.getElementById('card').value;
+    const email = document.getElementById('email').value;
 
-  // Enable registration form submission
-  document.getElementById('submitButton').disabled = false; // Allow registration and payment
+    if (!name || !card || !email) {
+      alert("All fields are required!");
+      return; // Don't proceed if fields are empty
+    }
 
-  // Automatically submit the form after payment success
-  document.getElementById('registerForm').submit();
-}
+    // Simulate payment success
+    alert("Payment Successful!");
 
-// Close modal and background blur when clicked outside
-document.getElementById('overlay').onclick = function() {
-  document.getElementById('checkoutModal').classList.remove('active');
-  document.getElementById('overlay').classList.remove('active');
-}
+    // Enable the registration button after successful payment
+    document.getElementById('submitButton').disabled = false;
+
+    // Close the modal after payment
+    document.getElementById('checkoutModal').classList.remove('active');
+    document.getElementById('overlay').classList.remove('active');
+
+    // Submit the registration form
+    document.getElementById('registerForm').submit();
+  }
+
+  // Close modal and background blur when clicked outside
+  document.getElementById('overlay').onclick = function() {
+    document.getElementById('checkoutModal').classList.remove('active');
+    document.getElementById('overlay').classList.remove('active');
+  }
 </script>
 
 </body>

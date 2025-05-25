@@ -36,23 +36,32 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   $adminStmt->close(); // Close admin query if not admin
 
   // If not admin, proceed with regular user login (using hashed password)
-  $stmt = $conn->prepare("SELECT Account_ID, Password FROM accountlist WHERE Email = ?");
+  $stmt = $conn->prepare("SELECT Account_ID, Password, Plan_ID FROM accountlist WHERE Email = ?");
   $stmt->bind_param("s", $email);
   $stmt->execute();
   $stmt->store_result();
 
   if ($stmt->num_rows == 1) {
     // User found
-    $stmt->bind_result($account_id, $hashed_password);
+    $stmt->bind_result($account_id, $hashed_password, $plan_id);
     $stmt->fetch();
 
     if (password_verify($password, $hashed_password)) {
+      // Get the plan type
+      $planStmt = $conn->prepare("SELECT Plan_Name FROM plans WHERE Plan_ID = ?");
+      $planStmt->bind_param("i", $plan_id);
+      $planStmt->execute();
+      $planStmt->bind_result($plan_name);
+      $planStmt->fetch();
+      $planStmt->close();
+
       // Set session variables for user
       $_SESSION['user_id'] = $account_id;
       $_SESSION['user_email'] = $email; // Store email of user
+      $_SESSION['user_plan'] = $plan_name; // Store plan type
 
       echo "<script>
-        alert('Welcome User!');
+        alert('Welcome User! Plan: " . $plan_name . "');
         window.location.href = '../home.php';
       </script>";
       exit;

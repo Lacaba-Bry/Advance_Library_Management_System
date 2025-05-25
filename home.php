@@ -1,19 +1,33 @@
 <?php
+require_once __DIR__ . '/backend/config/config.php';
 session_start();
-require_once 'backend/config/config.php';
 
 if (!isset($_SESSION['user_id'])) {
     header("Location: index.php");
     exit();
 }
 
-$user_id = $_SESSION['user_id'];
-$stmt = $conn->prepare("SELECT fullname FROM register WHERE Register_ID = ?");
-$stmt->bind_param("i", $user_id);
+// You correctly set these in login.php:
+$accountId = $_SESSION['user_id'];
+$userEmail = $_SESSION['user_email'] ?? 'Unknown';
+$userType = $_SESSION['user_type'] ?? 'Free'; // Plan name: Free, Premium, or VIP
+$userName = $_SESSION['fullname'] ?? 'User';
+
+$stmt = $conn->prepare("
+    SELECT p.Plan_Name 
+    FROM accountlist a
+    LEFT JOIN plans p ON a.Plan_ID = p.Plan_ID
+    WHERE a.Account_ID = ?
+");
+$stmt->bind_param("i", $accountId);
 $stmt->execute();
-$stmt->bind_result($user_name);
+$stmt->bind_result($userType);
 $stmt->fetch();
 $stmt->close();
+
+// Update session (optional, to keep in sync)
+$_SESSION['user_type'] = $userType ?? 'Free';
+
 ?>
 
 <!DOCTYPE html>
@@ -30,16 +44,16 @@ $stmt->close();
 
 <header class="top-nav">
   <div class="left-section">
-    <img src="Logo.jpg" class="logo" alt="Logo" />
+  <img src="Logo.jpg" class="logo" alt="Logo" />
     <nav class="nav-links">
       <div class="dropdown">
         <button class="dropbtn">
-  Browse 
-  <span class="material-icons dropdown-icon">arrow_drop_down</span>
-</button>
+          Browse 
+          <span class="material-icons dropdown-icon">arrow_drop_down</span>
+        </button>
         <div class="dropdown-content">
-          <a href="#">Home</a>
-          <a href="#">Genres</a>
+          <a href="home.php">Home</a>
+          <a href="genres.php">Genres</a>
         </div>
       </div>
     </nav>
@@ -49,20 +63,21 @@ $stmt->close();
     <input type="text" class="search-bar" placeholder="Search" />
   </div>
 
-<div class="right-section">
-  <button class="premium-btn">⚡ Try Premium</button>
+  <div class="right-section">
+    <button class="premium-btn">⚡ Try Premium</button>
 
-  <div class="profile dropdown">
-    <div class="user-info">
-      <img src="sample1.jpg" class="avatar" alt="User" />
+    <div class="profile dropdown">
+      <div class="user-info">
+        <img src="<?php echo htmlspecialchars($profileImage); ?>" class="avatar" alt="User" />
+      </div>
+      <div class="dropdown-content">
+        <a href="index/profile.php">Profile</a>
+        <a href="logout.php">Logout</a>
+      </div>
     </div>
-    <div class="dropdown-content">
-      <a href="#">Profile</a>
-      <a href="#">Logout</a>
-    </div>
+
+    <span class="user-type"><?php echo htmlspecialchars($userType); ?></span>
   </div>
-   <span class="user-type">Free User</span>
-</div>
 </header>
 
 

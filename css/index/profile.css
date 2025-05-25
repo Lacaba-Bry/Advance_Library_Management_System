@@ -1,0 +1,385 @@
+/* === PROFILE HEADER === */
+.profile-header {
+  background-color: #4e3bcf;
+  padding: 40px 20px;
+  text-align: center;
+  color: white;
+}
+
+
+.profile-header .avatar {
+  border-radius: 50%;
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  margin-bottom: 10px;
+}
+
+.profile-header h1 {
+  margin: 10px 0 5px;
+  font-size: 2rem;
+}
+
+.profile-header p {
+  margin: 5px 0;
+  font-size: 1rem;
+}
+
+/* === PLAN BADGE STYLES === */
+.plan-badge {
+  background-color: #f2f0fe;
+  color: #4e3bcf;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-weight: 600;
+  display: inline-block;
+  margin-top: 10px;
+}
+
+.plan-badge.premium {
+  color: #4e3bcf;
+  background-color: #eae6ff;
+  box-shadow: 0 0 8px #a59eff;
+}
+
+.plan-badge.vip {
+  color: #c49b28;
+  background-color: #fff4cc;
+  box-shadow: 0 0 12px #c49b28b3;
+}
+
+.plan-badge i {
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+/* === PLAN-BASED HEADER COLOR === */
+.border-free {
+  border-top: 6px solid #ffffff;
+  background-color: #f9f9f9;
+}
+
+.border-premium {
+  border-top: 6px solid #4e3bcf;
+  background: linear-gradient(135deg, #f4f2ff, #ffffff);
+  box-shadow: 0 4px 20px rgba(78, 59, 207, 0.15);
+}
+
+.border-vip {
+  border-top: 6px solid #c49b28;
+  background: linear-gradient(135deg, #fff7e6, #ffffff);
+  box-shadow: 0 4px 20px rgba(196, 155, 40, 0.2);
+}
+
+/* === PROFILE STATS === */
+.profile-header .profile-stats {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+.profile-header .stat {
+  text-align: center;
+}
+
+.profile-header .stat strong {
+  display: block;
+  font-size: 1.6rem;
+}
+
+.profile-header .stat span {
+  font-size: 0.9rem;
+  opacity: 0.85;
+}
+
+/* === NAVIGATION BAR === */
+.profile-nav-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 30px;
+  margin-top: 20px;
+  background-color: #fff;
+}
+
+.tabs {
+  display: flex;
+  gap: 30px;
+}
+
+.tabs a {
+  text-decoration: none;
+  color: #333;
+  font-weight: 500;
+  position: relative;
+  padding-bottom: 12px;
+}
+
+.tabs a.active::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 3px;
+  width: 100%;
+  background-color: #e84917;
+  border-radius: 5px;
+}
+
+.tab-underline {
+  margin: 0;
+  border: none;
+  border-top: 1px solid #e1e1e1;
+}
+
+.profile-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.plan-bubble {
+  padding: 2px;
+  font-weight: bold;
+  width: 120px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f2f0fe;
+  border-radius: 20px;
+}
+
+.plan-bubble p {
+  color: black;
+  font-size: 0.9rem;
+}
+
+/* === TABS CONTENT === */
+.tab-section {
+  display: none;
+  margin-top: 30px;
+  width: 100%;
+  padding: 0 20px;
+  box-sizing: border-box;
+}
+
+.tab-section.active-tab {
+  display: flex;
+}
+
+.about-grid {
+  display: flex;
+  gap: 40px;
+  justify-content: space-between;
+  align-items: flex-start;
+  width: 100%;
+  max-width: 1100px;
+  margin: auto;
+  flex-wrap: wrap;
+}
+
+.left-content {
+  flex: 2;
+  min-width: 300px;
+}
+
+.right-content {
+  flex: 1;
+  min-width: 200px;
+  text-align: right;
+}
+
+.centered-content {
+  margin: auto;
+  text-align: center;
+  max-width: 600px;
+  width: 100%;
+}
+
+/* === PROFILE BODY === */
+.profile-body {
+  background-color: white;
+  max-width: 850px;
+  margin: 0 auto;
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.profile-body h3 {
+  color: #4e3bcf;
+  margin-bottom: 15px;
+}
+
+.profile-body p {
+  color: #555;
+  line-height: 1.6;
+  font-size: 1rem;
+}
+
+/* === SOCIAL MEDIA === */
+.social-links {
+  margin: 20px 0;
+}
+
+.social-links p {
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.social-links a i {
+  font-size: 40px;
+  color: #555;
+  margin: 0 10px;
+  transition: color 0.3s, transform 0.2s;
+}
+
+.social-links a i:hover {
+  color: #3a2eb1;
+  transform: scale(1.2);
+}
+
+/* === EDIT BUTTON === */
+.edit-profile-btn,
+.btn-edit {
+  display: inline-block;
+  background-color: #4e3bcf;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.edit-profile-btn:hover,
+.btn-edit:hover {
+  background-color: #3a2eb1;
+}
+
+/* === READING LIST BOX === */
+.reading-list-box {
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  padding: 20px;
+  margin: 0 auto;
+  text-align: center;
+  width: 400px;
+  border: 1px solid #ddd;
+}
+
+.reading-list-header {
+  margin-bottom: 20px;
+}
+
+.title-placeholder,
+.subtitle-placeholder {
+  background-color: #eee;
+  height: 20px;
+  border-radius: 4px;
+  margin: 10px auto;
+}
+
+.title-placeholder {
+  width: 60%;
+}
+
+.subtitle-placeholder {
+  width: 40%;
+}
+
+.reading-thumbnails {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin: 20px 0;
+  flex-wrap: wrap;
+}
+
+.reading-thumbnails .thumb {
+  width: 80px;
+  height: 140px;
+  background-color: #eee;
+  border-radius: 8px;
+}
+
+.reading-list-button {
+  margin-top: 10px;
+}
+
+.btn-create-list {
+  background-color: #e84917;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.btn-create-list:hover {
+  background-color: #c63f12;
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 768px) {
+  .profile-body {
+    padding: 20px;
+    margin: 20px 10px;
+  }
+
+  .profile-header h1 {
+    font-size: 1.6rem;
+  }
+
+  .profile-header .avatar {
+    width: 90px;
+    height: 90px;
+  }
+
+  .about-grid {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .right-content {
+    text-align: left;
+    margin-top: 20px;
+  }
+}
+.border-premium {
+  border-top: 6px solid #4e3bcf;
+  background: linear-gradient(135deg, #4e3bcf 0%, #8b7dfd 100%);
+  box-shadow: 0 4px 20px rgba(78, 59, 207, 0.2);
+  color: white;
+}
+
+/* Unique Name Design */
+.profile-header.free h1 {
+  color: #333;
+  font-weight: bold;
+}
+
+.profile-header.premium h1 {
+  background: linear-gradient(to right, #ffffff, #c7bcff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.profile-header.vip h1 {
+  background: linear-gradient(to right, #ffd700, #c49b28);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 800;
+  text-shadow: 0 0 8px rgba(196, 155, 40, 0.4);
+}

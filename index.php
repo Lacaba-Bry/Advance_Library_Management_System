@@ -263,7 +263,7 @@
 
 
 
-<!-- MODAL SECTION-->
+
 <!-- Login Modal -->
 <div id="loginModal" class="modal">
   <div class="modal-content">
