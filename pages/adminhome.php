@@ -1,9 +1,3 @@
-<?php
-require_once('backend/config/config.php');
-
-?>
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,23 +7,21 @@ require_once('backend/config/config.php');
    <link rel="stylesheet" href="css/adminheader.css">
    <script type="text/javascript" src="javascript/adminhome.js" defer></script>
    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
-
-   
   <title>Document</title>
   <style>
-    
-
-
+    /* Additional styles for the Price input field */
+    #priceField {
+      display: none;
+    }
   </style>
+</head>
 <body>
 
 <main>
-  </head>
-   <header class="header">
+  <header class="header">
         <span class="logo-section">
           <span class="logo">Home</span>
         </span>
-
         <div class="search-bar">
           <input type="text" placeholder="Search ..." aria-label="Search">
         </div>
@@ -38,22 +30,9 @@ require_once('backend/config/config.php');
           <div class="user-profile">
             <img src="./sample1.jpg" alt="Profile picture of Arafat Hossain" class="profile-img">
             <span class="user-name">Bryan Lacaba</span>
-
           </div>
         </div>
       </header>
-
-
-
-
-
-
-
-
-
-
-
-
 
     <div class="dashboard-header">
         <p>Jan 12, 2023 | Thursday, 11:00</p>
@@ -77,7 +56,6 @@ require_once('backend/config/config.php');
             <p>New Members</p>
         </div>
     </div>
-
 
     <!-- Quick Actions -->
     <div class="quick-actions">
@@ -103,13 +81,9 @@ require_once('backend/config/config.php');
     </div>
 </main>
 
-
-
-
-
-
+<!-- Add New Book Modal -->
 <div class="modal fade" id="addBookModal" tabindex="-1" aria-labelledby="addBookModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered modal-lg"> <!-- modal-lg for wider modal -->
+  <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="addBookModalLabel">Add New Book</h5>
@@ -133,14 +107,26 @@ require_once('backend/config/config.php');
             <input type="text" class="form-control" name="Genre" placeholder="Genre">
           </div>
          <div class="mb-3">
-  <label for="PlanSelect" class="form-label">Plan_type</label>
-  <select class="form-select" id="PlanSelect" name="Plan_type" required>
-    <option value="" disabled selected>Plan Type</option>
-    <option value="Free">Free</option>
-    <option value="Premium">Premium</option>
-  </select>
-</div>
-          <div class="mb-3">
+          <label for="PlanSelect" class="form-label">Plan_type</label>
+          <select class="form-select" id="PlanSelect" name="Plan_type" required>
+            <option value="" disabled selected>Plan Type</option>
+            <option value="Free">Free</option>
+            <option value="Premium">Premium</option>
+            <option value="Paid">Paid</option> <!-- Added Paid option -->
+          </select>
+        </div>
+        
+        <!-- Price Input (Initially hidden) -->
+        <div class="mb-3" id="priceField">
+          <input type="number" class="form-control" name="Price" placeholder="Price" step="0.01" min="0">
+        </div>
+
+        <!-- Stock Input -->
+        <div class="mb-3">
+          <input type="number" class="form-control" name="Stock" placeholder="Stock" min="0" required>
+        </div>
+
+        <div class="mb-3">
             <label for="bookCover" class="form-label">Book Cover</label>
             <input type="file" class="form-control" id="bookCover" name="Book_Cover" accept="image/*">
           </div>
@@ -162,27 +148,35 @@ require_once('backend/config/config.php');
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
           <button type="submit" class="btn btn-primary">Add Book</button>
         </div>
-        
       </form>
     </div>
   </div>
 </div>
 
-
-<div class="modal hidden" id="myModal">
-  <div class="modal-content">
-    <span class="close" onclick="closeModal()">&times;</span>
-    <h2>Confirm Action</h2>
-    <p>Are you sure you want to continue?</p>
-    <div class="modal-actions">
-      <button class="btn-secondary" onclick="closeModal()">Cancel</button>
-      <button class="btn-primary">Confirm</button>
-    </div>
-  </div>
-</div>
-
 <script>
+document.addEventListener('DOMContentLoaded', () => {
+  const planSelect = document.getElementById('PlanSelect');
+  const priceField = document.getElementById('priceField');
+  const priceInput = priceField.querySelector('input');
 
+  // Function to handle Plan Type change
+  function handlePlanChange() {
+    if (planSelect.value === 'Paid') {
+      priceField.style.display = 'block'; // Show the price input
+      priceInput.required = true; // Make price field required
+    } else {
+      priceField.style.display = 'none'; // Hide the price input
+      priceInput.required = false; // Make price field not required
+      priceInput.value = 0; // Set price to 0 for Free and Premium
+    }
+  }
+
+  // Set initial state based on the default value
+  handlePlanChange();
+
+  // Listen for changes in Plan type
+  planSelect.addEventListener('change', handlePlanChange);
+});
 
 document.addEventListener('DOMContentLoaded', () => {
   const addBookForm = document.getElementById('addBookForm');
@@ -193,7 +187,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const formData = new FormData(addBookForm);
 
     try {
-    const response = await fetch('process/addnewbook.php', {
+      const response = await fetch('process/addnewbook.php', {
         method: 'POST',
         body: formData
       });
@@ -209,8 +203,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
-
-
 </script>
 
 </body>

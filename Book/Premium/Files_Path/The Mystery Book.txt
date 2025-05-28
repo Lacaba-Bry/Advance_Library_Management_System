@@ -1,9 +1,0 @@
-Title: The Mystery Book
-Author: Jane Doe
-Publisher: ABC Publishing
-ISBN: 978-3-16-148410-0
-Genre: Mystery
-Story Snippet: It was a dark and stormy night...
-Description: This book is about a thrilling mystery that unfolds in an old manor.
-Story:
-Once upon a time, in a foggy little village...

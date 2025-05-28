@@ -17,6 +17,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $story_snippet = $_POST['Story_Snippet'];
     $description = $_POST['Description'];
     $story = $_POST['Story'];
+    $price = isset($_POST['Price']) ? $_POST['Price'] : 0; // Handle Price input if Paid
+    $stock = isset($_POST['Stock']) ? $_POST['Stock'] : 0; // Get Stock value
+
+    // Determine Status based on Stock
+    $status = ($stock > 0) ? "Available" : "Unavailable";
 
     // Plan_type is already set correctly, no need for further manipulation
     $prefix = $Plan_type;  // Directly using the Plan_type
@@ -36,11 +41,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $cover_name = basename($_FILES["Book_Cover"]["name"]);
     $cover_path = $cover_folder . $cover_name;
 
-    // Make sure folder exists
+    // Debugging: Check if the directory exists for the paid books
     if (!is_dir($cover_folder)) {
-        mkdir($cover_folder, 0777, true);
+        echo "The cover directory doesn't exist: $cover_folder"; // Debugging output
+        mkdir($cover_folder, 0777, true); // Create directory if doesn't exist
     }
+
     move_uploaded_file($_FILES["Book_Cover"]["tmp_name"], $cover_path);
+
+    // Debugging: Check the cover path for the uploaded file
+    echo "Cover path: $cover_path"; // Debugging output
 
     // Upload book file
     $file_folder = "../Book/$Plan_type/Files_Path/"; // Plan-based folder
@@ -53,13 +63,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
     move_uploaded_file($_FILES["File_Path"]["tmp_name"], $file_path);
 
-    // Insert into database
+    // Insert into database with the correct number of placeholders
     $sql = "INSERT INTO books 
-        (Book_ID, Title, Author, Publisher, ISBN, Genre, Plan_type, Book_Cover, File_Path, Story_Snippet, Description, Story)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        (Book_ID, Title, Author, Publisher, ISBN, Genre, Plan_type, Price, Status, Stock, Book_Cover, File_Path, Story_Snippet, Description, Story)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
+    // Binding 15 values with 15 placeholders
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("ssssssssssss", $book_id, $title, $author, $publisher, $isbn, $genre, $Plan_type, $cover_path, $file_path, $story_snippet, $description, $story);
+    $stmt->bind_param("sssssssssssssss", $book_id, $title, $author, $publisher, $isbn, $genre, $Plan_type, $price, $status, $stock, $cover_path, $file_path, $story_snippet, $description, $story);
 
     if ($stmt->execute()) {
         echo "Book added successfully with ID: $book_id";
@@ -73,6 +84,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         mkdir($preview_folder, 0777, true);
     }
     $preview_filename = $preview_folder . $isbn . ".php";
+
+    // Generate the correct path for the cover image
+    $coverPath = "../../../Book/" . $Plan_type . "/Book_Cover/" . basename($cover_path);
 
     $preview_template = <<<PHP
 <?php
@@ -93,6 +107,8 @@ if (!\$book) {
 
 // Extract Plan_type from the database record
 \$Plan_type = \$book['Plan_type'];
+// Generate cover path for preview page
+\$coverPath = "../../../Book/" . \$Plan_type . "/Book_Cover/" . basename(\$book['Book_Cover']);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -105,7 +121,6 @@ if (!\$book) {
 <body>
 <div class="book-preview">
   <div class="preview-header">
-    <!-- Use the correct image path here -->
     <img src="http://localhost/BryanCodeX/Book/<?= \$Plan_type ?>/Book_Cover/<?= basename(htmlspecialchars(\$book['Book_Cover'])) ?>" alt="Book Cover" class="book-cover">
     <div class="book-info">
       <h2 class="book-title"><?= htmlspecialchars(\$book['Title']) ?></h2>
@@ -143,14 +158,14 @@ PHP;
 
     file_put_contents($preview_filename, $preview_template);
 
-    // ✅ Auto-generate Story page
+    // ✅ Auto-generate Story page for Paid plan
     $story_folder = "../Book/$Plan_type/Story/"; // Plan-based folder for story
     if (!is_dir($story_folder)) {
         mkdir($story_folder, 0777, true);
     }
     $story_filename = $story_folder . $isbn . "_story.php";
 
-   $story_template = <<<PHP
+    $story_template = <<<PHP
 <?php
 require_once('../../../backend/config/config.php');
 include '../../../reusable/header.php';
@@ -185,7 +200,7 @@ if (!\$book) {
   content: "";
   position: absolute;
   top: 0; left: 0; right: 0; bottom: 0;
- background: url('<?= $coverPath ?>') no-repeat center center;
+  background: url('<?= \$coverPath ?>') no-repeat center center;
   background-size: cover;
   filter: blur(20px);
   transform: scale(1.1); /* Prevent blur edges from cutting off */
@@ -229,7 +244,6 @@ if (!\$book) {
 </body>
 </html>
 PHP;
-
 
     file_put_contents($story_filename, $story_template);
 

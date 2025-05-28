@@ -76,7 +76,7 @@ $avatar = $avatar ?: 'image/profile/defaultprofile.jpg'; // Set default image if
       </div>
       <div class="dropdown-content">
         <a href="index/profile.php">Profile</a>
-        <a href="logout.php">Logout</a>
+        <a href="backend/logout.php">Logout</a> 
       </div>
     </div>
 

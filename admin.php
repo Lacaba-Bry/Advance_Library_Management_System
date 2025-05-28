@@ -67,7 +67,7 @@
             <li><a href="?page=booklist">Book List</a></li>
             <li><a href="?page=bookfeatures">Features Book</a></li>
             <li><a href="#">VIP Book</a></li>
-            <li><a href="#">Paid Book</a></li>
+            <li><a href="?page=paidbook">Paid Book</a></li>
           </div>
         </ul>
       </li>
@@ -102,7 +102,7 @@
   <!-- Main content area -->
  <?php
   $page = $_GET['page'] ?? 'adminhome';
-  $allowed_pages = ['dashboard', 'adminhome','memberlist','banlist','booklist','bookfeatures','transaction','logs'];
+  $allowed_pages = ['dashboard', 'adminhome','memberlist','banlist','booklist','paidbook','bookfeatures','transaction','logs'];
 
   if (in_array($page, $allowed_pages)) {
       $filepath = __DIR__ . "/pages/{$page}.php";
