@@ -4,10 +4,14 @@ require_once(__DIR__ . '/../backend/config/config.php');
 $searchTerm = isset($_GET['search']) ? $_GET['search'] : '';
 $genreFilter = isset($_GET['genre']) ? $_GET['genre'] : 'all';
 
-// SQL with optional genre filter
-$query = "SELECT * FROM books WHERE Title LIKE ? OR Author LIKE ?";
+// SQL with optional genre filter.  Prioritize books.Price
+$query = "SELECT books.*, COALESCE(books.Price, plans.Price) AS display_price
+          FROM books
+          LEFT JOIN plans ON books.Plan_type = plans.Plan_Name
+          WHERE books.Title LIKE ? OR books.Author LIKE ?";
+
 if ($genreFilter !== 'all') {
-    $query .= " AND Genre = ?";
+    $query .= " AND books.Genre = ?";
 }
 
 $stmt = $conn->prepare($query);
@@ -38,6 +42,8 @@ try {
   <link rel="stylesheet" href="css/adminheader.css">
   <link rel="stylesheet" href="css/adminpanel/booklist.css">
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </head>
 <body>
   <main>
@@ -84,6 +90,7 @@ try {
             <th>ISBN</th>
             <th>Genre</th>
             <th>Plan</th>
+            <th>Price</th>
             <th>Stock</th>
             <th>Actions</th>
           </tr>
@@ -91,7 +98,7 @@ try {
         <tbody>
           <?php
        foreach ($books as $book) {
-   
+
     $planType = strtolower($book['Plan_type']); // Ensure lowercase for consistency
     $filename = basename($book['Book_Cover']); // Extract filename
 
@@ -115,12 +122,13 @@ try {
     echo '<td>' . $book['ISBN'] . '</td>';
     echo '<td>' . $book['Genre'] . '</td>';
     echo '<td><span class="badge badge-' . getBadgeClass($book['Plan_type']) . '">' . $book['Plan_type'] . '</span></td>';
+    echo '<td>' . $book['display_price'] . '</td>';  // Use display_price
     echo '<td>' . $book['Stock'] . '</td>';
-    echo '<td>
+     echo '<td>
             <div class="action-buttons">
               <button class="btn btn-info btn-sm" onclick="viewBook(\'' . $book['Book_ID'] . '\')">View</button>
               <button class="btn btn-warning btn-sm" onclick="updateBook(\'' . $book['Book_ID'] . '\')">Update</button>
-              <button class="btn btn-danger btn-sm" onclick="deleteBook(\'' . $book['Book_ID'] . '\')">Delete</button>
+              <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteConfirmationModal" data-book-id="' . $book['Book_ID'] . '">Delete</button>
             </div>
           </td>';
     echo '</tr>';
@@ -139,25 +147,59 @@ try {
         </tbody>
       </table>
     </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteConfirmationModal" tabindex="-1" role="dialog" aria-labelledby="deleteConfirmationModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="deleteConfirmationModalLabel">Delete Book</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            Are you sure you want to delete this book? This action cannot be undone.
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
+            <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Yes, Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </main>
 
-  <script>
-    function viewBook(bookId) {
-      alert("Viewing book: " + bookId);
-    }
 
-    function updateBook(bookId) {
-      alert("Updating book: " + bookId);
-    }
+   <script>
+      $(document).ready(function() {
+      let bookIdToDelete;
 
-    function deleteBook(bookId) {
-      if (confirm("Are you sure you want to delete book ID " + bookId + "? This action cannot be undone.")) {
-        alert("Book " + bookId + " deleted.");
-      }
-    }
+      $('#deleteConfirmationModal').on('show.bs.modal', function (event) {
+        const button = $(event.relatedTarget); // Button that triggered the modal
+        bookIdToDelete = button.data('book-id'); // Extract info from data-* attributes
+      });
+
+      $('#confirmDeleteBtn').click(function() {
+        if (bookIdToDelete) {
+          $.ajax({
+            url: '/BryanCodeX/process/admin/delete_book.php', // Corrected URL - ROOT RELATIVE
+            type: 'POST',
+            data: { book_id: bookIdToDelete },
+            success: function(response) {
+              $('#deleteConfirmationModal').modal('hide');
+              alert(response); // Show response from the server
+              location.reload(); // Reload the page to reflect changes
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+              console.error("Error deleting book:", textStatus, errorThrown);
+              alert("An error occurred while deleting the book.");
+            }
+          });
+        }
+      });
+    });
   </script>
-  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
 </body>
 </html>

@@ -33,24 +33,6 @@ $_SESSION['user_type'] = $userType ?? 'Free';
 // Check if the avatar image is set, otherwise use default
 $avatar = $avatar ?: 'image/profile/defaultprofile.jpg'; // Set default image if $avatar is empty
 
-/*
-// Get the expiration date from user_plans table
-$expirationDate = null; // Initialize to null
-if ($userType !== 'Free') {  // Only query if it's not the free plan
-    $stmt = $conn->prepare("
-        SELECT Expiration_Date
-        FROM user_plans
-        WHERE Account_ID = ?
-    ");
-    $stmt->bind_param("i", $accountId);
-    $stmt->execute();
-    $stmt->bind_result($expiration);
-    if ($stmt->fetch()) {
-        $expirationDate = $expiration; // Assign the expiration date
-    }
-    $stmt->close();
-}
-*/
 ?>
 
 <!DOCTYPE html>
@@ -100,19 +82,6 @@ if ($userType !== 'Free') {  // Only query if it's not the free plan
     </div>
 
     <span class="user-type"><?php echo htmlspecialchars($userType); ?></span>
-<!--
-    <?php
-    // Display user information
-    // echo "<p>Full Name: " . htmlspecialchars($userName) . "</p>";
-    // echo "<p>Plan Type: " . htmlspecialchars($userType) . "</p>";
-    // if ($expirationDate) {
-    //    echo "<p>Expiration Date: " . htmlspecialchars($expirationDate) . "</p>";
-    //} else {
-    //    echo "<p>Expiration Date: N/A</p>"; // Or any other message for free plans
-    //}
-    ?>
-  </div>
--->
 </header>
 
 

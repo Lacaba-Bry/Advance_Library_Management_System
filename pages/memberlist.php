@@ -363,7 +363,7 @@ function getBadgeClass($status) {
 
             echo '<tr>';
             echo '<td>' . ($index + 1) . '</td>'; // The index number
-            echo '<td><a href="' . htmlspecialchars($profileLink) . '" class="profile-cell"><img src="' . htmlspecialchars($defaultProfileImage) . '" alt="Profile" class="profile-image"></a></td>';
+            echo '<td><a href="index/' . htmlspecialchars($profileLink) . '" class="profile-cell"><img src="' . htmlspecialchars($defaultProfileImage) . '" alt="Profile" class="profile-image"></a></td>';
             echo '<td>' . htmlspecialchars($member['Fullname']) . '</td>';
             echo '<td>' . htmlspecialchars($member['Email']) . '</td>';
             echo '<td>' . htmlspecialchars($member['Plan_Name']) . '</td>';
