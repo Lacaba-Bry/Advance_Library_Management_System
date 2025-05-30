@@ -7,13 +7,12 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
-// You correctly set these in login.php:
+// User information retrieval (as before, with error handling)
 $accountId = $_SESSION['user_id'];
 $userEmail = $_SESSION['user_email'] ?? 'Unknown';
-$userType = $_SESSION['user_type'] ?? 'Free'; // Plan name: Free, Premium, or VIP
+$userType = $_SESSION['user_type'] ?? 'Free';
 $userName = $_SESSION['fullname'] ?? 'User';
 
-// Query to get the user's plan and avatar from the profiles table
 $stmt = $conn->prepare("
     SELECT p.Plan_Name, pr.Avatar
     FROM accountlist a
@@ -21,18 +20,66 @@ $stmt = $conn->prepare("
     LEFT JOIN profiles pr ON a.Account_ID = pr.Account_ID
     WHERE a.Account_ID = ?
 ");
+
+if ($stmt === false) {
+    error_log("Prepare failed: " . $conn->error);
+    die("Database error: " . htmlspecialchars($conn->error));
+}
+
 $stmt->bind_param("i", $accountId);
 $stmt->execute();
-$stmt->bind_result($userType, $avatar); // Retrieve userType and avatar
+
+if ($stmt->errno) {
+    error_log("Execute failed: " . $stmt->error);
+    die("Database query failed: " . htmlspecialchars($stmt->error));
+}
+
+$stmt->bind_result($userType, $avatar);
 $stmt->fetch();
 $stmt->close();
 
-// Update session (optional, to keep in sync)
 $_SESSION['user_type'] = $userType ?? 'Free';
+$avatar = $avatar ?: 'image/profile/defaultprofile.jpg';
 
-// Check if the avatar image is set, otherwise use default
-$avatar = $avatar ?: 'image/profile/defaultprofile.jpg'; // Set default image if $avatar is empty
+// --------------------------------------------------------------------------
+// Fetch Books Data and Calculate Top Genres
+// --------------------------------------------------------------------------
 
+// Function to fetch books from the database
+function getBooks($conn) {
+    $books = [];
+    $sql = "SELECT Book_ID, Title, Author, Book_Cover, Genre, Price FROM books";  // Select relevant columns
+    $result = $conn->query($sql);
+
+    if ($result && $result->num_rows > 0) {
+        while($row = $result->fetch_assoc()) {
+            $books[] = $row;
+        }
+    }
+    return $books;
+}
+
+// Get all books
+$books = getBooks($conn);
+
+// Calculate genre counts
+$genreCounts = [];
+foreach ($books as $book) {
+    $genre = $book['Genre'];
+    if (isset($genreCounts[$genre])) {
+        $genreCounts[$genre]++;
+    } else {
+        $genreCounts[$genre] = 1;
+    }
+}
+
+// Sort genres by count in descending order
+arsort($genreCounts);
+
+// Get the top 3 genres
+$topGenres = array_slice(array_keys($genreCounts), 0, 3);
+
+// --------------------------------------------------------------------------
 ?>
 
 <!DOCTYPE html>
@@ -53,7 +100,7 @@ $avatar = $avatar ?: 'image/profile/defaultprofile.jpg'; // Set default image if
     <nav class="nav-links">
       <div class="dropdown">
         <button class="dropbtn">
-          Browse 
+          Browse
           <span class="material-icons dropdown-icon">arrow_drop_down</span>
         </button>
         <div class="dropdown-content">
@@ -73,11 +120,11 @@ $avatar = $avatar ?: 'image/profile/defaultprofile.jpg'; // Set default image if
 
     <div class="profile dropdown">
       <div class="user-info">
-    <img src="<?php echo htmlspecialchars($avatar); ?>" class="avatar" alt="User" />
+        <img src="<?php echo htmlspecialchars($avatar); ?>" class="avatar" alt="User" />
       </div>
       <div class="dropdown-content">
         <a href="index/profile.php">Profile</a>
-        <a href="backend/logout.php">Logout</a> 
+        <a href="backend/logout.php">Logout</a>
       </div>
     </div>
 
@@ -89,16 +136,27 @@ $avatar = $avatar ?: 'image/profile/defaultprofile.jpg'; // Set default image if
   <div class="best-seller-carousel-wrapper">
     <button class="carousel-btn prev-btn" onclick="moveBestSellerCarousel(-1)">&#8249;</button>
     <div class="best-seller-carousel" id="bestSellerCarousel">
-      <?php for ($i = 1; $i <= 8; $i++): ?>
-        <div class="best-seller-item">
-          <img src="Books/BestSeller/book<?php echo $i; ?>.jpg" alt="Best Seller Book <?php echo $i; ?>">
-          <div class="best-seller-info">
-            <h3>Book Title <?php echo $i; ?></h3>
-            <p>Author Name</p>
-            <p class="price">$<?php echo rand(10, 30); ?></p>
+      <?php
+        $bestSellerCount = 0;
+        foreach ($books as $book):
+            if ($bestSellerCount >= 8) break;  // Limit to 8 bestsellers
+
+            // Basic placeholder logic for "bestseller" status.  REPLACE WITH ACTUAL LOGIC
+            if ($book['Price'] > 20):  // Example: Books with price > $20 are considered bestsellers
+              $bestSellerCount++;
+        ?>
+          <div class="best-seller-item">
+            <img src="<?php echo htmlspecialchars($book['Book_Cover']); ?>" alt="<?php echo htmlspecialchars($book['Title']); ?>">
+            <div class="best-seller-info">
+              <h3><?php echo htmlspecialchars($book['Title']); ?></h3>
+              <p><?php echo htmlspecialchars($book['Author']); ?></p>
+              <p class="price">$<?php echo htmlspecialchars($book['Price']); ?></p>
+            </div>
           </div>
-        </div>
-      <?php endfor; ?>
+        <?php
+            endif;  // if bestseller
+          endforeach; // foreach books
+         ?>
     </div>
     <button class="carousel-btn next-btn" onclick="moveBestSellerCarousel(1)">&#8250;</button>
   </div>
@@ -149,11 +207,22 @@ $avatar = $avatar ?: 'image/profile/defaultprofile.jpg'; // Set default image if
     <button class="carousel-btn prev-btn" onclick="moveFreeCarousel(-1)">&#8249;</button>
     <div class="free-carousel" id="freeCarousel">
       <!-- Add your free items here -->
-      <?php for ($i = 1; $i <= 25; $i++): ?>
+      <?php
+      $freeCount = 0;
+        foreach ($books as $book):
+            if ($freeCount >= 25) break;  // Limit to 25 free books
+
+            // Basic placeholder logic for "free" status. REPLACE WITH ACTUAL LOGIC
+            if ($book['Price'] <= 5): // Example: Books with price <= $5 are considered free
+              $freeCount++;
+        ?>
         <div class="free-item">
-          <img src="Books/Free/book<?php echo $i; ?>.jpg" alt="Free Book <?php echo $i; ?>">
+          <img src="<?php echo htmlspecialchars($book['Book_Cover']); ?>" alt="<?php echo htmlspecialchars($book['Title']); ?>">
         </div>
-      <?php endfor; ?>
+        <?php
+            endif;  // if free
+          endforeach; // foreach books
+         ?>
     </div>
     <button class="carousel-btn next-btn" onclick="moveFreeCarousel(1)">&#8250;</button>
   </div>
@@ -165,11 +234,22 @@ $avatar = $avatar ?: 'image/profile/defaultprofile.jpg'; // Set default image if
   <div class="premium-carousel-wrapper">
     <button class="carousel-btn prev-btn" onclick="movePremiumCarousel(-1)">&#8249;</button>
     <div class="premium-carousel" id="premiumCarousel">
-      <?php for ($i = 1; $i <= 25; $i++): ?>
+      <?php
+        $premiumCount = 0;
+        foreach ($books as $book):
+            if ($premiumCount >= 25) break;  // Limit to 25 premium books
+
+            // Basic placeholder logic for "premium" status.  REPLACE WITH ACTUAL LOGIC
+            if ($book['Price'] > 5 && $book['Price'] <= 20): // Example: Books priced between $5 and $20 are premium
+              $premiumCount++;
+        ?>
         <div class="premium-item">
-          <img src="Books/Premium/book<?php echo $i; ?>.jpg" alt="Premium Book <?php echo $i; ?>">
+          <img src="<?php echo htmlspecialchars($book['Book_Cover']); ?>" alt="<?php echo htmlspecialchars($book['Title']); ?>">
         </div>
-      <?php endfor; ?>
+        <?php
+            endif;  // if premium
+          endforeach; // foreach books
+         ?>
     </div>
     <button class="carousel-btn next-btn" onclick="movePremiumCarousel(1)">&#8250;</button>
   </div>
@@ -178,11 +258,11 @@ $avatar = $avatar ?: 'image/profile/defaultprofile.jpg'; // Set default image if
 
 
 <section class="wattpad-classics-section py-4">
-  <h2 class="text-center">Wattpad Classics</h2>
+  <h2 class="text-center">Wattpad Classics (Top Genres: <?php echo htmlspecialchars(implode(", ", $topGenres)); ?>)</h2>  <!-- Dynamic top genres -->
   <div class="carousel-wrapper">
     <button class="carousel-btn prev-btn" onclick="moveWattpadClassicsCarousel(-1)">&#8249;</button>
     <div class="carousel" id="wattpadClassicsCarousel">
-      <?php 
+      <?php
       // Define the books to display in the carousel
       $books = [
         ["title" => "I Miss You Too", "image" => "sample1.jpg", "description" => "When Carmen Cruz finds herself in competition with her ex-girlfriend Briar Sutton for the school play...", "progress" => "95.4K", "status" => "Complete"],
@@ -212,6 +292,7 @@ $avatar = $avatar ?: 'image/profile/defaultprofile.jpg'; // Set default image if
           </div>
         </div>
       <?php endfor; ?>
+      ?>
     </div>
     <button class="carousel-btn next-btn" onclick="moveWattpadClassicsCarousel(1)">&#8250;</button>
   </div>
@@ -224,11 +305,22 @@ $avatar = $avatar ?: 'image/profile/defaultprofile.jpg'; // Set default image if
     <button class="carousel-btn prev-btn" onclick="moveCarousel(-1)">&#8249;</button>
     <div class="fiction-carousel" id="fictionCarousel">
       <!-- Add your fiction book items here -->
-      <?php for ($i = 1; $i <= 25; $i++): ?>
+       <?php
+        $fictionCount = 0;
+        foreach ($books as $book):
+            if ($fictionCount >= 25) break;  // Limit to 25 fiction books
+
+            // Basic placeholder logic for genre.  REPLACE WITH ACTUAL LOGIC
+            if ($book['Genre'] == "Fiction"):
+              $fictionCount++;
+        ?>
         <div class="fiction-item">
-          <img src="Books/Fiction/book<?php echo $i; ?>.jpg" alt="Fiction Book <?php echo $i; ?>">
+          <img src="<?php echo htmlspecialchars($book['Book_Cover']); ?>" alt="<?php echo htmlspecialchars($book['Title']); ?>">
         </div>
-      <?php endfor; ?>
+        <?php
+            endif;  // if genre fiction
+          endforeach; // foreach books
+         ?>
     </div>
     <button class="carousel-btn next-btn" onclick="moveCarousel(1)">&#8250;</button>
   </div>
@@ -241,11 +333,22 @@ $avatar = $avatar ?: 'image/profile/defaultprofile.jpg'; // Set default image if
   <div class="nonfiction-carousel-wrapper">
     <button class="carousel-btn prev-btn" onclick="moveNonFictionCarousel(-1)">&#8249;</button>
     <div class="nonfiction-carousel" id="nonfictionCarousel">
-      <?php for ($i = 1; $i <= 25; $i++): ?>
+        <?php
+        $nonFictionCount = 0;
+        foreach ($books as $book):
+            if ($nonFictionCount >= 25) break;  // Limit to 25 non fiction books
+
+            // Basic placeholder logic for genre.  REPLACE WITH ACTUAL LOGIC
+            if ($book['Genre'] == "Non-Fiction"):
+              $nonFictionCount++;
+        ?>
         <div class="nonfiction-item">
-          <img src="Books/NonFiction/book<?php echo $i; ?>.jpg" alt="Non-Fiction Book <?php echo $i; ?>">
+          <img src="<?php echo htmlspecialchars($book['Book_Cover']); ?>" alt="<?php echo htmlspecialchars($book['Title']); ?>">
         </div>
-      <?php endfor; ?>
+          <?php
+            endif;  // if genre non fiction
+          endforeach; // foreach books
+         ?>
     </div>
     <button class="carousel-btn next-btn" onclick="moveNonFictionCarousel(1)">&#8250;</button>
   </div>
@@ -257,11 +360,22 @@ $avatar = $avatar ?: 'image/profile/defaultprofile.jpg'; // Set default image if
   <div class="sciencefiction-carousel-wrapper">
     <button class="carousel-btn prev-btn" onclick="moveScienceFictionCarousel(-1)">&#8249;</button>
     <div class="sciencefiction-carousel" id="sciencefictionCarousel">
-      <?php for ($i = 1; $i <= 25; $i++): ?>
+          <?php
+        $sciFiCount = 0;
+        foreach ($books as $book):
+            if ($sciFiCount >= 25) break;  // Limit to 25 science fiction books
+
+            // Basic placeholder logic for genre.  REPLACE WITH ACTUAL LOGIC
+            if ($book['Genre'] == "Science Fiction"):
+              $sciFiCount++;
+        ?>
         <div class="sciencefiction-item">
-          <img src="Books/ScienceFiction/book<?php echo $i; ?>.jpg" alt="Science Fiction Book <?php echo $i; ?>">
+          <img src="<?php echo htmlspecialchars($book['Book_Cover']); ?>" alt="<?php echo htmlspecialchars($book['Title']); ?>">
         </div>
-      <?php endfor; ?>
+              <?php
+            endif;  // if genre science fiction
+          endforeach; // foreach books
+         ?>
     </div>
     <button class="carousel-btn next-btn" onclick="moveScienceFictionCarousel(1)">&#8250;</button>
   </div>
@@ -273,11 +387,22 @@ $avatar = $avatar ?: 'image/profile/defaultprofile.jpg'; // Set default image if
   <div class="fantasy-carousel-wrapper">
     <button class="carousel-btn prev-btn" onclick="moveFantasyCarousel(-1)">&#8249;</button>
     <div class="fantasy-carousel" id="fantasyCarousel">
-      <?php for ($i = 1; $i <= 25; $i++): ?>
+          <?php
+        $fantasyCount = 0;
+        foreach ($books as $book):
+            if ($fantasyCount >= 25) break;  // Limit to 25 fantasy books
+
+            // Basic placeholder logic for genre.  REPLACE WITH ACTUAL LOGIC
+            if ($book['Genre'] == "Fantasy"):
+              $fantasyCount++;
+        ?>
         <div class="fantasy-item">
-          <img src="Books/Fantasy/book<?php echo $i; ?>.jpg" alt="Fantasy Book <?php echo $i; ?>">
+          <img src="<?php echo htmlspecialchars($book['Book_Cover']); ?>" alt="<?php echo htmlspecialchars($book['Title']); ?>">
         </div>
-      <?php endfor; ?>
+              <?php
+            endif;  // if genre fantasy
+          endforeach; // foreach books
+         ?>
     </div>
     <button class="carousel-btn next-btn" onclick="moveFantasyCarousel(1)">&#8250;</button>
   </div>
@@ -289,11 +414,22 @@ $avatar = $avatar ?: 'image/profile/defaultprofile.jpg'; // Set default image if
   <div class="mystery-carousel-wrapper">
     <button class="carousel-btn prev-btn" onclick="moveMysteryCarousel(-1)">&#8249;</button>
     <div class="mystery-carousel" id="mysteryCarousel">
-      <?php for ($i = 1; $i <= 25; $i++): ?>
+          <?php
+        $mysteryCount = 0;
+        foreach ($books as $book):
+            if ($mysteryCount >= 25) break;  // Limit to 25 mystery books
+
+            // Basic placeholder logic for genre.  REPLACE WITH ACTUAL LOGIC
+            if ($book['Genre'] == "Mystery"):
+              $mysteryCount++;
+        ?>
         <div class="mystery-item">
-          <img src="Books/Mystery/book<?php echo $i; ?>.jpg" alt="Mystery Book <?php echo $i; ?>">
+          <img src="<?php echo htmlspecialchars($book['Book_Cover']); ?>" alt="<?php echo htmlspecialchars($book['Title']); ?>">
         </div>
-      <?php endfor; ?>
+              <?php
+            endif;  // if genre mystery
+          endforeach; // foreach books
+         ?>
     </div>
     <button class="carousel-btn next-btn" onclick="moveMysteryCarousel(1)">&#8250;</button>
   </div>
@@ -305,11 +441,22 @@ $avatar = $avatar ?: 'image/profile/defaultprofile.jpg'; // Set default image if
   <div class="romance-carousel-wrapper">
     <button class="carousel-btn prev-btn" onclick="moveRomanceCarousel(-1)">&#8249;</button>
     <div class="romance-carousel" id="romanceCarousel">
-      <?php for ($i = 1; $i <= 25; $i++): ?>
+          <?php
+        $romanceCount = 0;
+        foreach ($books as $book):
+            if ($romanceCount >= 25) break;  // Limit to 25 romance books
+
+            // Basic placeholder logic for genre.  REPLACE WITH ACTUAL LOGIC
+            if ($book['Genre'] == "Romance"):
+              $romanceCount++;
+        ?>
         <div class="romance-item">
-          <img src="Books/Romance/book<?php echo $i; ?>.jpg" alt="Romance Book <?php echo $i; ?>">
+          <img src="<?php echo htmlspecialchars($book['Book_Cover']); ?>" alt="<?php echo htmlspecialchars($book['Title']); ?>">
         </div>
-      <?php endfor; ?>
+              <?php
+            endif;  // if genre romance
+          endforeach; // foreach books
+         ?>
     </div>
     <button class="carousel-btn next-btn" onclick="moveRomanceCarousel(1)">&#8250;</button>
   </div>
@@ -321,11 +468,22 @@ $avatar = $avatar ?: 'image/profile/defaultprofile.jpg'; // Set default image if
   <div class="horror-carousel-wrapper">
     <button class="carousel-btn prev-btn" onclick="moveHorrorCarousel(-1)">&#8249;</button>
     <div class="horror-carousel" id="horrorCarousel">
-      <?php for ($i = 1; $i <= 25; $i++): ?>
+          <?php
+        $horrorCount = 0;
+        foreach ($books as $book):
+            if ($horrorCount >= 25) break;  // Limit to 25 horror books
+
+            // Basic placeholder logic for genre.  REPLACE WITH ACTUAL LOGIC
+            if ($book['Genre'] == "Horror"):
+              $horrorCount++;
+        ?>
         <div class="horror-item">
-          <img src="Books/Horror/book<?php echo $i; ?>.jpg" alt="Horror Book <?php echo $i; ?>">
+          <img src="<?php echo htmlspecialchars($book['Book_Cover']); ?>" alt="<?php echo htmlspecialchars($book['Title']); ?>">
         </div>
-      <?php endfor; ?>
+              <?php
+            endif;  // if genre horror
+          endforeach; // foreach books
+         ?>
     </div>
     <button class="carousel-btn next-btn" onclick="moveHorrorCarousel(1)">&#8250;</button>
   </div>
@@ -338,7 +496,7 @@ $avatar = $avatar ?: 'image/profile/defaultprofile.jpg'; // Set default image if
       <h2>Haven Library</h2>
       <p>Advanced Library Management System</p>
     </div>
-    
+
  <div class="footer-right">
       <h3>Follow Us</h3>
       <div class="social-media">
@@ -364,7 +522,7 @@ $avatar = $avatar ?: 'image/profile/defaultprofile.jpg'; // Set default image if
       </div>
     </div>
 
-   
+
   </div>
 </footer>
 

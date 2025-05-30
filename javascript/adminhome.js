@@ -25,7 +25,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function autoFillForm(text) {
     const fields = {
-
       'Title': 'Title',
       'Author': 'Author',
       'Publisher': 'Publisher',

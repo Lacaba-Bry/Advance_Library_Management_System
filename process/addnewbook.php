@@ -36,15 +36,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $book_id = $prefix . str_pad($number, 2, '0', STR_PAD_LEFT);
     $stmt->close();
 
-    // Upload book cover
-    $cover_folder = "../Book/$Plan_type/Book_Cover/"; // Plan-based folder
+    // Define the absolute path for book cover
+    $baseDir = $_SERVER['DOCUMENT_ROOT'] . "/BryanCodeX/Book/"; // Absolute path to the root of your project
+    $cover_folder = $baseDir . "$Plan_type/Book_Cover/"; // Absolute path for the cover folder
     $cover_name = basename($_FILES["Book_Cover"]["name"]);
     $cover_path = $cover_folder . $cover_name;
 
     // Debugging: Check if the directory exists for the paid books
     if (!is_dir($cover_folder)) {
         echo "The cover directory doesn't exist: $cover_folder"; // Debugging output
-        mkdir($cover_folder, 0777, true); // Create directory if doesn't exist
+        mkdir($cover_folder, 0777, true); // Create directory if it doesn't exist
     }
 
     move_uploaded_file($_FILES["Book_Cover"]["tmp_name"], $cover_path);
@@ -53,11 +54,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     echo "Cover path: $cover_path"; // Debugging output
 
     // Upload book file
-    $file_folder = "../Book/$Plan_type/Files_Path/"; // Plan-based folder
+    $file_folder = $baseDir . "$Plan_type/Files_Path/"; // Absolute path for book file folder
     $file_name = basename($_FILES["File_Path"]["name"]);
     $file_path = $file_folder . $file_name;
 
-    // Make sure folder exists
+    // Make sure the folder exists for the file
     if (!is_dir($file_folder)) {
         mkdir($file_folder, 0777, true);
     }
@@ -79,14 +80,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     // ✅ Auto-generate preview page
-    $preview_folder = "../Book/$Plan_type/Preview/"; // Plan-based folder for previews
+    $preview_folder = $baseDir . "$Plan_type/Preview/"; // Absolute path for preview folder
     if (!is_dir($preview_folder)) {
         mkdir($preview_folder, 0777, true);
     }
     $preview_filename = $preview_folder . $isbn . ".php";
 
     // Generate the correct path for the cover image
-    $coverPath = "../../../Book/" . $Plan_type . "/Book_Cover/" . basename($cover_path);
+    $coverPath = "/BryanCodeX/Book/$Plan_type/Book_Cover/" . basename($cover_path);
 
     $preview_template = <<<PHP
 <?php
@@ -159,7 +160,7 @@ PHP;
     file_put_contents($preview_filename, $preview_template);
 
     // ✅ Auto-generate Story page for Paid plan
-    $story_folder = "../Book/$Plan_type/Story/"; // Plan-based folder for story
+    $story_folder = $baseDir . "$Plan_type/Story/"; // Absolute path for story folder
     if (!is_dir($story_folder)) {
         mkdir($story_folder, 0777, true);
     }

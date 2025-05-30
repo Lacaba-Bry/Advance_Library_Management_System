@@ -143,23 +143,6 @@ function isBookFavorited($conn, $account_id, $book_id) {
 </head>
 <body>
 
-<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
-  <div class="container-fluid">
-    <a class="navbar-brand fw-bold" href="#">Haven Library</a>
-    <form class="d-flex mx-auto w-50">
-      <input class="form-control me-2" type="search" placeholder="Search for books, titles, authors..." aria-label="Search">
-      <button class="search-icon btn btn-outline-dark ms-2">🔍</button>
-    </form>
-    <div class="d-flex">
-      <a href="#" class="me-3 text-dark"><i class="fa-regular fa-heart fa-lg"></i></a>
-      <a href="#" class="me-3 text-dark"><i class="fa-solid fa-cart-shopping fa-lg"></i></a>
-      <a href="#" class="me-3 text-dark">
-       <img src="<?php echo htmlspecialchars($avatar); ?>" class="rounded-circle" alt="Profile" style="width:32px; height:32px;">
-      </a>
-      <a href="<?php echo htmlspecialchars($logout_url); ?>" class="btn btn-outline-dark">Logout</a>
-    </div>
-  </div>
-</nav>
 
 <div class="container-fluid py-4">
   <div class="row">
@@ -215,7 +198,8 @@ function isBookFavorited($conn, $account_id, $book_id) {
     <div class="col-md-6">
       <div class="row g-4">
         <?php foreach ($booksOnCurrentPage as $book):
-            $imagePath = "Book/" . htmlspecialchars($book['Plan_type']) . "/Book_Cover/" . htmlspecialchars($book['Book_Cover']);
+           // $imagePath = htmlspecialchars($book['Book_Cover']); // COMMENT OUT THIS LINE
+$imagePath = "Book/" . htmlspecialchars($book['Plan_type']) . "/Book_Cover/" . htmlspecialchars($book['Book_Cover']); // UNCOMMENT THIS LINE
             $isFavorited = isBookFavorited($conn, $accountId, $book['Book_ID']);
             $heartIcon = $isFavorited ? 'fa-heart' : 'fa-heart-o';
 
