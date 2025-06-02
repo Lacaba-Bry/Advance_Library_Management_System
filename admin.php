@@ -66,7 +66,7 @@
           <div>
             <li><a href="?page=booklist">Book List</a></li>
             <li><a href="?page=bookfeatures">Features Book</a></li>
-            <li><a href="#">VIP Book</a></li>
+            <li><a href="#">Book rented</a></li>
             <li><a href="?page=paidbook">Paid Book</a></li>
           </div>
         </ul>

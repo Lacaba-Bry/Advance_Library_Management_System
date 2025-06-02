@@ -1,5 +1,4 @@
 <?php 
-
 require_once('../backend/config/config.php');
 
 ini_set('display_errors', 1);
@@ -42,10 +41,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $cover_name = basename($_FILES["Book_Cover"]["name"]);
     $cover_path = $cover_folder . $cover_name;
 
+    // URL-encode the file name to handle special characters
+    $encodedCoverName = urlencode($cover_name);
+    $imageUrl = "/BryanCodeX/Book/" . ucfirst($Plan_type) . "/Book_Cover/" . $encodedCoverName;
+
     // Debugging: Check if the directory exists for the paid books
     if (!is_dir($cover_folder)) {
         echo "The cover directory doesn't exist: $cover_folder"; // Debugging output
-        mkdir($cover_folder, 0777, true); // Create directory if it doesn't exist
+        mkdir($cover_folder, 0777, true); // Create directory if doesn't exist
     }
 
     move_uploaded_file($_FILES["Book_Cover"]["tmp_name"], $cover_path);
@@ -70,8 +73,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     // Binding 15 values with 15 placeholders
+    // Store the relative paths in the database
+    $relativeCoverPath = "/BryanCodeX/Book/$Plan_type/Book_Cover/" . basename($cover_path); // Relative path for cover image
+    $relativeFilePath = "/BryanCodeX/Book/$Plan_type/Files_Path/" . basename($file_path); // Relative path for the file
+
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("sssssssssssssss", $book_id, $title, $author, $publisher, $isbn, $genre, $Plan_type, $price, $status, $stock, $cover_path, $file_path, $story_snippet, $description, $story);
+    $stmt->bind_param("sssssssssssssss", $book_id, $title, $author, $publisher, $isbn, $genre, $Plan_type, $price, $status, $stock, $relativeCoverPath, $relativeFilePath, $story_snippet, $description, $story);
 
     if ($stmt->execute()) {
         echo "Book added successfully with ID: $book_id";
@@ -256,5 +263,4 @@ if (!isset($_POST['Title'], $_POST['Plan_type'], $_FILES['Book_Cover'], $_FILES[
     echo "Missing required fields.";
     exit;
 }
-
 ?>

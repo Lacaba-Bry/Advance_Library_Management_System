@@ -89,7 +89,7 @@ $topGenres = array_slice(array_keys($genreCounts), 0, 3);
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer" />
  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <link rel="stylesheet" href="./css/home.css">
+  <link rel="stylesheet" href="./css/homeTHIS.css">
   <title>Haven Library - User Dashboard</title>
 </head>
 <body>
@@ -234,22 +234,23 @@ $topGenres = array_slice(array_keys($genreCounts), 0, 3);
   <div class="premium-carousel-wrapper">
     <button class="carousel-btn prev-btn" onclick="movePremiumCarousel(-1)">&#8249;</button>
     <div class="premium-carousel" id="premiumCarousel">
+      <!-- Premium items will be added dynamically, the same as Free items -->
       <?php
         $premiumCount = 0;
         foreach ($books as $book):
             if ($premiumCount >= 25) break;  // Limit to 25 premium books
 
-            // Basic placeholder logic for "premium" status.  REPLACE WITH ACTUAL LOGIC
+            // Basic placeholder logic for "premium" status. REPLACE WITH ACTUAL LOGIC
             if ($book['Price'] > 5 && $book['Price'] <= 20): // Example: Books priced between $5 and $20 are premium
               $premiumCount++;
-        ?>
+      ?>
         <div class="premium-item">
           <img src="<?php echo htmlspecialchars($book['Book_Cover']); ?>" alt="<?php echo htmlspecialchars($book['Title']); ?>">
         </div>
-        <?php
+      <?php
             endif;  // if premium
           endforeach; // foreach books
-         ?>
+      ?>
     </div>
     <button class="carousel-btn next-btn" onclick="movePremiumCarousel(1)">&#8250;</button>
   </div>

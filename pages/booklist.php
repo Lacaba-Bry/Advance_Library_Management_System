@@ -4,7 +4,7 @@ require_once(__DIR__ . '/../backend/config/config.php');
 $searchTerm = isset($_GET['search']) ? $_GET['search'] : '';
 $genreFilter = isset($_GET['genre']) ? $_GET['genre'] : 'all';
 
-// SQL with optional genre filter.  Prioritize books.Price
+// SQL with optional genre filter. Prioritize books.Price
 $query = "SELECT books.*, COALESCE(books.Price, plans.Price) AS display_price
           FROM books
           LEFT JOIN plans ON books.Plan_type = plans.Plan_Name
@@ -43,7 +43,7 @@ try {
   <link rel="stylesheet" href="css/adminpanel/booklist.css">
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </head>
 <body>
   <main>
@@ -97,43 +97,49 @@ try {
         </thead>
         <tbody>
           <?php
-       foreach ($books as $book) {
+          foreach ($books as $book) {
+              // Ensure lowercase for consistency
+              $planType = strtolower($book['Plan_type']);
+              $filename = basename($book['Book_Cover']); // Extract filename
 
-    $planType = strtolower($book['Plan_type']); // Ensure lowercase for consistency
-    $filename = basename($book['Book_Cover']); // Extract filename
+              // Sanitize filename (removing special characters)
+              $filename = preg_replace("/[^a-zA-Z0-9._-]/", "", $filename);
 
-    // Sanitize filename
-    $filename = preg_replace("/[^a-zA-Z0-9._-]/", "", $filename);
+              // URL-encode the filename to handle special characters (like apostrophes or spaces)
+              $encodedFilename = urlencode($filename);
 
-    $imagePath = $_SERVER['DOCUMENT_ROOT'] . "/BryanCodeX/Book/" . ucfirst($planType) . "/Book_Cover/" . $filename; // Corrected path (for file_exists)
-    $imageUrl = "/BryanCodeX/Book/" . ucfirst($planType) . "/Book_Cover/" . $filename; // URL for the image
+              // Define base directory and image path
+              $baseDir = $_SERVER['DOCUMENT_ROOT'] . "/BryanCodeX/Book/";
+              $imagePath = $baseDir . ucfirst($planType) . "/Book_Cover/" . $filename;
+              $imageUrl = "/BryanCodeX/Book/" . ucfirst($planType) . "/Book_Cover/" . $encodedFilename;
+           
 
-    echo '<tr>';
-    if (!empty($book['Book_Cover']) && file_exists($imagePath)) {
-        echo '<td><img src="' . htmlspecialchars($imageUrl) . '" alt="' . htmlspecialchars($book['Title']) . ' Cover" width="50"></td>';
-    } else {
-        echo '<td><span style="color: red;">Image not found: ' . htmlspecialchars($imagePath) . '</span></td>'; // Show the file path in the error message
-    }
+              echo '<tr>';
+              if (!empty($book['Book_Cover']) && file_exists($imagePath)) {
+                  echo '<td><img src="' . htmlspecialchars($imageUrl) . '" alt="' . htmlspecialchars($book['Title']) . ' Cover" width="50"></td>';
+              } else {
+                  // Show a placeholder if the image doesn't exist
+                  echo '<td><img src="/path_to_placeholder_image.jpg" alt="Placeholder Image" width="50"></td>';
+              }
 
-    echo '<td>' . $book['Book_ID'] . '</td>';
-    echo '<td>' . $book['Title'] . '</td>';
-    echo '<td>' . $book['Author'] . '</td>';
-    echo '<td>' . $book['Publisher'] . '</td>';
-    echo '<td>' . $book['ISBN'] . '</td>';
-    echo '<td>' . $book['Genre'] . '</td>';
-    echo '<td><span class="badge badge-' . getBadgeClass($book['Plan_type']) . '">' . $book['Plan_type'] . '</span></td>';
-    echo '<td>' . $book['display_price'] . '</td>';  // Use display_price
-    echo '<td>' . $book['Stock'] . '</td>';
-     echo '<td>
-            <div class="action-buttons">
-              <button class="btn btn-info btn-sm" onclick="viewBook(\'' . $book['Book_ID'] . '\')">View</button>
-              <button class="btn btn-warning btn-sm" onclick="updateBook(\'' . $book['Book_ID'] . '\')">Update</button>
-              <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteConfirmationModal" data-book-id="' . $book['Book_ID'] . '">Delete</button>
-            </div>
-          </td>';
-    echo '</tr>';
-}
-
+              echo '<td>' . $book['Book_ID'] . '</td>';
+              echo '<td>' . $book['Title'] . '</td>';
+              echo '<td>' . $book['Author'] . '</td>';
+              echo '<td>' . $book['Publisher'] . '</td>';
+              echo '<td>' . $book['ISBN'] . '</td>';
+              echo '<td>' . $book['Genre'] . '</td>';
+              echo '<td><span class="badge badge-' . getBadgeClass($book['Plan_type']) . '">' . $book['Plan_type'] . '</span></td>';
+              echo '<td>' . $book['display_price'] . '</td>';  // Use display_price
+              echo '<td>' . $book['Stock'] . '</td>';
+              echo '<td>
+                        <div class="action-buttons">
+                          <button class="btn btn-info btn-sm" onclick="viewBook(\'' . $book['Book_ID'] . '\')">View</button>
+                          <button class="btn btn-warning btn-sm" onclick="updateBook(\'' . $book['Book_ID'] . '\')">Update</button>
+                          <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteConfirmationModal" data-book-id="' . $book['Book_ID'] . '">Delete</button>
+                        </div>
+                      </td>';
+              echo '</tr>';
+          }
 
           function getBadgeClass($planType) {
               switch (strtolower($planType)) {
@@ -169,7 +175,6 @@ try {
       </div>
     </div>
   </main>
-
 
    <script>
       $(document).ready(function() {
