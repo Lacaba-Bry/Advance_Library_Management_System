@@ -151,149 +151,6 @@ body {
   background-color: darkred;
 }
 
-
-/* Best Seller Section */
-.best-seller-section {
-  padding: 40px 70px;
-  color: #4e3bcf;
-}
-
-.best-seller-section h2 {
-  font-size: 35px;
-  margin-bottom: 20px;
-}
-
-.best-seller-carousel-wrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.best-seller-carousel {
-  display: flex;
-  gap: 20px;
-  transition: transform 0.4s ease-in-out;
-  scroll-behavior: smooth;
-}
-
-.best-seller-item {
-  flex: 0 0 800px; /* Card width */
-  height: 570px;
-  background: #333;
-  color: white;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
-  display: flex;
-  flex-direction: column;
-  position: relative;
-}
-
-.best-seller-item img {
-  width: 100%;
-  height: 70%;
-  object-fit: cover; /* Ensure the image fits without stretching */
-  object-position: center; /* Keep the image centered in the container */
-}
-
-.best-seller-info {
-  padding: 20px;
-  background-color: rgba(0, 0, 0, 0.8);
-  height: 30%;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
-.best-seller-info h3 {
-  font-size: 24px;
-  margin: 0;
-}
-
-.best-seller-info p {
-  font-size: 18px;
-  margin: 4px 0;
-}
-
-.best-seller-info .price {
-  font-size: 22px;
-  color: #f0a500;
-  font-weight: bold;
-}
-
-.carousel-btn {
-  background-color: #4e3bcf;
-  color: white;
-  font-size: 28px;
-  padding: 14px 18px;
-  border: none;
-  border-radius: 50%;
-  cursor: pointer;
-  z-index: 1;
-  margin: 0 20px;
-  transition: background-color 0.3s;
-}
-
-.carousel-btn:hover {
-  background-color: #32229e;
-}
-
-/* Additional Enhancements */
-.best-seller-carousel-wrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-  overflow: hidden;
-  max-width: 1700px;
-  margin: auto;
-}
-
-.best-seller-item {
-  flex: 0 0 800px; /* Card width */
-  height: 570px;
-  background: #333;
-  color: white;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
-  display: flex;
-  flex-direction: column;
-  position: relative;
-}
-
-.best-seller-item img {
-  width: 100%;
-  height: 100%; /* Make the image fill the top portion of the card */
-  object-fit: cover; /* Ensure image covers the area while maintaining aspect ratio */
-  object-position: center; /* Keep the image centered */
-}
-
-.best-seller-info {
-  padding: 20px;
-  background-color: rgba(0, 0, 0, 0.8);
-  flex: 1; /* Ensure it fills the remaining space */
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
-.best-seller-info h3 {
-  font-size: 24px;
-  margin: 0;
-}
-
-.best-seller-info p {
-  font-size: 18px;
-  margin: 4px 0;
-}
-
-.price {
-  font-size: 22px;
-  color: #f0a500;
-  font-weight: bold;
-}
-
 /* Trending Now Section */
 .trending-section {
   color: #4e3bcf;
@@ -350,95 +207,7 @@ footer {
   margin-top: 40px;
 }
 
-/* Best Seller Section */
-.best-seller-section {
-  padding: 40px 70px;
-  color: #4e3bcf;
-}
 
-.best-seller-section h2 {
-  font-size: 35px;
-  margin-bottom: 20px;
-}
-
-.best-seller-carousel-wrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.best-seller-carousel {
-  display: grid;
-  grid-template-columns: repeat(2, 800px); /* 2 columns per slide */
-  grid-template-rows: repeat(2, 570px);    /* 2 rows per slide */
-  gap: 20px;
-  overflow: hidden;
-  width: 100%;
-  max-width: 1700px; /* 2x card width + gaps */
-  scroll-behavior: smooth;
-}
-
-.best-seller-item {
-  background: #333;
-  color: white;
-  border-radius: 12px;
-  overflow: hidden;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  width: 800px;
-  height: 570px;
-  box-shadow: 0 6px 12px rgba(0,0,0,0.3);
-}
-
-.best-seller-item img {
-  width: 100%;
-  height: 70%;
-  object-fit: cover;
-}
-
-.best-seller-info {
-  padding: 20px;
-  background-color: rgba(0, 0, 0, 0.8);
-  height: 30%;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
-.best-seller-info h3 {
-  font-size: 24px;
-  margin: 0;
-}
-
-.best-seller-info p {
-  margin: 4px 0;
-  font-size: 18px;
-}
-
-.best-seller-info .price {
-  font-size: 22px;
-  font-weight: bold;
-  color: #f0a500;
-}
-
-.carousel-btn {
-  background-color: #4e3bcf;
-  color: white;
-  font-size: 28px;
-  padding: 14px 18px;
-  border: none;
-  border-radius: 50%;
-  cursor: pointer;
-  z-index: 1;
-  margin: 0 20px;
-  transition: background-color 0.3s;
-}
-
-.carousel-btn:hover {
-  background-color: #32229e;
-}
 
 /* Continue Reading Section */
 .continue-reading-section {
@@ -586,6 +355,101 @@ footer {
   border-radius: 50%;
   cursor: pointer;
   z-index: 1;
+  transition: background-color 0.3s;
+}
+
+.carousel-btn:hover {
+  background-color: #32229e;
+}
+
+
+
+
+
+
+/* Best Seller Section */
+.best-seller-section {
+  padding: 40px 70px;
+  color: #4e3bcf;
+}
+
+.best-seller-section h2 {
+  font-size: 35px;
+  margin-bottom: 20px;
+}
+
+.best-seller-carousel-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.best-seller-carousel {
+  display: grid;
+  grid-template-columns: repeat(2, 800px); /* 2 columns per slide */
+  grid-template-rows: repeat(2, 570px);    /* 2 rows per slide */
+  gap: 20px;
+  overflow: hidden;
+  width: 100%;
+  max-width: 1700px; /* 2x card width + gaps */
+  scroll-behavior: smooth;
+}
+
+.best-seller-item {
+  background: #333;
+  color: white;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 800px;
+  height: 570px;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+}
+
+.best-seller-item img {
+  width: 100%;
+  height: 70%;
+  object-fit: cover;
+}
+
+.best-seller-info {
+  padding: 20px;
+  background-color: rgba(0, 0, 0, 0.8);
+  height: 30%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.best-seller-info h3 {
+  font-size: 24px;
+  margin: 0;
+}
+
+.best-seller-info p {
+  margin: 4px 0;
+  font-size: 18px;
+}
+
+.best-seller-info .price {
+  font-size: 22px;
+  font-weight: bold;
+  color: #f0a500;
+}
+
+.carousel-btn {
+  background-color: #4e3bcf;
+  color: white;
+  font-size: 28px;
+  padding: 14px 18px;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 1;
+  margin: 0 20px;
   transition: background-color 0.3s;
 }
 

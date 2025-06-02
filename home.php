@@ -7,12 +7,16 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
-// User information retrieval (as before, with error handling)
+// --------------------------------------------------------------------------
+// USER SESSION AND PROFILE DATA
+// --------------------------------------------------------------------------
+
 $accountId = $_SESSION['user_id'];
 $userEmail = $_SESSION['user_email'] ?? 'Unknown';
 $userType = $_SESSION['user_type'] ?? 'Free';
 $userName = $_SESSION['fullname'] ?? 'User';
 
+// Get Plan Name and Avatar
 $stmt = $conn->prepare("
     SELECT p.Plan_Name, pr.Avatar
     FROM accountlist a
@@ -42,45 +46,69 @@ $_SESSION['user_type'] = $userType ?? 'Free';
 $avatar = $avatar ?: 'image/profile/defaultprofile.jpg';
 
 // --------------------------------------------------------------------------
-// Fetch Books Data and Calculate Top Genres
+// BOOK FETCH FUNCTIONS
 // --------------------------------------------------------------------------
 
-// Function to fetch books from the database
+// Fetch books by plan type
+function getBooksByPlanType($conn, $planType) {
+    $books = [];
+    $sql = "SELECT Book_ID, Title, Author, Book_Cover, Genre, Price, Plan_type FROM books WHERE Plan_type = ?";
+
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("s", $planType);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    while ($row = $result->fetch_assoc()) {
+        $books[] = $row;
+    }
+
+    return $books;
+}
+
+// Fetch all books
 function getBooks($conn) {
     $books = [];
-    $sql = "SELECT Book_ID, Title, Author, Book_Cover, Genre, Price FROM books";  // Select relevant columns
+    $sql = "SELECT Book_ID, Title, Author, Book_Cover, Genre, Price FROM books";
     $result = $conn->query($sql);
 
     if ($result && $result->num_rows > 0) {
-        while($row = $result->fetch_assoc()) {
+        while ($row = $result->fetch_assoc()) {
             $books[] = $row;
         }
     }
     return $books;
 }
 
-// Get all books
-$books = getBooks($conn);
-
-// Calculate genre counts
-$genreCounts = [];
-foreach ($books as $book) {
-    $genre = $book['Genre'];
-    if (isset($genreCounts[$genre])) {
-        $genreCounts[$genre]++;
-    } else {
-        $genreCounts[$genre] = 1;
+function getBestSellersPaid($conn, $limit = 10) {
+    $books = [];
+    $sql = "SELECT Book_ID, Title, Author, Book_Cover, Genre, Price, Plan_type 
+            FROM books 
+            WHERE Plan_type = 'Paid' 
+            ORDER BY Price DESC 
+            LIMIT ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $limit);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    while ($row = $result->fetch_assoc()) {
+        $books[] = $row;
     }
+    return $books;
 }
 
-// Sort genres by count in descending order
-arsort($genreCounts);
-
-// Get the top 3 genres
-$topGenres = array_slice(array_keys($genreCounts), 0, 3);
 
 // --------------------------------------------------------------------------
+// FETCH BOOK DATA FOR EACH SECTION
+// --------------------------------------------------------------------------
+
+$freeBooks = getBooksByPlanType($conn, 'Free');
+$premiumBooks = getBooksByPlanType($conn, 'Premium');
+$paidBooks = getBooksByPlanType($conn, 'Paid');
+$bestSellerPaidBooks = getBestSellersPaid($conn);
+
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -89,7 +117,8 @@ $topGenres = array_slice(array_keys($genreCounts), 0, 3);
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer" />
  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <link rel="stylesheet" href="./css/homeTHIS.css">
+  <link rel="stylesheet" href="css/index/home.css">
+  <script src="javascript/home.js"></script>
   <title>Haven Library - User Dashboard</title>
 </head>
 <body>
@@ -132,97 +161,51 @@ $topGenres = array_slice(array_keys($genreCounts), 0, 3);
 </header>
 
 
-  <section class="best-seller-section">
+<!-- Best Seller Section -->
+<section class="best-seller-section">
+  <h2>Best Sellers</h2>
   <div class="best-seller-carousel-wrapper">
     <button class="carousel-btn prev-btn" onclick="moveBestSellerCarousel(-1)">&#8249;</button>
     <div class="best-seller-carousel" id="bestSellerCarousel">
       <?php
-        $bestSellerCount = 0;
-        foreach ($books as $book):
-            if ($bestSellerCount >= 8) break;  // Limit to 8 bestsellers
-
-            // Basic placeholder logic for "bestseller" status.  REPLACE WITH ACTUAL LOGIC
-            if ($book['Price'] > 20):  // Example: Books with price > $20 are considered bestsellers
-              $bestSellerCount++;
-        ?>
-          <div class="best-seller-item">
-            <img src="<?php echo htmlspecialchars($book['Book_Cover']); ?>" alt="<?php echo htmlspecialchars($book['Title']); ?>">
-            <div class="best-seller-info">
-              <h3><?php echo htmlspecialchars($book['Title']); ?></h3>
-              <p><?php echo htmlspecialchars($book['Author']); ?></p>
-              <p class="price">$<?php echo htmlspecialchars($book['Price']); ?></p>
-            </div>
+        // Fetch best seller books from Paid plan_type ordered by Views DESC
+        $bestSellerBooks = getBestSellersPaid($conn);  // Function already defined in PHP block
+        foreach ($bestSellerBooks as $book): 
+      ?>
+        <div class="best-seller-item">
+          <img src="<?= htmlspecialchars($book['Book_Cover']) ?>" alt="<?= htmlspecialchars($book['Title']) ?>">
+          <div class="best-seller-info">
+            <h3><?= htmlspecialchars($book['Title']) ?></h3>
+            <p><?= htmlspecialchars($book['Author']) ?></p>
+            <p class="price">₱<?= htmlspecialchars($book['Price']) ?></p>
           </div>
-        <?php
-            endif;  // if bestseller
-          endforeach; // foreach books
-         ?>
+        </div>
+      <?php endforeach; ?>
     </div>
     <button class="carousel-btn next-btn" onclick="moveBestSellerCarousel(1)">&#8250;</button>
   </div>
 </section>
 
 
-  <section class="trending-section">
+<section class="trending-section">
   <h2>Trending Now</h2>
-  <div class="carousel-container">
-    <div class="trending-carousel">
-      <div class="trending-item"><span class="rank">1</span><img src="Books/Trending/Possesive.jpg" alt="Possessive"></div>
-      <div class="trending-item"><span class="rank">2</span><img src="Books/Trending/Fifty.jpg" alt="Fifty"></div>
-      <div class="trending-item"><span class="rank">3</span><img src="Books/Trending/Seduce.jpg" alt="Seduce"></div>
-      <div class="trending-item"><span class="rank">4</span><img src="Books/Trending/Stepdad.jpg" alt="Stepdad"></div>
-      <div class="trending-item"><span class="rank">5</span><img src="Books/Trending/Dominant.jpg" alt="Dominant"></div>
-      <div class="trending-item"><span class="rank">6</span><img src="Books/Trending/after.jpg" alt="Possessive"></div>
-      <div class="trending-item"><span class="rank">7</span><img src="Books/Trending/assist.jpg" alt="Fifty"></div>
-      <div class="trending-item"><span class="rank">8</span><img src="Books/Trending/crave.jpg" alt="Seduce"></div>
-      <div class="trending-item"><span class="rank">9</span><img src="Books/Trending/Desire.jpg" alt="Stepdad"></div>
-      <div class="trending-item"><span class="rank">10</span><img src="Books/Trending/obses.jpg" alt="Dominant"></div>
-    </div>
-  </div>
 </section>
 
 <section class="continue-reading-section">
   <h2>Continue Reading</h2>
-  <div class="continue-reading-carousel-wrapper">
-    <button class="carousel-btn prev-btn" onclick="moveContinueCarousel(-1)">&#8249;</button>
-    <div class="continue-carousel" id="continueCarousel">
-      <?php for ($i = 1; $i <= 6; $i++): ?>
-        <?php $progress = rand(10, 80); ?>
-        <div class="continue-item">
-          <img src="Books/Continue/book<?php echo $i; ?>.jpg" alt="Continue Book <?php echo $i; ?>">
-          <div class="progress-bar">
-            <div class="progress" style="width: <?php echo $progress; ?>%;"></div>
-          </div>
-        </div>
-      <?php endfor; ?>
-    </div>
-    <button class="carousel-btn next-btn" onclick="moveContinueCarousel(1)">&#8250;</button>
-  </div>
 </section>
 
-
+<!-- Top Free Section -->
 <section class="free-section">
   <h2>Top Free</h2>
   <div class="free-carousel-wrapper">
     <button class="carousel-btn prev-btn" onclick="moveFreeCarousel(-1)">&#8249;</button>
     <div class="free-carousel" id="freeCarousel">
-      <!-- Add your free items here -->
-      <?php
-      $freeCount = 0;
-        foreach ($books as $book):
-            if ($freeCount >= 25) break;  // Limit to 25 free books
-
-            // Basic placeholder logic for "free" status. REPLACE WITH ACTUAL LOGIC
-            if ($book['Price'] <= 5): // Example: Books with price <= $5 are considered free
-              $freeCount++;
-        ?>
+      <?php foreach ($freeBooks as $book): ?>
         <div class="free-item">
           <img src="<?php echo htmlspecialchars($book['Book_Cover']); ?>" alt="<?php echo htmlspecialchars($book['Title']); ?>">
         </div>
-        <?php
-            endif;  // if free
-          endforeach; // foreach books
-         ?>
+      <?php endforeach; ?>
     </div>
     <button class="carousel-btn next-btn" onclick="moveFreeCarousel(1)">&#8250;</button>
   </div>
@@ -234,23 +217,11 @@ $topGenres = array_slice(array_keys($genreCounts), 0, 3);
   <div class="premium-carousel-wrapper">
     <button class="carousel-btn prev-btn" onclick="movePremiumCarousel(-1)">&#8249;</button>
     <div class="premium-carousel" id="premiumCarousel">
-      <!-- Premium items will be added dynamically, the same as Free items -->
-      <?php
-        $premiumCount = 0;
-        foreach ($books as $book):
-            if ($premiumCount >= 25) break;  // Limit to 25 premium books
-
-            // Basic placeholder logic for "premium" status. REPLACE WITH ACTUAL LOGIC
-            if ($book['Price'] > 5 && $book['Price'] <= 20): // Example: Books priced between $5 and $20 are premium
-              $premiumCount++;
-      ?>
+      <?php foreach ($premiumBooks as $book): ?>
         <div class="premium-item">
           <img src="<?php echo htmlspecialchars($book['Book_Cover']); ?>" alt="<?php echo htmlspecialchars($book['Title']); ?>">
         </div>
-      <?php
-            endif;  // if premium
-          endforeach; // foreach books
-      ?>
+      <?php endforeach; ?>
     </div>
     <button class="carousel-btn next-btn" onclick="movePremiumCarousel(1)">&#8250;</button>
   </div>
@@ -528,224 +499,6 @@ $topGenres = array_slice(array_keys($genreCounts), 0, 3);
 </footer>
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<script>
-let currentSlide = 0;
-const itemsPerPage = 10;
-const totalItems = 25;
-const carousel = document.getElementById("fictionCarousel");
-
-function moveCarousel(direction) {
-  const maxSlide = Math.ceil(totalItems / itemsPerPage) - 1;
-  currentSlide += direction;
-
-  if (currentSlide < 0) currentSlide = 0;
-  if (currentSlide > maxSlide) currentSlide = maxSlide;
-
-  const scrollAmount = currentSlide * (160 + 16) * itemsPerPage;
-  carousel.scrollTo({ left: scrollAmount, behavior: "smooth" });
-}
-
-let currentBestSellerSlide = 0;
-const bestSellerItemsPerPage = 2;
-const totalBestSellerItems = 8;
-const bestSellerCarousel = document.getElementById("bestSellerCarousel");
-
-function moveBestSellerCarousel(direction) {
-  const maxSlide = Math.ceil(totalBestSellerItems / bestSellerItemsPerPage) - 1;
-  currentBestSellerSlide += direction;
-
-  if (currentBestSellerSlide < 0) currentBestSellerSlide = 0;
-  if (currentBestSellerSlide > maxSlide) currentBestSellerSlide = maxSlide;
-
-  const scrollAmount = currentBestSellerSlide * (800 + 20) * bestSellerItemsPerPage;
-  bestSellerCarousel.scrollTo({ left: scrollAmount, behavior: "smooth" });
-}
-let currentContinueSlide = 0;
-const continueItemsPerPage = 3;
-const totalContinueItems = 6;
-const continueCarousel = document.getElementById("continueCarousel");
-
-function moveContinueCarousel(direction) {
-  const maxSlide = Math.ceil(totalContinueItems / continueItemsPerPage) - 1;
-  currentContinueSlide += direction;
-
-  if (currentContinueSlide < 0) currentContinueSlide = 0;
-  if (currentContinueSlide > maxSlide) currentContinueSlide = maxSlide;
-
-  const scrollAmount = currentContinueSlide * (300 + 20) * continueItemsPerPage;
-  continueCarousel.scrollTo({ left: scrollAmount, behavior: "smooth" });}
-
-
-
-let currentsSlide = 0;
-const wattpadItemsPerPage = 2; // Two books per slide
-const totalWattpadItems = 6;  // Number of books
-const wattpadCarousel = document.getElementById("wattpadClassicsCarousel");
-
-function moveWattpadClassicsCarousel(direction) {
-  const maxSlide = Math.ceil(totalWattpadItems / wattpadItemsPerPage) - 1;
-  currentsSlide += direction;
-
-  if (currentsSlide < 0) currentsSlide = 0;
-  if (currentsSlide > maxSlide) currentsSlide = maxSlide;
-
-  const scrollAmount = currentsSlide * (wattpadCarousel.offsetWidth); // Calculate full carousel width
-  wattpadCarousel.scrollTo({ left: scrollAmount, behavior: "smooth" });
-}
-
-
-let currentSlideFree = 0;
-const itemsPerPageFree = 10;
-const totalItemsFree = 25;
-const carouselFree = document.getElementById("freeCarousel");
-
-function moveFreeCarousel(direction) {
-  const maxSlideFree = Math.ceil(totalItemsFree / itemsPerPageFree) - 1;
-  currentSlideFree += direction;
-
-  if (currentSlideFree < 0) currentSlideFree = 0;
-  if (currentSlideFree > maxSlideFree) currentSlideFree = maxSlideFree;
-
-  const scrollAmountFree = currentSlideFree * (160 + 16) * itemsPerPageFree;
-  carouselFree.scrollTo({ left: scrollAmountFree, behavior: "smooth" });
-}
-
-// Top Premium Carousel
-let currentSlidePremium = 0;
-const itemsPerPagePremium = 10;
-const totalItemsPremium = 25;
-const carouselPremium = document.getElementById("premiumCarousel");
-
-function movePremiumCarousel(direction) {
-  const maxSlidePremium = Math.ceil(totalItemsPremium / itemsPerPagePremium) - 1;
-  currentSlidePremium += direction;
-
-  if (currentSlidePremium < 0) currentSlidePremium = 0;
-  if (currentSlidePremium > maxSlidePremium) currentSlidePremium = maxSlidePremium;
-
-  const scrollAmountPremium = currentSlidePremium * (160 + 16) * itemsPerPagePremium;
-  carouselPremium.scrollTo({ left: scrollAmountPremium, behavior: "smooth" });
-}
-
-
-// Top Non-Fiction Carousel
-let currentSlideNonFiction = 0;
-const itemsPerPageNonFiction = 10;
-const totalItemsNonFiction = 25;
-const carouselNonFiction = document.getElementById("nonfictionCarousel");
-
-function moveNonFictionCarousel(direction) {
-  const maxSlideNonFiction = Math.ceil(totalItemsNonFiction / itemsPerPageNonFiction) - 1;
-  currentSlideNonFiction += direction;
-
-  if (currentSlideNonFiction < 0) currentSlideNonFiction = 0;
-  if (currentSlideNonFiction > maxSlideNonFiction) currentSlideNonFiction = maxSlideNonFiction;
-
-  const scrollAmountNonFiction = currentSlideNonFiction * (160 + 16) * itemsPerPageNonFiction;
-  carouselNonFiction.scrollTo({ left: scrollAmountNonFiction, behavior: "smooth" });
-}
-
-// Top Science Fiction Carousel
-let currentSlideScienceFiction = 0;
-const itemsPerPageScienceFiction = 10;
-const totalItemsScienceFiction = 25;
-const carouselScienceFiction = document.getElementById("sciencefictionCarousel");
-
-function moveScienceFictionCarousel(direction) {
-  const maxSlideScienceFiction = Math.ceil(totalItemsScienceFiction / itemsPerPageScienceFiction) - 1;
-  currentSlideScienceFiction += direction;
-
-  if (currentSlideScienceFiction < 0) currentSlideScienceFiction = 0;
-  if (currentSlideScienceFiction > maxSlideScienceFiction) currentSlideScienceFiction = maxSlideScienceFiction;
-
-  const scrollAmountScienceFiction = currentSlideScienceFiction * (160 + 16) * itemsPerPageScienceFiction;
-  carouselScienceFiction.scrollTo({ left: scrollAmountScienceFiction, behavior: "smooth" });
-}
-
-// Top Fantasy Carousel
-let currentSlideFantasy = 0;
-const itemsPerPageFantasy = 10;
-const totalItemsFantasy = 25;
-const carouselFantasy = document.getElementById("fantasyCarousel");
-
-function moveFantasyCarousel(direction) {
-  const maxSlideFantasy = Math.ceil(totalItemsFantasy / itemsPerPageFantasy) - 1;
-  currentSlideFantasy += direction;
-
-  if (currentSlideFantasy < 0) currentSlideFantasy = 0;
-  if (currentSlideFantasy > maxSlideFantasy) currentSlideFantasy = maxSlideFantasy;
-
-  const scrollAmountFantasy = currentSlideFantasy * (160 + 16) * itemsPerPageFantasy;
-  carouselFantasy.scrollTo({ left: scrollAmountFantasy, behavior: "smooth" });
-}
-
-// Top Mystery Carousel
-let currentSlideMystery = 0;
-const itemsPerPageMystery = 10;
-const totalItemsMystery = 25;
-const carouselMystery = document.getElementById("mysteryCarousel");
-
-function moveMysteryCarousel(direction) {
-  const maxSlideMystery = Math.ceil(totalItemsMystery / itemsPerPageMystery) - 1;
-  currentSlideMystery += direction;
-
-  if (currentSlideMystery < 0) currentSlideMystery = 0;
-  if (currentSlideMystery > maxSlideMystery) currentSlideMystery = maxSlideMystery;
-
-  const scrollAmountMystery = currentSlideMystery * (160 + 16) * itemsPerPageMystery;
-  carouselMystery.scrollTo({ left: scrollAmountMystery, behavior: "smooth" });
-}
-
-// Top Romance Carousel
-let currentSlideRomance = 0;
-const itemsPerPageRomance = 10;
-const totalItemsRomance = 25;
-const carouselRomance = document.getElementById("romanceCarousel");
-
-function moveRomanceCarousel(direction) {
-  const maxSlideRomance = Math.ceil(totalItemsRomance / itemsPerPageRomance) - 1;
-  currentSlideRomance += direction;
-
-  if (currentSlideRomance < 0) currentSlideRomance = 0;
-  if (currentSlideRomance > maxSlideRomance) currentSlideRomance = maxSlideRomance;
-
-  const scrollAmountRomance = currentSlideRomance * (160 + 16) * itemsPerPageRomance;
-  carouselRomance.scrollTo({ left: scrollAmountRomance, behavior: "smooth" });
-}
-
-// Top Horror Carousel
-let currentSlideHorror = 0;
-const itemsPerPageHorror = 10;
-const totalItemsHorror = 25;
-const carouselHorror = document.getElementById("horrorCarousel");
-
-function moveHorrorCarousel(direction) {
-  const maxSlideHorror = Math.ceil(totalItemsHorror / itemsPerPageHorror) - 1;
-  currentSlideHorror += direction;
-
-  if (currentSlideHorror < 0) currentSlideHorror = 0;
-  if (currentSlideHorror > maxSlideHorror) currentSlideHorror = maxSlideHorror;
-
-  const scrollAmountHorror = currentSlideHorror * (160 + 16) * itemsPerPageHorror;
-  carouselHorror.scrollTo({ left: scrollAmountHorror, behavior: "smooth" });
-}
-</script>
 
 
 
