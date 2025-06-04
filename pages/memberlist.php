@@ -125,188 +125,303 @@ function getBadgeClass($status) {
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="css/adminheader.css">
   <style>
-    :root {
-      --primary-clr: #5e63ff;
-      --bg-clr: #f9f9f9;
-      --card-bg: #ffffff;
-      --text-clr: #333;
-      --muted-clr: #777;
-      --border-clr: #e0e0e0;
-      --success: #28a745;
-      --danger: #dc3545;
-      --table-header-bg: #f8f9fa;  /* A slightly lighter background for headers */
-      --table-row-hover-bg: #e9ecef;  /* A softer hover effect */
-      --table-border-color: #dee2e6;  /*  A subtle border color */
-    }
+  :root {
+    --primary-clr: #5e63ff;
+    --bg-clr: #f9f9f9;
+    --card-bg: #ffffff;
+    --text-clr: #333;
+    --muted-clr: #777;
+    --border-clr: #e0e0e0;
+    --success: #28a745;
+    --danger: #dc3545;
+    --table-header-bg: #f8f9fa;
+    --table-row-hover-bg: #e9ecef;
+    --table-border-color: #dee2e6;
+  }
 
+  body {
+  font-family: 'Inter', sans-serif;
+  background: linear-gradient(135deg, #f4f6ff, #eaefff);
+  color: var(--text-clr);
+  margin: 0;
+  padding: 0;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+main {
+  padding: 20px;
+}
+
+.page-header {
+  background-color: var(--primary-clr);
+  color: white;
+  padding: 16px 20px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  font-size: 20px;
+  font-weight: 600;
+  border-radius: 0 0 12px 12px;
+}
+
+
+  .summary-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    padding: 20px;
+    margin-top: 10px;
+  }
+
+  .summary-cards .card {
+    flex: 1 1 150px;
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(6px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .summary-cards .card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  }
+
+  .summary-cards .card h3 {
+    font-size: 14px;
+    color: var(--muted-clr);
+    margin-bottom: 8px;
+  }
+
+  .summary-cards .card p {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text-clr);
+    margin: 0;
+  }
+
+  @media (max-width: 600px) {
     .summary-cards {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 16px;
-      padding: 20px;
-      margin-top: 10px;
+      flex-direction: column;
     }
+  }
 
-    .summary-cards .card {
-      flex: 1 1 150px;
-      background: var(--card-bg);
-      border: 1px solid var(--border-clr);
-      border-radius: 8px;
-      padding: 20px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
-      text-align: center;
-    }
+  .header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 20px 10px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
 
-    .summary-cards .card h3 {
-      font-size: 14px;
-      color: var(--muted-clr);
-      margin-bottom: 8px;
-    }
+  .header-row h1 {
+    margin: 0;
+    font-size: 24px;
+  }
 
-    .summary-cards .card p {
-      font-size: 20px;
-      font-weight: 600;
-      color: var(--text-clr);
-      margin: 0;
-    }
+  .right-controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
 
-    @media (max-width: 600px) {
-      .summary-cards {
-        flex-direction: column;
-      }
-    }
+  .search-bar input,
+  .sort-dropdown select {
+    padding: 10px 15px;
+    padding-right: 30px;
+    border: 1px solid var(--border-clr);
+    border-radius: 6px;
+    font-size: 14px;
+    transition: border-color 0.3s ease;
+    outline: none;
+  }
 
-    .header-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 20px 20px 10px;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
+  .search-bar input:focus,
+  .sort-dropdown select:focus {
+    border-color: var(--primary-clr);
+    box-shadow: 0 0 0 0.2rem rgba(94, 99, 255, 0.2);
+  }
 
-    .header-row h1 {
-      margin: 0;
-      font-size: 24px;
-    }
+  .table-container {
+    overflow-x: auto;
+    padding: 0 20px 20px;
+  }
 
-    .right-controls {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-    }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--card-bg);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+    border: 1px solid var(--table-border-color);
+  }
 
-    .search-bar input,
-    .sort-dropdown select {
-      padding: 10px 15px;
-      border: 1px solid var(--border-clr);
-      border-radius: 6px;
-      font-size: 14px;
-    }
+  th, td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid var(--table-border-color);
+    font-size: 14px;
+  }
 
-    .table-container {
-      overflow-x: auto;
-    }
+  th {
+    background: var(--table-header-bg);
+    font-weight: 600;
+    color: var(--text-clr);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    font-size: 13px;
+  }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: var(--card-bg);
-      border-radius: 8px;
-      overflow: hidden;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
-      border: 1px solid var(--table-border-color); /* Added table border */
-    }
+  tbody tr {
+    transition: background-color 0.2s ease;
+  }
 
-    th, td {
-      padding: 12px 15px;  /* Slightly reduced padding */
-      text-align: left;
-      border-bottom: 1px solid var(--table-border-color);
-    }
+  tbody tr:hover {
+    background-color: var(--table-row-hover-bg);
+  }
 
-    th {
-      background: var(--table-header-bg); /*  Using variable for header background */
-      font-weight: 500; /*  Slightly reduced font weight for a cleaner look */
-      color: var(--text-clr);  /* Ensuring text color consistency */
-    }
+  .table-active {
+    background-color: #dfe7ff !important;
+  }
 
-    tbody tr:hover {
-      background-color: var(--table-row-hover-bg); /*  Using variable for row hover */
-    }
-
-   /* Enhanced Badge Styling for Membership Status */
   .badge {
-      padding: 5px 10px; /*  Slightly adjusted badge padding */
-      border-radius: 0.25rem;
-      font-size: 0.8rem;
-      font-weight: 500;
-      display: inline-block;
-    }
-
-
-
-/* Active (Success) - Free Plan */
-.bg-success {
-    background: linear-gradient(135deg, #7d6ce3 0%, #4e3bcf 100%) !important; /* Gradient matching the profile header color */
-    color: white;
-    box-shadow: 0px 4px 12px rgba(78, 59, 207, 0.3); /* Soft shadow */
-}
-
-/* Expired (Danger) */
-.bg-danger {
-    background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%) !important; /* Bold red gradient */
-    color: white;
-    box-shadow: 0px 4px 12px rgba(244, 67, 54, 0.3); /* Soft red shadow for depth */
-}
-
-/* Permanent (VIP) */
-.bg-secondary {
-    background: linear-gradient(135deg, #ffd700 0%, #c49b28 100%) !important; /* Gold gradient for VIP */
-    color: white;
-    box-shadow: 0px 4px 12px rgba(196, 155, 40, 0.3); /* Soft orange/gold shadow */
-}
-
-/* No Expiration (White & Black) */
-.bg-no-expiration {
-    background-color: grey !important;  /* White background */
-    color: white !important;             /* Black text */
-    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1); /* Soft shadow for subtle depth */
-}
-
-/* Hover effects for badges */
-.bg-success:hover, .bg-danger:hover, .bg-secondary:hover, .bg-no-expiration:hover {
-    transform: scale(1.05); /* Slight scale-up effect */
-    box-shadow: 0px 6px 18px rgba(0, 0, 0, 0.1); /* Stronger shadow on hover */
-}
-
-.badge {
-    /* Adding a subtle shadow for a 3D effect */
+    padding: 5px 10px;
+    border-radius: 0.25rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+    display: inline-block;
     box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .badge::before {
+    margin-right: 6px;
+    display: inline-block;
+  }
+
+  .bg-success {
+    background: linear-gradient(135deg, #7d6ce3 0%, #4e3bcf 100%) !important;
+    color: white;
+    box-shadow: 0px 4px 12px rgba(78, 59, 207, 0.3);
+  }
+  .bg-success::before { content: "✔️"; }
+
+  .bg-danger {
+    background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%) !important;
+    color: white;
+    box-shadow: 0px 4px 12px rgba(244, 67, 54, 0.3);
+  }
+  .bg-danger::before { content: "⛔"; }
+
+  .bg-secondary {
+    background: linear-gradient(135deg, #ffd700 0%, #c49b28 100%) !important;
+    color: white;
+    box-shadow: 0px 4px 12px rgba(196, 155, 40, 0.3);
+  }
+  .bg-secondary::before { content: "👑"; }
+
+  .bg-no-expiration {
+    background-color: grey !important;
+    color: white !important;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+  }
+  .bg-no-expiration::before { content: "📅"; }
+
+  .bg-success:hover, .bg-danger:hover, .bg-secondary:hover, .bg-no-expiration:hover {
+    transform: scale(1.05);
+    box-shadow: 0px 6px 18px rgba(0, 0, 0, 0.1);
+  }
+
+  .profile-image {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 8px;
+    vertical-align: middle;
+    border: 1px solid var(--border-clr);
+  }
+
+  .profile-cell {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  td {
+    box-shadow: inset 0 0 0 9999px var(--card-bg);
+    clip-path: inset(0 0 0 0);
+  }
+
+  /* Responsive tweak for controls */
+  @media (max-width: 768px) {
+    .header-row {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .d-flex.flex-wrap {
+      width: 100%;
+      justify-content: space-between;
+    }
+  }
+
+  .pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  padding: 24px 0;
+  flex-wrap: wrap;
+  margin-top: auto;
+}
+
+.pagination a {
+  padding: 8px 14px;
+  text-decoration: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--primary-clr);
+  background-color: white;
+  border: 1px solid var(--primary-clr);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+}
+
+.pagination a:hover:not(.active):not(.disabled) {
+  background-color: var(--primary-clr);
+  color: white;
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.pagination a.active {
+  background-color: var(--primary-clr);
+  color: white;
+  border: 1px solid var(--primary-clr);
+  pointer-events: none;
+}
+
+.pagination a.disabled {
+  color: #bbb;
+  border-color: #ccc;
+  background-color: #f1f1f1;
+  pointer-events: none;
+  box-shadow: none;
+}
+
+.table-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 60vh;
 }
 
 
-    .profile-image {
-      width: 32px;  /* Adjusted size */
-      height: 32px; /* Adjusted size */
-      border-radius: 50%;
-      object-fit: cover;
-      margin-right: 8px; /* Adjusted spacing */
-      vertical-align: middle;
-      border: 1px solid var(--border-clr); /* Added border to profile image */
-    }
+</style>
 
-    .profile-cell {
-      display: flex;
-      align-items: center;
-      gap: 8px; /* Adjusted spacing */
-    }
-
-    /*  Added subtle box-shadow to cells for depth */
-    td {
-      box-shadow: inset 0 0 0 9999px var(--card-bg);
-      clip-path: inset(0 0 0 0);
-    }
-  </style>
 </head>
 <body>
 <main>
@@ -315,7 +430,6 @@ function getBadgeClass($status) {
       <span class="logo">Home</span>
     </span>
 
-   
     <div class="user-info">
        <div class="user-profile">
             <img src="./sample1.jpg" alt="Profile picture of Arafat Hossain" class="profile-img">
@@ -324,6 +438,7 @@ function getBadgeClass($status) {
           </div>
     </div>
   </header>
+
 <div class="card">
       <div class="summary-cards">
   <div class="card">
@@ -375,6 +490,7 @@ function getBadgeClass($status) {
     </div>
 </div>
 
+<div class="table-wrapper">
 <div class="table-container">
   <table id="memberTable" class="table table-striped table-bordered">
     <thead>
@@ -389,6 +505,8 @@ function getBadgeClass($status) {
       </tr>
     </thead>
     <tbody>
+
+
       <?php
        $defaultProfileImage = 'image/profile/defaultprofile.jpg'; //  Corrected image path
        foreach ($members as $index => $member) {
@@ -411,8 +529,68 @@ function getBadgeClass($status) {
     </tbody>
   </table>
 </div>
+
+<div class="pagination" id="pagination"></div>
+</div>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const table = document.getElementById('memberTable');
+    const rows = Array.from(table.querySelectorAll('tbody tr'));
+    const paginationContainer = document.getElementById('pagination');
+    const rowsPerPage = 5; // You can change this to 10 or any number
+    let currentPage = 1;
+
+    function displayTablePage(page) {
+      const start = (page - 1) * rowsPerPage;
+      const end = start + rowsPerPage;
+
+      rows.forEach((row, index) => {
+        row.style.display = (index >= start && index < end) ? '' : 'none';
+      });
+
+      updatePaginationLinks(page);
+    }
+
+    function updatePaginationLinks(activePage) {
+      const pageCount = Math.ceil(rows.length / rowsPerPage);
+      paginationContainer.innerHTML = '';
+
+      if (pageCount <= 1) return;
+
+      const prev = document.createElement('a');
+      prev.href = '#';
+      prev.innerHTML = '&laquo;';
+      prev.className = activePage === 1 ? 'disabled' : '';
+      prev.onclick = () => {
+        if (activePage > 1) displayTablePage(activePage - 1);
+      };
+      paginationContainer.appendChild(prev);
+
+      for (let i = 1; i <= pageCount; i++) {
+        const pageLink = document.createElement('a');
+        pageLink.href = '#';
+        pageLink.textContent = i;
+        pageLink.className = i === activePage ? 'active' : '';
+        pageLink.onclick = () => displayTablePage(i);
+        paginationContainer.appendChild(pageLink);
+      }
+
+      const next = document.createElement('a');
+      next.href = '#';
+      next.innerHTML = '&raquo;';
+      next.className = activePage === pageCount ? 'disabled' : '';
+      next.onclick = () => {
+        if (activePage < pageCount) displayTablePage(activePage + 1);
+      };
+      paginationContainer.appendChild(next);
+    }
+
+    // Initial load
+    displayTablePage(currentPage);
+  });
+</script>
 
 </body>
 </html>
