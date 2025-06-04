@@ -82,12 +82,16 @@ function getBooks($conn) {
 
 function getBestSellersPaid($conn, $limit = 10) {
     $books = [];
-    $sql = "SELECT Book_ID, Title, Author, Book_Cover, Genre, Price, Plan_type 
-            FROM books 
-            WHERE Plan_type = 'Paid' 
-            ORDER BY Price DESC 
+    $sql = "SELECT Book_ID, Title, Author, Book_Cover, Genre, Price, Plan_type, ISBN
+            FROM books
+            WHERE Plan_type = 'Paid'
+            ORDER BY Price DESC
             LIMIT ?";
     $stmt = $conn->prepare($sql);
+    if ($stmt === false) {
+        error_log("Prepare failed: " . $conn->error);
+        return $books; // Or handle the error in a more appropriate way
+    }
     $stmt->bind_param("i", $limit);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -96,11 +100,6 @@ function getBestSellersPaid($conn, $limit = 10) {
     }
     return $books;
 }
-
-
-// --------------------------------------------------------------------------
-// FETCH BOOK DATA FOR EACH SECTION
-// --------------------------------------------------------------------------
 
 $freeBooks = getBooksByPlanType($conn, 'Free');
 $premiumBooks = getBooksByPlanType($conn, 'Premium');
@@ -117,51 +116,17 @@ $bestSellerPaidBooks = getBestSellersPaid($conn);
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer" />
  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <link rel="stylesheet" href="css/index/home.css">
+  <link rel="stylesheet" href="css/index/homeX.css">
   <script src="javascript/home.js"></script>
   <title>Haven Library - User Dashboard</title>
+  
 </head>
 <body>
 
-<header class="top-nav">
-  <div class="left-section">
-  <img src="Logo.jpg" class="logo" alt="Logo" />
-    <nav class="nav-links">
-      <div class="dropdown">
-        <button class="dropbtn">
-          Browse
-          <span class="material-icons dropdown-icon">arrow_drop_down</span>
-        </button>
-        <div class="dropdown-content">
-          <a href="home.php">Home</a>
-          <a href="genres.php">Genres</a>
-        </div>
-      </div>
-    </nav>
-  </div>
 
-  <div class="center-section">
-    <input type="text" class="search-bar" placeholder="Search" />
-  </div>
-
-  <div class="right-section">
-    <button class="premium-btn">⚡ Try Premium</button>
-
-    <div class="profile dropdown">
-      <div class="user-info">
-        <img src="<?php echo htmlspecialchars($avatar); ?>" class="avatar" alt="User" />
-      </div>
-      <div class="dropdown-content">
-        <a href="index/profile.php">Profile</a>
-        <a href="backend/logout.php">Logout</a>
-      </div>
-    </div>
-
-    <span class="user-type"><?php echo htmlspecialchars($userType); ?></span>
-</header>
+<?php include('reusable/header.php'); ?>
 
 
-<!-- Best Seller Section -->
 <section class="best-seller-section">
   <h2>Best Sellers</h2>
   <div class="best-seller-carousel-wrapper">
@@ -170,10 +135,22 @@ $bestSellerPaidBooks = getBestSellersPaid($conn);
       <?php
         // Fetch best seller books from Paid plan_type ordered by Views DESC
         $bestSellerBooks = getBestSellersPaid($conn);  // Function already defined in PHP block
-        foreach ($bestSellerBooks as $book): 
+        foreach ($bestSellerBooks as $book):
+          // Check if ISBN exists in the $book array before using it
+          $previewPath = "Book/" . ucfirst(strtolower($book['Plan_type'])) . "/Preview/";
+          if (isset($book['ISBN'])) {
+              $previewPath .= $book['ISBN'] . ".php";
+          } else {
+              // Handle the case where ISBN is missing
+              $previewPath .= "default.php"; // Or some other default page
+              error_log("ISBN is missing for book ID: " . $book['Book_ID']);
+          }
       ?>
         <div class="best-seller-item">
-          <img src="<?= htmlspecialchars($book['Book_Cover']) ?>" alt="<?= htmlspecialchars($book['Title']) ?>">
+          <!-- Wrap the book cover with a link to the preview page -->
+          <a href="<?= htmlspecialchars($previewPath) ?>" class="cover-link">
+            <img src="<?= htmlspecialchars($book['Book_Cover']) ?>" alt="<?= htmlspecialchars($book['Title']) ?>">
+          </a>
           <div class="best-seller-info">
             <h3><?= htmlspecialchars($book['Title']) ?></h3>
             <p><?= htmlspecialchars($book['Author']) ?></p>
@@ -185,7 +162,6 @@ $bestSellerPaidBooks = getBestSellersPaid($conn);
     <button class="carousel-btn next-btn" onclick="moveBestSellerCarousel(1)">&#8250;</button>
   </div>
 </section>
-
 
 <section class="trending-section">
   <h2>Trending Now</h2>
@@ -201,11 +177,55 @@ $bestSellerPaidBooks = getBestSellersPaid($conn);
   <div class="free-carousel-wrapper">
     <button class="carousel-btn prev-btn" onclick="moveFreeCarousel(-1)">&#8249;</button>
     <div class="free-carousel" id="freeCarousel">
-      <?php foreach ($freeBooks as $book): ?>
-        <div class="free-item">
-          <img src="<?php echo htmlspecialchars($book['Book_Cover']); ?>" alt="<?php echo htmlspecialchars($book['Title']); ?>">
-        </div>
-      <?php endforeach; ?>
+      <?php
+        // Query to fetch Free books
+        $query = "SELECT Book_ID, Title, Author, Book_Cover, Genre, Price, Plan_type, ISBN FROM books WHERE Plan_type = 'Free' LIMIT 25";
+        $result = $conn->query($query);
+
+        // Debugging: Log the query and result
+        error_log("Free Section - SQL Query: " . $query);
+        if ($result) {
+            error_log("Free Section - Number of rows: " . $result->num_rows);
+        } else {
+            error_log("Free Section - Query failed: " . $conn->error);
+        }
+
+
+        if ($result && $result->num_rows > 0) {
+            while ($book = $result->fetch_assoc()):
+
+              // Construct the preview path
+              $previewPath = "Book/" . ucfirst(strtolower($book['Plan_type'])) . "/Preview/";
+              if (isset($book['ISBN'])) {
+                  $previewPath .= $book['ISBN'] . ".php";
+              } else {
+                  // Handle the case where ISBN is missing
+                  $previewPath .= "default.php"; // Or some other default page
+                  error_log("ISBN is missing for book ID: " . $book['Book_ID']);
+              }
+
+              // Debugging: Log book data and preview path
+              error_log("Free Section - Book ID: " . $book['Book_ID'] . ", Title: " . $book['Title'] . ", ISBN: " . $book['ISBN'] . ", Plan_type: " . $book['Plan_type']);
+              error_log("Free Section - Preview Path: " . $previewPath);
+
+              // Use the full image path directly from the database
+              $imagePath = htmlspecialchars($book['Book_Cover']);
+
+              // Debugging: Log the image path
+              error_log("Free Section - Image Path: " . $imagePath);
+
+               ?>
+            <div class="free-item">
+                <a href="<?= htmlspecialchars($previewPath) ?>">
+                    <img src="<?php echo $imagePath; ?>" alt="<?php echo htmlspecialchars($book['Title']); ?>">
+                </a>
+            </div>
+        <?php
+            endwhile;
+        } else {
+            echo "<p>No free books found.</p>";
+        }
+      ?>
     </div>
     <button class="carousel-btn next-btn" onclick="moveFreeCarousel(1)">&#8250;</button>
   </div>
@@ -213,116 +233,138 @@ $bestSellerPaidBooks = getBestSellersPaid($conn);
 
 <!-- Top Premium Section -->
 <section class="premium-section">
-  <h2>Top Premium</h2>
-  <div class="premium-carousel-wrapper">
-    <button class="carousel-btn prev-btn" onclick="movePremiumCarousel(-1)">&#8249;</button>
-    <div class="premium-carousel" id="premiumCarousel">
-      <?php foreach ($premiumBooks as $book): ?>
-        <div class="premium-item">
-          <img src="<?php echo htmlspecialchars($book['Book_Cover']); ?>" alt="<?php echo htmlspecialchars($book['Title']); ?>">
-        </div>
-      <?php endforeach; ?>
-    </div>
-    <button class="carousel-btn next-btn" onclick="movePremiumCarousel(1)">&#8250;</button>
-  </div>
-</section>
+    <h2>Top Premium</h2>
+    <div class="premium-carousel-wrapper">
+        <button class="carousel-btn prev-btn" onclick="movePremiumCarousel(-1)">&#8249;</button>
+        <div class="premium-carousel" id="premiumCarousel">
+            <?php
+        // Query to fetch Premium books
+        $query = "SELECT Book_ID, Title, Author, Book_Cover, Genre, Price, Plan_type, ISBN FROM books WHERE Plan_type = 'Premium' LIMIT 25";
+        $result = $conn->query($query);
+
+        // Debugging: Log the query and result
+        error_log("Premium Section - SQL Query: " . $query);
+        if ($result) {
+            error_log("Premium Section - Number of rows: " . $result->num_rows);
+        } else {
+            error_log("Premium Section - Query failed: " . $conn->error);
+        }
 
 
+        if ($result && $result->num_rows > 0) {
+            while ($book = $result->fetch_assoc()):
+              // Construct the preview path
+              $previewPath = "Book/" . ucfirst(strtolower($book['Plan_type'])) . "/Preview/";
+              if (isset($book['ISBN'])) {
+                  $previewPath .= $book['ISBN'] . ".php";
+              } else {
+                  // Handle the case where ISBN is missing
+                  $previewPath .= "default.php"; // Or some other default page
+                  error_log("ISBN is missing for book ID: " . $book['Book_ID']);
+              }
 
-<section class="wattpad-classics-section py-4">
-  <h2 class="text-center">Wattpad Classics (Top Genres: <?php echo htmlspecialchars(implode(", ", $topGenres)); ?>)</h2>  <!-- Dynamic top genres -->
-  <div class="carousel-wrapper">
-    <button class="carousel-btn prev-btn" onclick="moveWattpadClassicsCarousel(-1)">&#8249;</button>
-    <div class="carousel" id="wattpadClassicsCarousel">
-      <?php
-      // Define the books to display in the carousel
-      $books = [
-        ["title" => "I Miss You Too", "image" => "sample1.jpg", "description" => "When Carmen Cruz finds herself in competition with her ex-girlfriend Briar Sutton for the school play...", "progress" => "95.4K", "status" => "Complete"],
-         ["title" => "Another Book", "image" => "sample1.jpg", "description" => "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris sed tortor leo...", "progress" => "150K", "status" => "Complete"],
-        ["title" => "Another Book", "image" => "sample1.jpg", "description" => "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris sed tortor leo...", "progress" => "150K", "status" => "Complete"],
-        ["title" => "Book Four", "image" => "sample1.jpg", "description" => "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque...", "progress" => "300K", "status" => "Complete"],
-        ["title" => "Book Five", "image" => "Books/Classic/book5.jpg", "description" => "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur...", "progress" => "550K", "status" => "Complete"],
-        ["title" => "Book Six", "image" => "Books/Classic/book6.jpg", "description" => "Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua...", "progress" => "400K", "status" => "Complete"]
-      ];
+              // Debugging: Log book data and preview path
+              error_log("Premium Section - Book ID: " . $book['Book_ID'] . ", Title: " . $book['Title'] . ", ISBN: " . $book['ISBN'] . ", Plan_type: " . $book['Plan_type']);
+              error_log("Premium Section - Preview Path: " . $previewPath);
 
-      // Iterate through the books array and display each pair of books as a slide
-      for ($i = 0; $i < count($books); $i+=2): ?>
-        <div class="carousel-item <?php echo $i === 0 ? 'active' : ''; ?>">
-          <div class="row justify-content-center">
-            <?php for ($j = $i; $j < $i + 2 && $j < count($books); $j++): ?>
-              <div class="col-12 col-md-6 mb-4">
-                <div class="card wattpad-classics-card">
-                  <img src="<?php echo $books[$j]['image']; ?>" class="card-img-top" alt="<?php echo $books[$j]['title']; ?>">
-                  <div class="card-body">
-                    <h5 class="card-title"><?php echo $books[$j]['title']; ?></h5>
-                    <p class="card-text"><?php echo $books[$j]['description']; ?></p>
-                    <p class="text-muted"><?php echo $books[$j]['progress']; ?> | <?php echo $books[$j]['status']; ?></p>
-                  </div>
-                </div>
-              </div>
-            <?php endfor; ?>
-          </div>
-        </div>
-      <?php endfor; ?>
+              // Use the full image path directly from the database
+              $imagePath = htmlspecialchars($book['Book_Cover']);
+
+              // Debugging: Log the image path
+              error_log("Premium Section - Image Path: " . $imagePath);
+
+               ?>
+            <div class="premium-item">
+                <a href="<?= htmlspecialchars($previewPath) ?>">
+                    <img src="<?php echo $imagePath; ?>" alt="<?php echo htmlspecialchars($book['Title']); ?>">
+                </a>
+            </div>
+        <?php
+            endwhile;
+        } else {
+            echo "<p>No premium books found.</p>";
+        }
       ?>
+        </div>
+        <button class="carousel-btn next-btn" onclick="movePremiumCarousel(1)">&#8250;</button>
     </div>
-    <button class="carousel-btn next-btn" onclick="moveWattpadClassicsCarousel(1)">&#8250;</button>
-  </div>
 </section>
 
 
 <section class="fiction-section">
   <h2>Top in Fiction</h2>
   <div class="fiction-carousel-wrapper">
-    <button class="carousel-btn prev-btn" onclick="moveCarousel(-1)">&#8249;</button>
+    <button class="carousel-btn prev-btn" onclick="moveCarousel('fiction', -1)">&#8249;</button>
     <div class="fiction-carousel" id="fictionCarousel">
-      <!-- Add your fiction book items here -->
-       <?php
-        $fictionCount = 0;
-        foreach ($books as $book):
-            if ($fictionCount >= 25) break;  // Limit to 25 fiction books
+      <?php
+        // Example query to fetch books of genre 'Fiction'
+        $query = "SELECT * FROM books WHERE Genre = 'Fiction' LIMIT 25";
+        $result = $conn->query($query);
 
-            // Basic placeholder logic for genre.  REPLACE WITH ACTUAL LOGIC
-            if ($book['Genre'] == "Fiction"):
-              $fictionCount++;
-        ?>
-        <div class="fiction-item">
+        if ($result && $result->num_rows > 0) {
+            while ($book = $result->fetch_assoc()):
+              // Construct the preview path, same as Best Seller
+              $previewPath = "Book/" . ucfirst(strtolower($book['Plan_type'])) . "/Preview/";
+              if (isset($book['ISBN'])) {
+                  $previewPath .= $book['ISBN'] . ".php";
+              } else {
+                  // Handle the case where ISBN is missing
+                  $previewPath .= "default.php"; // Or some other default page
+                  error_log("ISBN is missing for book ID: " . $book['Book_ID']);
+              }
+      ?>
+      <div class="fiction-item">
+        <!-- Wrap the book cover with a link to the preview page -->
+        <a href="<?= htmlspecialchars($previewPath) ?>" class="cover-link">
           <img src="<?php echo htmlspecialchars($book['Book_Cover']); ?>" alt="<?php echo htmlspecialchars($book['Title']); ?>">
+        </a>
+        <div class="fiction-info">
+          <h3><?php echo htmlspecialchars($book['Title']); ?></h3>
+          <p>By <?php echo htmlspecialchars($book['Author']); ?></p>
+          <!-- Add other details if you like -->
         </div>
-        <?php
-            endif;  // if genre fiction
-          endforeach; // foreach books
-         ?>
+      </div>
+      <?php
+            endwhile;
+        } else {
+            echo "<p>No fiction books found.</p>";
+        }
+      ?>
     </div>
-    <button class="carousel-btn next-btn" onclick="moveCarousel(1)">&#8250;</button>
+    <button class="carousel-btn next-btn" onclick="moveCarousel('fiction', 1)">&#8250;</button>
   </div>
 </section>
+
+
+
+
 
 
 <!-- Top Non-Fiction Section -->
 <section class="nonfiction-section">
   <h2>Top Non-Fiction</h2>
   <div class="nonfiction-carousel-wrapper">
-    <button class="carousel-btn prev-btn" onclick="moveNonFictionCarousel(-1)">&#8249;</button>
+    <button class="carousel-btn prev-btn" onclick="moveCarousel('nonfiction', -1)">&#8249;</button>
     <div class="nonfiction-carousel" id="nonfictionCarousel">
-        <?php
-        $nonFictionCount = 0;
-        foreach ($books as $book):
-            if ($nonFictionCount >= 25) break;  // Limit to 25 non fiction books
+      <?php
+        // Fetch books of genre 'Non-Fiction' from the database
+        $query = "SELECT * FROM books WHERE Genre = 'Non-Fiction' LIMIT 25";
+        $result = $conn->query($query);
 
-            // Basic placeholder logic for genre.  REPLACE WITH ACTUAL LOGIC
-            if ($book['Genre'] == "Non-Fiction"):
-              $nonFictionCount++;
-        ?>
+        if ($result && $result->num_rows > 0) {
+            while ($book = $result->fetch_assoc()):
+      ?>
         <div class="nonfiction-item">
           <img src="<?php echo htmlspecialchars($book['Book_Cover']); ?>" alt="<?php echo htmlspecialchars($book['Title']); ?>">
         </div>
-          <?php
-            endif;  // if genre non fiction
-          endforeach; // foreach books
-         ?>
+      <?php
+            endwhile;
+        } else {
+            echo "<p>No Non-Fiction books found.</p>";
+        }
+      ?>
     </div>
-    <button class="carousel-btn next-btn" onclick="moveNonFictionCarousel(1)">&#8250;</button>
+    <button class="carousel-btn next-btn" onclick="moveCarousel('nonfiction', 1)">&#8250;</button>
   </div>
 </section>
 
@@ -330,26 +372,27 @@ $bestSellerPaidBooks = getBestSellersPaid($conn);
 <section class="sciencefiction-section">
   <h2>Top Science Fiction</h2>
   <div class="sciencefiction-carousel-wrapper">
-    <button class="carousel-btn prev-btn" onclick="moveScienceFictionCarousel(-1)">&#8249;</button>
+    <button class="carousel-btn prev-btn" onclick="moveCarousel('sciencefiction', -1)">&#8249;</button>
     <div class="sciencefiction-carousel" id="sciencefictionCarousel">
-          <?php
-        $sciFiCount = 0;
-        foreach ($books as $book):
-            if ($sciFiCount >= 25) break;  // Limit to 25 science fiction books
+      <?php
+        // Fetch books of genre 'Science Fiction' from the database
+        $query = "SELECT * FROM books WHERE Genre = 'Science Fiction' LIMIT 25";
+        $result = $conn->query($query);
 
-            // Basic placeholder logic for genre.  REPLACE WITH ACTUAL LOGIC
-            if ($book['Genre'] == "Science Fiction"):
-              $sciFiCount++;
-        ?>
+        if ($result && $result->num_rows > 0) {
+            while ($book = $result->fetch_assoc()):
+      ?>
         <div class="sciencefiction-item">
           <img src="<?php echo htmlspecialchars($book['Book_Cover']); ?>" alt="<?php echo htmlspecialchars($book['Title']); ?>">
         </div>
-              <?php
-            endif;  // if genre science fiction
-          endforeach; // foreach books
-         ?>
+      <?php
+            endwhile;
+        } else {
+            echo "<p>No Science Fiction books found.</p>";
+        }
+      ?>
     </div>
-    <button class="carousel-btn next-btn" onclick="moveScienceFictionCarousel(1)">&#8250;</button>
+    <button class="carousel-btn next-btn" onclick="moveCarousel('sciencefiction', 1)">&#8250;</button>
   </div>
 </section>
 
@@ -357,26 +400,27 @@ $bestSellerPaidBooks = getBestSellersPaid($conn);
 <section class="fantasy-section">
   <h2>Top Fantasy</h2>
   <div class="fantasy-carousel-wrapper">
-    <button class="carousel-btn prev-btn" onclick="moveFantasyCarousel(-1)">&#8249;</button>
+    <button class="carousel-btn prev-btn" onclick="moveCarousel('fantasy', -1)">&#8249;</button>
     <div class="fantasy-carousel" id="fantasyCarousel">
-          <?php
-        $fantasyCount = 0;
-        foreach ($books as $book):
-            if ($fantasyCount >= 25) break;  // Limit to 25 fantasy books
+      <?php
+        // Fetch books of genre 'Fantasy' from the database
+        $query = "SELECT * FROM books WHERE Genre = 'Fantasy' LIMIT 25";
+        $result = $conn->query($query);
 
-            // Basic placeholder logic for genre.  REPLACE WITH ACTUAL LOGIC
-            if ($book['Genre'] == "Fantasy"):
-              $fantasyCount++;
-        ?>
+        if ($result && $result->num_rows > 0) {
+            while ($book = $result->fetch_assoc()):
+      ?>
         <div class="fantasy-item">
           <img src="<?php echo htmlspecialchars($book['Book_Cover']); ?>" alt="<?php echo htmlspecialchars($book['Title']); ?>">
         </div>
-              <?php
-            endif;  // if genre fantasy
-          endforeach; // foreach books
-         ?>
+      <?php
+            endwhile;
+        } else {
+            echo "<p>No Fantasy books found.</p>";
+        }
+      ?>
     </div>
-    <button class="carousel-btn next-btn" onclick="moveFantasyCarousel(1)">&#8250;</button>
+    <button class="carousel-btn next-btn" onclick="moveCarousel('fantasy', 1)">&#8250;</button>
   </div>
 </section>
 
@@ -384,26 +428,27 @@ $bestSellerPaidBooks = getBestSellersPaid($conn);
 <section class="mystery-section">
   <h2>Top Mystery</h2>
   <div class="mystery-carousel-wrapper">
-    <button class="carousel-btn prev-btn" onclick="moveMysteryCarousel(-1)">&#8249;</button>
+    <button class="carousel-btn prev-btn" onclick="moveCarousel('mystery', -1)">&#8249;</button>
     <div class="mystery-carousel" id="mysteryCarousel">
-          <?php
-        $mysteryCount = 0;
-        foreach ($books as $book):
-            if ($mysteryCount >= 25) break;  // Limit to 25 mystery books
+      <?php
+        // Fetch books of genre 'Mystery' from the database
+        $query = "SELECT * FROM books WHERE Genre = 'Mystery' LIMIT 25";
+        $result = $conn->query($query);
 
-            // Basic placeholder logic for genre.  REPLACE WITH ACTUAL LOGIC
-            if ($book['Genre'] == "Mystery"):
-              $mysteryCount++;
-        ?>
+        if ($result && $result->num_rows > 0) {
+            while ($book = $result->fetch_assoc()):
+      ?>
         <div class="mystery-item">
           <img src="<?php echo htmlspecialchars($book['Book_Cover']); ?>" alt="<?php echo htmlspecialchars($book['Title']); ?>">
         </div>
-              <?php
-            endif;  // if genre mystery
-          endforeach; // foreach books
-         ?>
+      <?php
+            endwhile;
+        } else {
+            echo "<p>No Mystery books found.</p>";
+        }
+      ?>
     </div>
-    <button class="carousel-btn next-btn" onclick="moveMysteryCarousel(1)">&#8250;</button>
+    <button class="carousel-btn next-btn" onclick="moveCarousel('mystery', 1)">&#8250;</button>
   </div>
 </section>
 
@@ -411,26 +456,27 @@ $bestSellerPaidBooks = getBestSellersPaid($conn);
 <section class="romance-section">
   <h2>Top Romance</h2>
   <div class="romance-carousel-wrapper">
-    <button class="carousel-btn prev-btn" onclick="moveRomanceCarousel(-1)">&#8249;</button>
+    <button class="carousel-btn prev-btn" onclick="moveCarousel('romance', -1)">&#8249;</button>
     <div class="romance-carousel" id="romanceCarousel">
-          <?php
-        $romanceCount = 0;
-        foreach ($books as $book):
-            if ($romanceCount >= 25) break;  // Limit to 25 romance books
+      <?php
+        // Fetch books of genre 'Romance' from the database
+        $query = "SELECT * FROM books WHERE Genre = 'Romance' LIMIT 25";
+        $result = $conn->query($query);
 
-            // Basic placeholder logic for genre.  REPLACE WITH ACTUAL LOGIC
-            if ($book['Genre'] == "Romance"):
-              $romanceCount++;
-        ?>
+        if ($result && $result->num_rows > 0) {
+            while ($book = $result->fetch_assoc()):
+      ?>
         <div class="romance-item">
           <img src="<?php echo htmlspecialchars($book['Book_Cover']); ?>" alt="<?php echo htmlspecialchars($book['Title']); ?>">
         </div>
-              <?php
-            endif;  // if genre romance
-          endforeach; // foreach books
-         ?>
+      <?php
+            endwhile;
+        } else {
+            echo "<p>No Romance books found.</p>";
+        }
+      ?>
     </div>
-    <button class="carousel-btn next-btn" onclick="moveRomanceCarousel(1)">&#8250;</button>
+    <button class="carousel-btn next-btn" onclick="moveCarousel('romance', 1)">&#8250;</button>
   </div>
 </section>
 
@@ -438,28 +484,30 @@ $bestSellerPaidBooks = getBestSellersPaid($conn);
 <section class="horror-section">
   <h2>Top Horror</h2>
   <div class="horror-carousel-wrapper">
-    <button class="carousel-btn prev-btn" onclick="moveHorrorCarousel(-1)">&#8249;</button>
+    <button class="carousel-btn prev-btn" onclick="moveCarousel('horror', -1)">&#8249;</button>
     <div class="horror-carousel" id="horrorCarousel">
-          <?php
-        $horrorCount = 0;
-        foreach ($books as $book):
-            if ($horrorCount >= 25) break;  // Limit to 25 horror books
+      <?php
+        // Fetch books of genre 'Horror' from the database
+        $query = "SELECT * FROM books WHERE Genre = 'Horror' LIMIT 25";
+        $result = $conn->query($query);
 
-            // Basic placeholder logic for genre.  REPLACE WITH ACTUAL LOGIC
-            if ($book['Genre'] == "Horror"):
-              $horrorCount++;
-        ?>
+        if ($result && $result->num_rows > 0) {
+            while ($book = $result->fetch_assoc()):
+      ?>
         <div class="horror-item">
           <img src="<?php echo htmlspecialchars($book['Book_Cover']); ?>" alt="<?php echo htmlspecialchars($book['Title']); ?>">
         </div>
-              <?php
-            endif;  // if genre horror
-          endforeach; // foreach books
-         ?>
+      <?php
+            endwhile;
+        } else {
+            echo "<p>No Horror books found.</p>";
+        }
+      ?>
     </div>
-    <button class="carousel-btn next-btn" onclick="moveHorrorCarousel(1)">&#8250;</button>
+    <button class="carousel-btn next-btn" onclick="moveCarousel('horror', 1)">&#8250;</button>
   </div>
 </section>
+
 
 <footer class="footer">
   <div class="footer-container">
@@ -497,7 +545,6 @@ $bestSellerPaidBooks = getBestSellersPaid($conn);
 
   </div>
 </footer>
-
 
 
 

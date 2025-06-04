@@ -4,7 +4,7 @@ require_once('../../../backend/config/config.php');
 include '../../../reusable/header.php';
 
 // Define the ISBN and prepare the query
-$isbn = '978-1-23-456804-0';
+$isbn = '978-1-23-456798-2';
 $stmt = $conn->prepare("SELECT * FROM books WHERE ISBN = ?");
 $stmt->bind_param("s", $isbn);
 $stmt->execute();
@@ -79,7 +79,7 @@ if ($userId) {
 
 <?php if (!$canRead && $hasChecked): ?>
     <?php if ($book['Plan_type'] === 'Free' || $book['Plan_type'] === 'Premium'): ?>
-        <div class="button-container">
+        
              <input type="hidden" name="isbn" value="<?= $isbn ?>">
             <form method="post" action="reserve_rent_book.php">
                   <?php if ($stock > 0): ?>

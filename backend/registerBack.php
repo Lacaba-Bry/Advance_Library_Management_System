@@ -47,6 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $stmt2 = null;
     $stmt3 = null;
     $stmt4 = null;
+    $stmt5 = null;  // Declare stmt5 for transaction insert
     try {
         // Insert new user into register table
         $stmt = $conn->prepare("INSERT INTO register (Email, Password, Fullname, Date_Created) VALUES (?, ?, ?, CURRENT_TIMESTAMP)");
@@ -103,6 +104,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             }
         }
 
+        $price = ($plan_id == 1) ? 0.00 : (($plan_id == 2) ? 199.00 : 1599.00);
+        $payment_status = 'completed';  // Initially, payment status is 'pending'
+        $transaction_date = date('Y-m-d H:i:s');  // Current timestamp
+
+        $stmt5 = $conn->prepare("INSERT INTO transaction_plan (account_id, plan_id, amount, payment_status, transaction_date) VALUES (?, ?, ?, ?, ?)");
+        if (!$stmt5) {
+            throw new Exception("Prepare failed for transaction_plan: " . $conn->error);
+        }
+        $stmt5->bind_param("iiiss", $account_id, $plan_id, $price, $payment_status, $transaction_date);
+        if (!$stmt5->execute()) {
+            throw new Exception("Error inserting into transaction_plan: " . $stmt5->error);
+        }
+
+        // Commit the transaction if everything was successful
         $conn->commit();
         header("Location: ../index.php?registration=success"); // Redirect on success
         exit();
@@ -119,6 +134,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if ($stmt2) $stmt2->close();
         if ($stmt3) $stmt3->close();
         if ($stmt4) $stmt4->close();
+        if ($stmt5) $stmt5->close();  // Close statement for transaction_plan
         $conn->close();
     }
 }
+?>

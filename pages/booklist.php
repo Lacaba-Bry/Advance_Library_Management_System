@@ -31,6 +31,61 @@ try {
     $books = [];
 }
 
+
+// Query to get the total number of transactions
+$total_transactions_query = "SELECT COUNT(*) AS total_transactions FROM transaction_plan";
+$total_transactions_result = $conn->query($total_transactions_query);
+$total_transactions = 0; // Default value if the query fails
+
+if ($total_transactions_result) {
+    $row = $total_transactions_result->fetch_assoc();
+    $total_transactions = $row['total_transactions'];
+}
+
+// Query to get the total earnings (sum of the amounts)
+$total_earnings_query = "SELECT SUM(amount) AS total_earnings FROM transaction_plan WHERE payment_status = 'completed'";
+$total_earnings_result = $conn->query($total_earnings_query);
+$total_earnings = 0.00; // Default value if the query fails
+
+if ($total_earnings_result) {
+    $row = $total_earnings_result->fetch_assoc();
+    $total_earnings = number_format($row['total_earnings'], 2);  // Format to 2 decimal places
+}
+
+// Query to get the total book count and stock for Free, Premium, and Paid books
+$book_count_query = "
+    SELECT 
+        Plan_type,
+        COUNT(*) AS total_books,
+        SUM(Stock) AS total_stock
+    FROM books
+    GROUP BY Plan_type
+";
+
+$book_count_result = $conn->query($book_count_query);
+$book_counts = [];
+
+// Initialize the book counts for Free, Premium, and Paid plans
+$book_counts = [
+    'free' => ['total_books' => 0, 'total_stock' => 0],
+    'premium' => ['total_books' => 0, 'total_stock' => 0],
+    'paid' => ['total_books' => 0, 'total_stock' => 0]
+];
+
+if ($book_count_result) {
+    while ($row = $book_count_result->fetch_assoc()) {
+        $plan_type = strtolower($row['Plan_type']);
+        $book_counts[$plan_type] = [
+            'total_books' => $row['total_books'],
+            'total_stock' => $row['total_stock']
+        ];
+    }
+}
+
+
+
+
+
 ?>
 
 <!DOCTYPE html>
@@ -56,6 +111,25 @@ try {
         </div>
       </div>
     </header>
+                  <!-- Summary Cards (Total Transactions and Earnings) -->
+                        <div class="summary-cards">
+                            <div class="card">
+                                <h3>Total Transactions</h3>
+                                <p><?php echo $total_transactions; ?></p> <!-- Display dynamic total transactions -->
+                            </div>
+                            <div class="card">
+                                <h3>Free Books</h3>
+                                <p><?php echo $book_counts['free']['total_books']; ?> Books</p> <!-- Display Free Books Count -->
+                            </div>
+                            <div class="card">
+                                <h3>Premium Books</h3>
+                                <p><?php echo $book_counts['premium']['total_books']; ?> Books</p> <!-- Display Premium Books Count -->
+                            </div>
+                            <div class="card">
+                                <h3>Paid Books</h3>
+                                <p><?php echo $book_counts['paid']['total_books']; ?> Books</p> <!-- Display Paid Books Count -->
+                            </div>
+                        </div>
 
     <div class="header-row">
       <h1>Book List</h1>
@@ -96,60 +170,68 @@ try {
           </tr>
         </thead>
         <tbody>
-          <?php
-          foreach ($books as $book) {
-              // Ensure lowercase for consistency
-              $planType = strtolower($book['Plan_type']);
-              $filename = basename($book['Book_Cover']); // Extract filename
+         <?php
+foreach ($books as $book) {
+    // Ensure lowercase for consistency
+    $planType = strtolower($book['Plan_type']);
+    $filename = basename($book['Book_Cover']); // Extract filename
 
-              // Sanitize filename (removing special characters)
-              $filename = preg_replace("/[^a-zA-Z0-9._-]/", "", $filename);
+    // Sanitize filename (removing special characters)
+    $filename = preg_replace("/[^a-zA-Z0-9._-]/", "", $filename);
 
-              // URL-encode the filename to handle special characters (like apostrophes or spaces)
-              $encodedFilename = urlencode($filename);
+    // URL-encode the filename to handle special characters (like apostrophes or spaces)
+    $encodedFilename = urlencode($filename);
 
-              // Define base directory and image path
-              $baseDir = $_SERVER['DOCUMENT_ROOT'] . "/BryanCodeX/Book/";
-              $imagePath = $baseDir . ucfirst($planType) . "/Book_Cover/" . $filename;
-              $imageUrl = "/BryanCodeX/Book/" . ucfirst($planType) . "/Book_Cover/" . $encodedFilename;
-           
+    // Define base directory and image path
+    $baseDir = $_SERVER['DOCUMENT_ROOT'] . "/BryanCodeX/Book/";
+    $imagePath = $baseDir . ucfirst($planType) . "/Book_Cover/" . $filename;
+    $imageUrl = "/BryanCodeX/Book/" . ucfirst($planType) . "/Book_Cover/" . $encodedFilename;
 
-              echo '<tr>';
-              if (!empty($book['Book_Cover']) && file_exists($imagePath)) {
-                  echo '<td><img src="' . htmlspecialchars($imageUrl) . '" alt="' . htmlspecialchars($book['Title']) . ' Cover" width="50"></td>';
-              } else {
-                  // Show a placeholder if the image doesn't exist
-                  echo '<td><img src="/path_to_placeholder_image.jpg" alt="Placeholder Image" width="50"></td>';
-              }
+    // Construct the preview path for the View button
+    $previewPath = "Book/" . ucfirst(strtolower($book['Plan_type'])) . "/Preview/";
+    if (isset($book['ISBN'])) {
+        $previewPath .= $book['ISBN'] . ".php"; // Link to the preview page using ISBN
+    } else {
+        $previewPath .= "default.php"; // Use a default preview page if ISBN is missing
+    }
 
-              echo '<td>' . $book['Book_ID'] . '</td>';
-              echo '<td>' . $book['Title'] . '</td>';
-              echo '<td>' . $book['Author'] . '</td>';
-              echo '<td>' . $book['Publisher'] . '</td>';
-              echo '<td>' . $book['ISBN'] . '</td>';
-              echo '<td>' . $book['Genre'] . '</td>';
-              echo '<td><span class="badge badge-' . getBadgeClass($book['Plan_type']) . '">' . $book['Plan_type'] . '</span></td>';
-              echo '<td>' . $book['display_price'] . '</td>';  // Use display_price
-              echo '<td>' . $book['Stock'] . '</td>';
-              echo '<td>
-                        <div class="action-buttons">
-                          <button class="btn btn-info btn-sm" onclick="viewBook(\'' . $book['Book_ID'] . '\')">View</button>
-                          <button class="btn btn-warning btn-sm" onclick="updateBook(\'' . $book['Book_ID'] . '\')">Update</button>
-                          <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteConfirmationModal" data-book-id="' . $book['Book_ID'] . '">Delete</button>
-                        </div>
-                      </td>';
-              echo '</tr>';
-          }
+    echo '<tr>';
+    if (!empty($book['Book_Cover']) && file_exists($imagePath)) {
+        echo '<td><img src="' . htmlspecialchars($imageUrl) . '" alt="' . htmlspecialchars($book['Title']) . ' Cover" width="50"></td>';
+    } else {
+        // Show a placeholder if the image doesn't exist
+        echo '<td><img src="/path_to_placeholder_image.jpg" alt="Placeholder Image" width="50"></td>';
+    }
 
-          function getBadgeClass($planType) {
-              switch (strtolower($planType)) {
-                  case 'free': return 'success';
-                  case 'premium': return 'primary';
-                  case 'paid': return 'warning';
-                  default: return 'secondary';
-              }
-          }
-          ?>
+    echo '<td>' . $book['Book_ID'] . '</td>';
+    echo '<td>' . $book['Title'] . '</td>';
+    echo '<td>' . $book['Author'] . '</td>';
+    echo '<td>' . $book['Publisher'] . '</td>';
+    echo '<td>' . $book['ISBN'] . '</td>';
+    echo '<td>' . $book['Genre'] . '</td>';
+    echo '<td><span class="badge badge-' . getBadgeClass($book['Plan_type']) . '">' . $book['Plan_type'] . '</span></td>';
+    echo '<td>' . $book['display_price'] . '</td>';  // Use display_price
+    echo '<td>' . $book['Stock'] . '</td>';
+    echo '<td>
+              <div class="action-buttons">
+                  <a href="' . htmlspecialchars($previewPath) . '" class="btn btn-info btn-sm">View</a>  <!-- View button links to preview page -->
+                  <button class="btn btn-warning btn-sm" onclick="updateBook(\'' . $book['Book_ID'] . '\')">Update</button>
+                  <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteConfirmationModal" data-book-id="' . $book['Book_ID'] . '">Delete</button>
+              </div>
+          </td>';
+    echo '</tr>';
+}
+
+function getBadgeClass($planType) {
+    switch (strtolower($planType)) {
+        case 'free': return 'success';
+        case 'premium': return 'primary';
+        case 'paid': return 'warning';
+        default: return 'secondary';
+    }
+}
+?>
+
         </tbody>
       </table>
     </div>

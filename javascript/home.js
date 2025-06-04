@@ -1,203 +1,95 @@
-let currentSlide = 0;
-const itemsPerPage = 10;
-const totalItems = 25;
-const carousel = document.getElementById("fictionCarousel");
 
-function moveCarousel(direction) {
+// Generic horizontal scroll function
+function scrollCarousel(carouselId, stateObj, direction, itemWidth, itemGap, itemsPerPage, totalItems) {
+  const carousel = document.getElementById(carouselId);
+  if (!carousel) return;
+
   const maxSlide = Math.ceil(totalItems / itemsPerPage) - 1;
-  currentSlide += direction;
+  stateObj.current += direction;
+  if (stateObj.current < 0) stateObj.current = 0;
+  if (stateObj.current > maxSlide) stateObj.current = maxSlide;
 
-  if (currentSlide < 0) currentSlide = 0;
-  if (currentSlide > maxSlide) currentSlide = maxSlide;
-
-  const scrollAmount = currentSlide * (160 + 16) * itemsPerPage;
+  const scrollAmount = stateObj.current * (itemWidth + itemGap) * itemsPerPage;
   carousel.scrollTo({ left: scrollAmount, behavior: "smooth" });
 }
 
-let currentBestSellerSlide = 0;
-const bestSellerItemsPerPage = 2;
-const totalBestSellerItems = 8;
-const bestSellerCarousel = document.getElementById("bestSellerCarousel");
-
+// Best Seller (2 per page)
+const bestSellerState = { current: 0 };
 function moveBestSellerCarousel(direction) {
-  const bestSellerCarousel = document.getElementById("bestSellerCarousel");
-  const maxScroll = bestSellerCarousel.scrollWidth - bestSellerCarousel.clientWidth;
-  const currentScroll = bestSellerCarousel.scrollLeft;
-
-  // Move carousel
-  if (direction === -1 && currentScroll > 0) {
-    bestSellerCarousel.scrollLeft -= 300;  // Move left
-  } else if (direction === 1 && currentScroll < maxScroll) {
-    bestSellerCarousel.scrollLeft += 300;  // Move right
-  }
+  scrollCarousel("bestSellerCarousel", bestSellerState, direction, 430, 20, 2, 8);
 }
 
-let currentContinueSlide = 0;
-const continueItemsPerPage = 3;
-const totalContinueItems = 6;
-const continueCarousel = document.getElementById("continueCarousel");
+// Fiction
+const fictionState = { current: 0 };
+function moveCarousel(direction) {
+  scrollCarousel("fictionCarousel", fictionState, direction, 160, 16, 10, 25);
+}
 
+// Continue Reading
+const continueState = { current: 0 };
 function moveContinueCarousel(direction) {
-  const maxSlide = Math.ceil(totalContinueItems / continueItemsPerPage) - 1;
-  currentContinueSlide += direction;
+  scrollCarousel("continueCarousel", continueState, direction, 300, 20, 3, 6);
+}
 
-  if (currentContinueSlide < 0) currentContinueSlide = 0;
-  if (currentContinueSlide > maxSlide) currentContinueSlide = maxSlide;
-
-  const scrollAmount = currentContinueSlide * (300 + 20) * continueItemsPerPage;
-  continueCarousel.scrollTo({ left: scrollAmount, behavior: "smooth" });}
-
-
-
-let currentsSlide = 0;
-const wattpadItemsPerPage = 2; // Two books per slide
-const totalWattpadItems = 6;  // Number of books
-const wattpadCarousel = document.getElementById("wattpadClassicsCarousel");
-
+// Wattpad
+const wattpadState = { current: 0 };
 function moveWattpadClassicsCarousel(direction) {
-  const maxSlide = Math.ceil(totalWattpadItems / wattpadItemsPerPage) - 1;
-  currentsSlide += direction;
+  const carousel = document.getElementById("wattpadClassicsCarousel");
+  if (!carousel) return;
 
-  if (currentsSlide < 0) currentsSlide = 0;
-  if (currentsSlide > maxSlide) currentsSlide = maxSlide;
+  const maxSlide = Math.ceil(6 / 2) - 1;
+  wattpadState.current += direction;
+  if (wattpadState.current < 0) wattpadState.current = 0;
+  if (wattpadState.current > maxSlide) wattpadState.current = maxSlide;
 
-  const scrollAmount = currentsSlide * (wattpadCarousel.offsetWidth); // Calculate full carousel width
-  wattpadCarousel.scrollTo({ left: scrollAmount, behavior: "smooth" });
+  const scrollAmount = wattpadState.current * carousel.offsetWidth;
+  carousel.scrollTo({ left: scrollAmount, behavior: "smooth" });
 }
 
-
-let currentSlideFree = 0;
-const itemsPerPageFree = 10;
-const totalItemsFree = 25;
-const carouselFree = document.getElementById("freeCarousel");
-
+// Free Books
+const freeState = { current: 0 };
 function moveFreeCarousel(direction) {
-  const maxSlideFree = Math.ceil(totalItemsFree / itemsPerPageFree) - 1;
-  currentSlideFree += direction;
-
-  if (currentSlideFree < 0) currentSlideFree = 0;
-  if (currentSlideFree > maxSlideFree) currentSlideFree = maxSlideFree;
-
-  const scrollAmountFree = currentSlideFree * (160 + 16) * itemsPerPageFree;
-  carouselFree.scrollTo({ left: scrollAmountFree, behavior: "smooth" });
+  scrollCarousel("freeCarousel", freeState, direction, 160, 16, 10, 25);
 }
 
-// Top Premium Carousel
-let currentSlidePremium = 0;
-const itemsPerPagePremium = 10;
-const totalItemsPremium = 25;
-const carouselPremium = document.getElementById("premiumCarousel");
-
+// Premium Books
+const premiumState = { current: 0 };
 function movePremiumCarousel(direction) {
-  const maxSlidePremium = Math.ceil(totalItemsPremium / itemsPerPagePremium) - 1;
-  currentSlidePremium += direction;
-
-  if (currentSlidePremium < 0) currentSlidePremium = 0;
-  if (currentSlidePremium > maxSlidePremium) currentSlidePremium = maxSlidePremium;
-
-  const scrollAmountPremium = currentSlidePremium * (160 + 16) * itemsPerPagePremium;
-  carouselPremium.scrollTo({ left: scrollAmountPremium, behavior: "smooth" });
+  scrollCarousel("premiumCarousel", premiumState, direction, 160, 16, 10, 25);
 }
 
-
-// Top Non-Fiction Carousel
-let currentSlideNonFiction = 0;
-const itemsPerPageNonFiction = 10;
-const totalItemsNonFiction = 25;
-const carouselNonFiction = document.getElementById("nonfictionCarousel");
-
+// Nonfiction
+const nonFictionState = { current: 0 };
 function moveNonFictionCarousel(direction) {
-  const maxSlideNonFiction = Math.ceil(totalItemsNonFiction / itemsPerPageNonFiction) - 1;
-  currentSlideNonFiction += direction;
-
-  if (currentSlideNonFiction < 0) currentSlideNonFiction = 0;
-  if (currentSlideNonFiction > maxSlideNonFiction) currentSlideNonFiction = maxSlideNonFiction;
-
-  const scrollAmountNonFiction = currentSlideNonFiction * (160 + 16) * itemsPerPageNonFiction;
-  carouselNonFiction.scrollTo({ left: scrollAmountNonFiction, behavior: "smooth" });
+  scrollCarousel("nonfictionCarousel", nonFictionState, direction, 160, 16, 10, 25);
 }
 
-// Top Science Fiction Carousel
-let currentSlideScienceFiction = 0;
-const itemsPerPageScienceFiction = 10;
-const totalItemsScienceFiction = 25;
-const carouselScienceFiction = document.getElementById("sciencefictionCarousel");
-
+// Science Fiction
+const scienceFictionState = { current: 0 };
 function moveScienceFictionCarousel(direction) {
-  const maxSlideScienceFiction = Math.ceil(totalItemsScienceFiction / itemsPerPageScienceFiction) - 1;
-  currentSlideScienceFiction += direction;
-
-  if (currentSlideScienceFiction < 0) currentSlideScienceFiction = 0;
-  if (currentSlideScienceFiction > maxSlideScienceFiction) currentSlideScienceFiction = maxSlideScienceFiction;
-
-  const scrollAmountScienceFiction = currentSlideScienceFiction * (160 + 16) * itemsPerPageScienceFiction;
-  carouselScienceFiction.scrollTo({ left: scrollAmountScienceFiction, behavior: "smooth" });
+  scrollCarousel("sciencefictionCarousel", scienceFictionState, direction, 160, 16, 10, 25);
 }
 
-// Top Fantasy Carousel
-let currentSlideFantasy = 0;
-const itemsPerPageFantasy = 10;
-const totalItemsFantasy = 25;
-const carouselFantasy = document.getElementById("fantasyCarousel");
-
+// Fantasy
+const fantasyState = { current: 0 };
 function moveFantasyCarousel(direction) {
-  const maxSlideFantasy = Math.ceil(totalItemsFantasy / itemsPerPageFantasy) - 1;
-  currentSlideFantasy += direction;
-
-  if (currentSlideFantasy < 0) currentSlideFantasy = 0;
-  if (currentSlideFantasy > maxSlideFantasy) currentSlideFantasy = maxSlideFantasy;
-
-  const scrollAmountFantasy = currentSlideFantasy * (160 + 16) * itemsPerPageFantasy;
-  carouselFantasy.scrollTo({ left: scrollAmountFantasy, behavior: "smooth" });
+  scrollCarousel("fantasyCarousel", fantasyState, direction, 160, 16, 10, 25);
 }
 
-// Top Mystery Carousel
-let currentSlideMystery = 0;
-const itemsPerPageMystery = 10;
-const totalItemsMystery = 25;
-const carouselMystery = document.getElementById("mysteryCarousel");
-
+// Mystery
+const mysteryState = { current: 0 };
 function moveMysteryCarousel(direction) {
-  const maxSlideMystery = Math.ceil(totalItemsMystery / itemsPerPageMystery) - 1;
-  currentSlideMystery += direction;
-
-  if (currentSlideMystery < 0) currentSlideMystery = 0;
-  if (currentSlideMystery > maxSlideMystery) currentSlideMystery = maxSlideMystery;
-
-  const scrollAmountMystery = currentSlideMystery * (160 + 16) * itemsPerPageMystery;
-  carouselMystery.scrollTo({ left: scrollAmountMystery, behavior: "smooth" });
+  scrollCarousel("mysteryCarousel", mysteryState, direction, 160, 16, 10, 25);
 }
 
-// Top Romance Carousel
-let currentSlideRomance = 0;
-const itemsPerPageRomance = 10;
-const totalItemsRomance = 25;
-const carouselRomance = document.getElementById("romanceCarousel");
-
+// Romance
+const romanceState = { current: 0 };
 function moveRomanceCarousel(direction) {
-  const maxSlideRomance = Math.ceil(totalItemsRomance / itemsPerPageRomance) - 1;
-  currentSlideRomance += direction;
-
-  if (currentSlideRomance < 0) currentSlideRomance = 0;
-  if (currentSlideRomance > maxSlideRomance) currentSlideRomance = maxSlideRomance;
-
-  const scrollAmountRomance = currentSlideRomance * (160 + 16) * itemsPerPageRomance;
-  carouselRomance.scrollTo({ left: scrollAmountRomance, behavior: "smooth" });
+  scrollCarousel("romanceCarousel", romanceState, direction, 160, 16, 10, 25);
 }
 
-// Top Horror Carousel
-let currentSlideHorror = 0;
-const itemsPerPageHorror = 10;
-const totalItemsHorror = 25;
-const carouselHorror = document.getElementById("horrorCarousel");
-
+// Horror
+const horrorState = { current: 0 };
 function moveHorrorCarousel(direction) {
-  const maxSlideHorror = Math.ceil(totalItemsHorror / itemsPerPageHorror) - 1;
-  currentSlideHorror += direction;
-
-  if (currentSlideHorror < 0) currentSlideHorror = 0;
-  if (currentSlideHorror > maxSlideHorror) currentSlideHorror = maxSlideHorror;
-
-  const scrollAmountHorror = currentSlideHorror * (160 + 16) * itemsPerPageHorror;
-  carouselHorror.scrollTo({ left: scrollAmountHorror, behavior: "smooth" });
+  scrollCarousel("horrorCarousel", horrorState, direction, 160, 16, 10, 25);
 }

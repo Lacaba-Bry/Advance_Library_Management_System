@@ -1,7 +1,7 @@
 <?php
 session_start();
-require_once __DIR__ . '/../backend/config/config.php';
-include '../reusable/header.php';
+require_once __DIR__ . '/backend/config/config.php';
+include 'reusable/header.php';
 
 if (!isset($_SESSION['user_id'])) {
     header("Location: index.php");
@@ -47,7 +47,7 @@ if (strcasecmp($planName, 'Premium') === 0) {
 <head>
     <meta charset="UTF-8">
     <title><?php echo htmlspecialchars($fullname); ?>'s Profile</title>
-    <link rel="stylesheet" href="../css/index/profilex.css">
+    <link rel="stylesheet" href="css/index/profilex.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 </head>
 <body>
@@ -55,7 +55,7 @@ if (strcasecmp($planName, 'Premium') === 0) {
 <!-- Profile Header -->
 <div class="profile-header <?php echo $planBorderClass . ' ' . strtolower($planName); ?>">
 
-    <img src="../image/profile/<?php echo htmlspecialchars($avatar); ?>" alt="Avatar" class="avatar">
+    <img src="image/profile/<?php echo htmlspecialchars($avatar); ?>" alt="Avatar" class="avatar">
     <h1><?php echo htmlspecialchars($fullname); ?></h1>
     <p><?php echo htmlspecialchars($email); ?></p>
     <p class="plan-badge <?php echo strtolower($planName); ?>">

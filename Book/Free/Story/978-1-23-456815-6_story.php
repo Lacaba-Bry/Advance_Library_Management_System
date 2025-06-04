@@ -2,7 +2,7 @@
 require_once('../../../backend/config/config.php');
 include '../../../reusable/header.php';
 
-$isbn = '978-3-16-148410-0';
+$isbn = '978-1-23-456815-6';
 $stmt = $conn->prepare("SELECT * FROM books WHERE ISBN = ?");
 $stmt->bind_param("s", $isbn);
 $stmt->execute();

@@ -77,10 +77,16 @@ try {
 }
 
 
-function getMembershipStatus($expirationDate) {
-    if ($expirationDate === null) {
-        return 'No Expiration'; // Or 'Lifetime', 'Free', etc.  Adapt this to your logic.
+// Function to get membership status
+function getMembershipStatus($expirationDate, $planName) {
+    if ($planName === 'VIP') {
+        return 'Permanent';  // For VIP members, status is 'Permanent'
     }
+
+    if ($expirationDate === null) {
+        return 'No Expiration'; // Or 'Lifetime', 'Free', etc. Adapt this to your logic.
+    }
+
     $now = new DateTime();
     $expiration = new DateTime($expirationDate);
 
@@ -91,15 +97,21 @@ function getMembershipStatus($expirationDate) {
     }
 }
 
+// Function to get badge class based on membership status
 function getBadgeClass($status) {
-  if ($status === 'Active') {
-    return 'success';
-  } elseif ($status === 'Expired') {
-    return 'danger';
-  } else {
-    return 'secondary';  // For 'No Expiration' or other cases
-  }
+    if ($status === 'Active') {
+        return 'success';
+    } elseif ($status === 'Expired') {
+        return 'danger';
+    } elseif ($status === 'Permanent') {
+        return 'secondary';  // For VIP members
+    } elseif ($status === 'No Expiration') {
+        return 'no-expiration';  // For 'No Expiration' status
+    } else {
+        return 'secondary';  // For 'No Expiration' or other cases
+    }
 }
+
 
 ?>
 
@@ -222,7 +234,8 @@ function getBadgeClass($status) {
       background-color: var(--table-row-hover-bg); /*  Using variable for row hover */
     }
 
-    .badge {
+   /* Enhanced Badge Styling for Membership Status */
+  .badge {
       padding: 5px 10px; /*  Slightly adjusted badge padding */
       border-radius: 0.25rem;
       font-size: 0.8rem;
@@ -230,25 +243,47 @@ function getBadgeClass($status) {
       display: inline-block;
     }
 
-    .bg-success {
-      background-color: var(--success) !important;
-      color: white;
-    }
 
-    .bg-danger {
-      background-color: var(--danger) !important;
-      color: white;
-    }
 
-    .bg-secondary {
-      background-color: var(--muted-clr) !important;
-      color: white;
-    }
+/* Active (Success) - Free Plan */
+.bg-success {
+    background: linear-gradient(135deg, #7d6ce3 0%, #4e3bcf 100%) !important; /* Gradient matching the profile header color */
+    color: white;
+    box-shadow: 0px 4px 12px rgba(78, 59, 207, 0.3); /* Soft shadow */
+}
 
-    .btn:focus {
-      outline: none;
-      box-shadow: none;
-    }
+/* Expired (Danger) */
+.bg-danger {
+    background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%) !important; /* Bold red gradient */
+    color: white;
+    box-shadow: 0px 4px 12px rgba(244, 67, 54, 0.3); /* Soft red shadow for depth */
+}
+
+/* Permanent (VIP) */
+.bg-secondary {
+    background: linear-gradient(135deg, #ffd700 0%, #c49b28 100%) !important; /* Gold gradient for VIP */
+    color: white;
+    box-shadow: 0px 4px 12px rgba(196, 155, 40, 0.3); /* Soft orange/gold shadow */
+}
+
+/* No Expiration (White & Black) */
+.bg-no-expiration {
+    background-color: grey !important;  /* White background */
+    color: white !important;             /* Black text */
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1); /* Soft shadow for subtle depth */
+}
+
+/* Hover effects for badges */
+.bg-success:hover, .bg-danger:hover, .bg-secondary:hover, .bg-no-expiration:hover {
+    transform: scale(1.05); /* Slight scale-up effect */
+    box-shadow: 0px 6px 18px rgba(0, 0, 0, 0.1); /* Stronger shadow on hover */
+}
+
+.badge {
+    /* Adding a subtle shadow for a 3D effect */
+    box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.1);
+}
+
 
     .profile-image {
       width: 32px;  /* Adjusted size */
@@ -357,20 +392,21 @@ function getBadgeClass($status) {
       <?php
        $defaultProfileImage = 'image/profile/defaultprofile.jpg'; //  Corrected image path
        foreach ($members as $index => $member) {
-            $status = getMembershipStatus($member['Expiration_Date']); // Determine membership status
-            $badgeClass = getBadgeClass($status); // Get badge class based on status
-            $profileLink = 'profile.php?id=' . urlencode($member['Register_ID']);
+    $status = getMembershipStatus($member['Expiration_Date'], $member['Plan_Name']); // Pass Plan_Name
+    $badgeClass = getBadgeClass($status); // Get badge class based on status
+    $profileLink = 'profile.php?id=' . urlencode($member['Register_ID']);
 
-            echo '<tr>';
-            echo '<td>' . ($index + 1) . '</td>'; // The index number
-            echo '<td><a href="index/' . htmlspecialchars($profileLink) . '" class="profile-cell"><img src="' . htmlspecialchars($defaultProfileImage) . '" alt="Profile" class="profile-image"></a></td>';
-            echo '<td>' . htmlspecialchars($member['Fullname']) . '</td>';
-            echo '<td>' . htmlspecialchars($member['Email']) . '</td>';
-            echo '<td>' . htmlspecialchars($member['Plan_Name']) . '</td>';
-            echo '<td>' . htmlspecialchars($member['Date_Created']) . '</td>';
-            echo '<td><span class="badge bg-' . $badgeClass . '">' . $status . '</span></td>';
-            echo '</tr>';
+    echo '<tr>';
+    echo '<td>' . ($index + 1) . '</td>'; // The index number
+    echo '<td><a href="index/' . htmlspecialchars($profileLink) . '" class="profile-cell"><img src="' . htmlspecialchars($defaultProfileImage) . '" alt="Profile" class="profile-image"></a></td>';
+    echo '<td>' . htmlspecialchars($member['Fullname']) . '</td>';
+    echo '<td>' . htmlspecialchars($member['Email']) . '</td>';
+    echo '<td>' . htmlspecialchars($member['Plan_Name']) . '</td>';
+    echo '<td>' . htmlspecialchars($member['Date_Created']) . '</td>';
+    echo '<td><span class="badge bg-' . $badgeClass . '">' . $status . '</span></td>';
+    echo '</tr>';
 }
+
 ?>
     </tbody>
   </table>

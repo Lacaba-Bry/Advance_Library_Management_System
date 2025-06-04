@@ -66,25 +66,35 @@
           <div>
             <li><a href="?page=booklist">Book List</a></li>
             <li><a href="?page=bookfeatures">Features Book</a></li>
-            <li><a href="#">Book rented</a></li>
+            <li><a href="?page=bookrented">Book rented</a></li>
             <li><a href="?page=paidbook">Paid Book</a></li>
           </div>
         </ul>
       </li>
       <li>
-        <a href="?page=transaction">
+        
+      <button onclick=toggleSubMenu(this) class="dropdown-btn">
        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
-  <g data-name="Transaction">
+  
     <path d="M36 14l6 5-6 5v-3H24v-4h12z"/>
     <path d="M12 34l-6-5 6-5v3h12v4H12z"/>
     <path d="M4 4h40a1 1 0 0 1 1 1v38a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1zm1 2v36h38V6z"/>
-  </g>
-</svg>
-
-  <span>Transaction</span>
-        </a>
+    <span>Transaction</span>
+    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8eaed"><path d="M480-361q-8 0-15-2.5t-13-8.5L268-556q-11-11-11-28t11-28q11-11 28-11t28 11l156 156 156-156q11-11 28-11t28 11q11 11 11 28t-11 28L508-372q-6 6-13 8.5t-15 2.5Z"/></svg>
+    </svg>
+      </button>
+      <ul class="sub-menu">
+          <div>
+            <li><a href="?page=plans">Plans</a></li>
+            <li><a href="?page=paidbooks">Paid Books</a></li>
+          </div>
+        </ul>
       </li>
       <li>
+
+
+
+
         <a href="?page=logs">
        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path d="M8.38 11.65a1 1 0 0 0 .76.35 1 1 0 0 0 .77-.42l2.85-4a1 1 0 0 0-1.62-1.16l-2.12 3L8.76 9a1 1 0 1 0-1.52 1.3zM8.38 17.65a1 1 0 0 0 .76.35 1 1 0 0 0 .77-.42l2.85-4a1 1 0 0 0-1.62-1.16l-2.12 3-.26-.42a1 1 0 1 0-1.52 1.3zM10.19 19.62a3.19 3.19 0 1 0 3.19 3.19 3.19 3.19 0 0 0-3.19-3.19zm0 4.38a1.19 1.19 0 1 1 0-2.38 1.19 1.19 0 1 1 0 2.38zM24 8.08h-8a1 1 0 0 0 0 2h8a1 1 0 0 0 0-2zM24 15h-8a1 1 0 0 0 0 2h8a1 1 0 0 0 0-2zM24 21.92h-8a1 1 0 0 0 0 2h8a1 1 0 0 0 0-2z"/><path d="M26.15 2H5.85A3.86 3.86 0 0 0 2 5.85v20.3A3.86 3.86 0 0 0 5.85 30h20.3A3.86 3.86 0 0 0 30 26.15V5.85A3.86 3.86 0 0 0 26.15 2zM28 26.15A1.85 1.85 0 0 1 26.15 28H5.85A1.85 1.85 0 0 1 4 26.15V5.85A1.85 1.85 0 0 1 5.85 4h20.3A1.85 1.85 0 0 1 28 5.85z"/></svg>
           <span>Logs</span>
@@ -102,7 +112,7 @@
   <!-- Main content area -->
  <?php
   $page = $_GET['page'] ?? 'adminhome';
-  $allowed_pages = ['dashboard', 'adminhome','memberlist','banlist','booklist','paidbook','bookfeatures','transaction','logs'];
+  $allowed_pages = ['dashboard', 'adminhome','memberlist','banlist','booklist','paidbooks','bookrented','bookfeatures','transaction','logs','plans'];
 
   if (in_array($page, $allowed_pages)) {
       $filepath = __DIR__ . "/pages/{$page}.php";

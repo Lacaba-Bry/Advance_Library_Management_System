@@ -28,6 +28,7 @@ function getBooks($conn) {
 $books = getBooks($conn);
 
 function isBookFavorited($conn, $account_id, $book_id) {
+    $count = 0;
     $sql = "SELECT COUNT(*) FROM favorites WHERE account_id = ? AND book_id = ?";
     if ($stmt = $conn->prepare($sql)) {
         $stmt->bind_param("ii", $account_id, $book_id);
@@ -35,13 +36,11 @@ function isBookFavorited($conn, $account_id, $book_id) {
         $stmt->bind_result($count);
         $stmt->fetch();
         $stmt->close();
-        return $count > 0;
     } else {
-        // Handle potential errors with the SQL preparation
         die('Error preparing the statement: ' . $conn->error);
     }
+    return $count > 0;
 }
-
 ?>
 
 <!DOCTYPE html>
@@ -49,24 +48,31 @@ function isBookFavorited($conn, $account_id, $book_id) {
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Search Layout</title>
+  <title>Book List</title>
   <link rel="stylesheet" href="css/index/search.css"/>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
     .book-card img {
-        width: 150px;      /* Adjust as needed */
-        height: 200px;     /* Adjust as needed */
-        object-fit: cover;  /* Maintain aspect ratio and cover the area */
+        width: 150px;
+        height: 200px;
+        object-fit: cover;
+    }
+    .no-cover {
+        width: 150px;
+        height: 200px;
+        background-color: #f0f0f0; /* Placeholder color */
+        text-align: center;
+        line-height: 200px;
+        color: #888;
+        font-size: 14px;
     }
   </style>
 </head>
 <body>
 
 <div class="main-layout">
-  <!-- Sidebar -->
   <div class="sidebar">
-    
     <div class="form-group">
       <label for="editor-picks">🎯 Editor Picks</label>
       <select id="editor-picks" name="editor-picks">
@@ -109,7 +115,6 @@ function isBookFavorited($conn, $account_id, $book_id) {
     </div>
   </div>
 
-  <!-- Main Content -->
   <div class="main-content">
     <form class="search-container">
       <div class="search">
@@ -123,7 +128,6 @@ function isBookFavorited($conn, $account_id, $book_id) {
         <li>After by Anna Todd</li>
       </ul>
     </form>
-
     <div class="book-wrapper">
       <?php
       $cardsPerPage = 8;
@@ -137,24 +141,45 @@ function isBookFavorited($conn, $account_id, $book_id) {
       $booksOnCurrentPage = array_slice($books, $startIndex, $cardsPerPage);
 
       foreach ($booksOnCurrentPage as $book):
-          $imagePath = "Book/" . htmlspecialchars($book['Plan_type']) . "/Book_Cover/" . htmlspecialchars($book['Book_Cover']);
+        //  Absolute path for file_exists()
+        $basePath = $_SERVER['DOCUMENT_ROOT'];  //  Root of the web server's file system
 
-          // Check if the image exists and is a valid file, otherwise use a default image
-          if (!file_exists($imagePath) || empty($book['Book_Cover'])) {
-            $imagePath = 'image/profile/defaultprofile.jpg';
-          }
+        // Construct the full image path relative to the document root
+        $imagePath = $basePath . "/BryanCodeX/Book/" . htmlspecialchars($book['Plan_type']) . "/Book_Cover/" . htmlspecialchars($book['Book_Cover']);
+        
+        // Construct the URL path for the img src attribute
+        $imageUrl = "/BryanCodeX/Book/" . htmlspecialchars($book['Plan_type']) . "/Book_Cover/" . htmlspecialchars($book['Book_Cover']);
+        
+        // Debugging: Log the image path and URL
+        error_log("Image Path (file_exists): $imagePath");
+        error_log("Image URL (img src): $imageUrl");
 
-          $encodedImagePath = htmlspecialchars($imagePath);
+        // Check if the image exists using file_exists() or if the cover field is empty
+        if (empty($book['Book_Cover'])) {
+            error_log("Book_Cover field is empty for Book ID: " . $book['Book_ID']);
+            $imageUrl = './Book/Book_Cover/A-Fathers-Silence.png';  // Fallback image
+        } elseif (!file_exists($imagePath)) {
+            error_log("Image not found at path: " . $imagePath . " for Book ID: " . $book['Book_ID']);
+            $imageUrl = './Book/Book_Cover/A-Fathers-Silence.png';  // Fallback image
+        } else {
+            error_log("Image found at path: $imagePath for Book ID: " . $book['Book_ID']);
+        }
 
-          $isFavorited = isBookFavorited($conn, $accountId, $book['Book_ID']);
-          $heartIcon = $isFavorited ? 'fa-heart' : 'fa-heart-o';
+        // Encode the URL path for safe use in HTML
+        $encodedImageUrl = htmlspecialchars($imageUrl);
+
+        // Check if the book is favorited
+        $isFavorited = isBookFavorited($conn, $accountId, $book['Book_ID']);
+        $heartIcon = $isFavorited ? 'fa-heart' : 'fa-heart-o';
       ?>
         <div class="book-card">
           <button class="favorite-btn" data-book-id="<?php echo htmlspecialchars($book['Book_ID']); ?>">
             <i class="fa fa-<?php echo $heartIcon; ?>" aria-hidden="true"></i>
           </button>
-          <!-- Corrected Image Handling -->
-          <img src="<?php echo $encodedImagePath; ?>" alt="Book Cover" onerror="this.onerror=null; this.src='image/profile/defaultprofile.jpg';" />
+
+          <!-- Show book cover if it exists or fallback to default -->
+          <img src="<?php echo $encodedImageUrl; ?>" alt="Book Cover" class="book-cover" />
+
           <div class="book-details">
             <div class="book-title"><?php echo htmlspecialchars($book['Title']); ?></div>
             <div class="book-author"><?php echo htmlspecialchars($book['Author']); ?></div>
@@ -168,6 +193,7 @@ function isBookFavorited($conn, $account_id, $book_id) {
       <?php endforeach; ?>
     </div>
 
+    <!-- Pagination -->
     <div class="pagination">
       <button onclick="changePage(-1)" id="prevBtn" <?php if ($currentPage <= 1) echo 'disabled'; ?>>Prev</button>
       <span id="pageNumbers">
@@ -182,7 +208,7 @@ function isBookFavorited($conn, $account_id, $book_id) {
 
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script>
-    function toggleFavorite(button) {
+  function toggleFavorite(button) {
       button.classList.toggle('active');
     }
 
@@ -220,39 +246,19 @@ function isBookFavorited($conn, $account_id, $book_id) {
             }
           },
           error: function(jqXHR, textStatus, errorThrown) {
-            console.error("AJAX Error: " + textStatus, errorThrown);
-            alert('An error occurred while processing your request.');
+            alert('Error: ' + textStatus);
           }
         });
       });
 
       $(".add-to-cart-btn").click(function() {
         var bookId = $(this).data('book-id');
-        $.ajax({
-          url: 'process/index/addcart.php',
-          type: 'POST',
-          data: { book_id: bookId },
-          success: function(response) {
-            alert(response);
-          }
-        });
-      });
-
-      $(".rent-btn").click(function() {
-        var bookId = $(this).data('book-id');
-        $.ajax({
-          url: 'process/index/addrent.php',
-          type: 'POST',
-          data: { book_id: bookId },
-          success: function(response) {
-            alert(response);
-          }
-        });
+        // Handle add to cart logic here
       });
 
       $(".reserve-btn").click(function() {
         var bookId = $(this).data('book-id');
-        alert("Reserve functionality not implemented yet for book ID: " + bookId);
+        // Handle reserve logic here
       });
     });
   </script>
