@@ -229,32 +229,6 @@
   color: white;
 }
 
-.contact_us_8 .social-media-links {
-  width: 230px;
-  display: flex;
-  justify-content: space-evenly;
-}
-
-.contact_us_8 .checkboc-container {
-  display: flex;
-  align-items: flex-start;
-}
-
-.contact_us_8 .checkbox-text {
-  color: #9c9c9c;
-  margin-top: 16px;
-  margin-right: 0px;
-  margin-bottom: 16px;
-  margin-left: 10px;
-  margin: 0 0 0 10px;
-  text-align: left;
-}
-
-.contact_us_8 .responsive-cell-block.wk-tab-12.wk-mobile-12.wk-desk-8.wk-ipadp-12.checkbox-container {
-  min-height: 30px;
-  margin: 0 0 30px 0;
-}
-
 .contact_us_8 .workik-contact-bigbox {
     display: flex;
   }
@@ -411,10 +385,6 @@
     padding-left: 20px;
   }
 
-  .contact_us_8 .checkboc-container {
-    align-items: flex-start;
-  }
-
   .contact_us_8 .input {
     height: 45px;
   }
@@ -446,6 +416,15 @@
   color: #ffffff;
   margin: 0;
   line-height: 1.5;
+}
+
+.contact_us_8 .text-blk.getintouch-head {
+  font-size: 36px;
+  line-height: 45px;
+  font-weight: 900;
+  margin-top: 0px;
+  margin-right: 160px;
+  margin-bottom: 20px;
 }
 
 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@200;300;400;600;700;800&amp;display=swap');
