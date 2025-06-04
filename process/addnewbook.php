@@ -96,7 +96,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Generate the correct path for the cover image
     $coverPath = "/BryanCodeX/Book/$Plan_type/Book_Cover/" . basename($cover_path);
 
-  $preview_template = <<<PHP
+$preview_template = <<<PHP
 <?php
 session_start();  // Start the session at the top of the script
 require_once('../../../backend/config/config.php');
@@ -120,11 +120,35 @@ if (!\$book) {
 \$Plan_type = \$book['Plan_type'];
 \$coverPath = "../../../Book/" . \$Plan_type . "/Book_Cover/" . basename(\$book['Book_Cover']);
 \$stock = \$book['Stock'];
+
+
+
 // Get the user ID from the session if the user is logged in
 \$userId = \$_SESSION['user_id'] ?? null;  // Use null coalescing to handle an undefined session variable
 
+
 \$stock = \$book['Stock'];
 \$returnDate = \$_GET['return_date'] ?? null;
+
+
+// Get live vote count from the votes table
+\$voteCountStmt = \$conn->prepare("SELECT COUNT(*) AS vote_count FROM votes WHERE Book_ID = ?");
+\$voteCountStmt->bind_param("i", \$Book_ID);
+\$voteCountStmt->execute();
+\$voteResult = \$voteCountStmt->get_result()->fetch_assoc();
+\$voteCount = \$voteResult['vote_count'] ?? 0;
+\$voteCountStmt->close();
+
+// Get read count (number of rentals)
+\$readCountStmt = \$conn->prepare("SELECT COUNT(*) AS read_count FROM rent WHERE Book_ID = ?");
+\$readCountStmt->bind_param("i", \$Book_ID);
+\$readCountStmt->execute();
+\$readResult = \$readCountStmt->get_result()->fetch_assoc();
+\$readCount = \$readResult['read_count'] ?? 0;
+\$readCountStmt->close();
+
+
+
 ?>
 
 <!DOCTYPE html>
@@ -135,19 +159,29 @@ if (!\$book) {
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="../../../css/autogenerate/previewx.css">
+  <script src="../../../javascript/generatescript.js"></script>
   <style>
-
+      .vote-btn {
+        background: none;
+        border: none;
+        opacity: 0.6;
+      }
   </style>
 </head>
 <body>
 <div class="book-preview">
-  <div class="preview-header">
+ <div class="preview-header">
     <img src="<?php echo 'http://localhost/BryanCodeX/Book/' . \$Plan_type . '/Book_Cover/' . basename(htmlspecialchars(\$book['Book_Cover'])); ?>" alt="Book Cover" class="book-cover">
     <div class="book-info">
       <h2 class="book-title"><?php echo htmlspecialchars(\$book['Title']); ?></h2>
       <div class="book-stats">
-        <span><i class="fas fa-eye"></i> <strong>0</strong> Reads</span>
-        <span><i class="fas fa-star"></i> <strong>0</strong> Votes</span>
+       <span><i class="fas fa-eye"></i> <strong><?= \$readCount ?></strong> Reads</span>
+  <button class="vote-btn" id="voteBtn" onclick="submitVote(<?= \$book['Book_ID'] ?>, <?= \$userId ?? 'null' ?>)">
+    <i class="fas fa-star"></i>&nbsp;<strong id="voteCount"><?= \$voteCount ?></strong>
+</button>
+
+</span>
+
         <span><i class="fas fa-list"></i> <strong>1</strong> Parts</span>
         <span><i class="fa-solid fa-book"></i> <strong><?= \$stock ?></strong> Available</span>
       </div>
@@ -226,7 +260,7 @@ if (\$userId) {
                                   const seconds = Math.floor((timeDifference % (1000 * 60)) / 1000);
 
                                   // Display the countdown timer
-                                  document.getElementById("countdown-timer").innerHTML = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+                                  document.getElementById("countdown-timer").innerHTML = `\${days}d \${hours}h \${minutes}m \${seconds}s`;
                               }
 
                               // Update the countdown every second
@@ -364,10 +398,8 @@ if (\$userId) {
 
 
 <script>
-  function openModal(modalId) {
-    var modal = new bootstrap.Modal(document.getElementById(modalId));
-    modal.show();
-  }
+
+
 
 </script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js"></script>

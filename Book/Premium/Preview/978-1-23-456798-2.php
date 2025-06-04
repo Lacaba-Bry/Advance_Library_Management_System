@@ -4,7 +4,7 @@ require_once('../../../backend/config/config.php');
 include '../../../reusable/header.php';
 
 // Define the ISBN and prepare the query
-$isbn = '978-1-23-456813-2';
+$isbn = '978-1-23-456798-2';
 $stmt = $conn->prepare("SELECT * FROM books WHERE ISBN = ?");
 $stmt->bind_param("s", $isbn);
 $stmt->execute();
@@ -27,6 +27,13 @@ $userId = $_SESSION['user_id'] ?? null;  // Use null coalescing to handle an und
 $stock = $book['Stock'];
 $returnDate = $_GET['return_date'] ?? null;
 
+
+// Get the user ID from the session if the user is logged in
+$userId = $_SESSION['user_id'] ?? null;  // Use null coalescing to handle an undefined session variable
+
+$stock = $book['Stock'];
+$returnDate = $_GET['return_date'] ?? null;
+
 // Get live vote count from the votes table
 $voteCountStmt = $conn->prepare("SELECT COUNT(*) AS vote_count FROM votes WHERE Book_ID = ?");
 $voteCountStmt->bind_param("i", $Book_ID);
@@ -42,6 +49,8 @@ $readResult = $readCountStmt->get_result()->fetch_assoc();
 $readCount = $readResult['read_count'] ?? 0;
 $readCountStmt->close();
 
+
+
 ?>
 
 <!DOCTYPE html>
@@ -53,17 +62,16 @@ $readCountStmt->close();
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="../../../css/autogenerate/previewx.css">
   <style>
-.vote-btn {
-  background: none;
-  border: none;
-  opacity: 0.6;
-}
-
+      .vote-btn {
+        background: none;
+        border: none;
+        opacity: 0.6;
+      }
   </style>
 </head>
 <body>
 <div class="book-preview">
-  <div class="preview-header">
+ <div class="preview-header">
     <img src="<?php echo 'http://localhost/BryanCodeX/Book/' . $Plan_type . '/Book_Cover/' . basename(htmlspecialchars($book['Book_Cover'])); ?>" alt="Book Cover" class="book-cover">
     <div class="book-info">
       <h2 class="book-title"><?php echo htmlspecialchars($book['Title']); ?></h2>
@@ -78,7 +86,6 @@ $readCountStmt->close();
         <span><i class="fas fa-list"></i> <strong>1</strong> Parts</span>
         <span><i class="fa-solid fa-book"></i> <strong><?= $stock ?></strong> Available</span>
       </div>
-
 <div class="start-reading">
 <?php
 $canRead = false;
@@ -131,37 +138,37 @@ if ($userId) {
                       }
                   ?>
 
-                <?php if ($returnDate): ?>
-    <p>Countdown Days: <span id="countdown-timer"></span></p>
-    <script>
-        // JavaScript function to update the countdown
-        function updateCountdown() {
-            const returnDate = new Date("<?php echo $returnDate; ?> 23:59:59"); // Set return date from PHP
-            const currentDate = new Date();
-            const timeDifference = returnDate - currentDate;
+                  <!-- Display Countdown Timer if the user has rented the book -->
+                      <?php if ($returnDate): ?>
+                          <p>Countdown Days: <span id="countdown-timer"></span></p>
 
-            if (timeDifference <= 0) {
-                document.getElementById("countdown-timer").innerHTML = "Your rental has expired!";
-                return;
-            }
+                          <script>
+                              // JavaScript function to update the countdown
+                              function updateCountdown() {
+                                  const returnDate = new Date("<?php echo $returnDate; ?> 23:59:59"); // Set return date from PHP
+                                  const currentDate = new Date();
+                                  const timeDifference = returnDate - currentDate;
 
-            // Calculate remaining time
-            const days = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((timeDifference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((timeDifference % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((timeDifference % (1000 * 60)) / 1000);
+                                  if (timeDifference <= 0) {
+                                      document.getElementById("countdown-timer").innerHTML = "Your rental has expired!";
+                                      return;
+                                  }
 
-            document.getElementById("countdown-timer").innerHTML = `d h m s`;
-            console.log("Return Date from PHP:", "<?php echo $returnDate; ?>");
+                                  // Calculate remaining time
+                                  const days = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
+                                  const hours = Math.floor((timeDifference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                                  const minutes = Math.floor((timeDifference % (1000 * 60 * 60)) / (1000 * 60));
+                                  const seconds = Math.floor((timeDifference % (1000 * 60)) / 1000);
 
-  }
+                                  // Display the countdown timer
+                                  document.getElementById("countdown-timer").innerHTML = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+                              }
 
-        // Update the countdown every second
-        setInterval(updateCountdown, 1000);
-        updateCountdown(); // Call once to display immediately
-    </script>
-<?php endif; ?>
-
+                              // Update the countdown every second
+                              setInterval(updateCountdown, 1000);
+                              updateCountdown(); // Call once to display immediately
+                          </script>
+                      <?php endif; ?>
               <?php endif; ?>
 
 
@@ -297,13 +304,7 @@ if ($userId) {
     modal.show();
   }
 
-function submitVote(bookId, userId) {
-    if (!userId) {
-        alert("Please log in to vote.");
-        return;
-    }
-
-    const voteButton = document.getElementById("voteBtn");
+  const voteButton = document.getElementById("voteBtn");
 
     fetch('../../../process/index/submit_vote.php', {
         method: 'POST',
@@ -324,7 +325,6 @@ function submitVote(bookId, userId) {
         console.error('Error voting:', error);
         alert("Something went wrong. Try again.");
     });
-}
 
 </script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js"></script>
