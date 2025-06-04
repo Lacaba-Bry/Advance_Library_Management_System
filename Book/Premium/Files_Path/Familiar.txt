@@ -1,4 +1,3 @@
-bookid:1
 Title: Familiar
 Author: Salem Knox
 Publisher: Black Thorn Books

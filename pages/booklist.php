@@ -250,8 +250,9 @@ function getBadgeClass($planType) {
             Are you sure you want to delete this book? This action cannot be undone.
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
+           
             <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Yes, Delete</button>
+             <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
           </div>
         </div>
       </div>

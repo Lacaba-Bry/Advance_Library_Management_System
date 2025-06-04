@@ -4,7 +4,7 @@ require_once('../../../backend/config/config.php');
 include '../../../reusable/header.php';
 
 // Define the ISBN and prepare the query
-$isbn = '978-1-23-456798-2';
+$isbn = '978-1-23-456813-2';
 $stmt = $conn->prepare("SELECT * FROM books WHERE ISBN = ?");
 $stmt->bind_param("s", $isbn);
 $stmt->execute();
@@ -26,6 +26,22 @@ $userId = $_SESSION['user_id'] ?? null;  // Use null coalescing to handle an und
 
 $stock = $book['Stock'];
 $returnDate = $_GET['return_date'] ?? null;
+
+// Get live vote count from the votes table
+$voteCountStmt = $conn->prepare("SELECT COUNT(*) AS vote_count FROM votes WHERE Book_ID = ?");
+$voteCountStmt->bind_param("i", $Book_ID);
+$voteCountStmt->execute();
+$voteResult = $voteCountStmt->get_result()->fetch_assoc();
+$voteCount = $voteResult['vote_count'] ?? 0;
+$voteCountStmt->close();
+// Get read count (number of rentals)
+$readCountStmt = $conn->prepare("SELECT COUNT(*) AS read_count FROM rent WHERE Book_ID = ?");
+$readCountStmt->bind_param("i", $Book_ID);
+$readCountStmt->execute();
+$readResult = $readCountStmt->get_result()->fetch_assoc();
+$readCount = $readResult['read_count'] ?? 0;
+$readCountStmt->close();
+
 ?>
 
 <!DOCTYPE html>
@@ -37,6 +53,11 @@ $returnDate = $_GET['return_date'] ?? null;
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="../../../css/autogenerate/previewx.css">
   <style>
+.vote-btn {
+  background: none;
+  border: none;
+  opacity: 0.6;
+}
 
   </style>
 </head>
@@ -47,8 +68,13 @@ $returnDate = $_GET['return_date'] ?? null;
     <div class="book-info">
       <h2 class="book-title"><?php echo htmlspecialchars($book['Title']); ?></h2>
       <div class="book-stats">
-        <span><i class="fas fa-eye"></i> <strong>0</strong> Reads</span>
-        <span><i class="fas fa-star"></i> <strong>0</strong> Votes</span>
+       <span><i class="fas fa-eye"></i> <strong><?= $readCount ?></strong> Reads</span>
+  <button class="vote-btn" id="voteBtn" onclick="submitVote(<?= $book['Book_ID'] ?>, <?= $userId ?? 'null' ?>)">
+    <i class="fa-solid fa-heart"></i>&nbsp;<strong id="voteCount"><?= $voteCount ?></strong>
+</button>
+
+</span>
+
         <span><i class="fas fa-list"></i> <strong>1</strong> Parts</span>
         <span><i class="fa-solid fa-book"></i> <strong><?= $stock ?></strong> Available</span>
       </div>
@@ -79,7 +105,7 @@ if ($userId) {
 
 <?php if (!$canRead && $hasChecked): ?>
     <?php if ($book['Plan_type'] === 'Free' || $book['Plan_type'] === 'Premium'): ?>
-        
+        <div class="button-container">
              <input type="hidden" name="isbn" value="<?= $isbn ?>">
             <form method="post" action="reserve_rent_book.php">
                   <?php if ($stock > 0): ?>
@@ -104,37 +130,37 @@ if ($userId) {
                       }
                   ?>
 
-                  <!-- Display Countdown Timer if the user has rented the book -->
-                      <?php if ($returnDate): ?>
-                          <p>Countdown Days: <span id="countdown-timer"></span></p>
+                <?php if ($returnDate): ?>
+    <p>Countdown Days: <span id="countdown-timer"></span></p>
+    <script>
+        // JavaScript function to update the countdown
+        function updateCountdown() {
+            const returnDate = new Date("<?php echo $returnDate; ?> 23:59:59"); // Set return date from PHP
+            const currentDate = new Date();
+            const timeDifference = returnDate - currentDate;
 
-                          <script>
-                              // JavaScript function to update the countdown
-                              function updateCountdown() {
-                                  const returnDate = new Date("<?php echo $returnDate; ?> 23:59:59"); // Set return date from PHP
-                                  const currentDate = new Date();
-                                  const timeDifference = returnDate - currentDate;
+            if (timeDifference <= 0) {
+                document.getElementById("countdown-timer").innerHTML = "Your rental has expired!";
+                return;
+            }
 
-                                  if (timeDifference <= 0) {
-                                      document.getElementById("countdown-timer").innerHTML = "Your rental has expired!";
-                                      return;
-                                  }
+            // Calculate remaining time
+            const days = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((timeDifference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((timeDifference % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((timeDifference % (1000 * 60)) / 1000);
 
-                                  // Calculate remaining time
-                                  const days = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
-                                  const hours = Math.floor((timeDifference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                                  const minutes = Math.floor((timeDifference % (1000 * 60 * 60)) / (1000 * 60));
-                                  const seconds = Math.floor((timeDifference % (1000 * 60)) / 1000);
+            document.getElementById("countdown-timer").innerHTML = `d h m s`;
+            console.log("Return Date from PHP:", "<?php echo $returnDate; ?>");
 
-                                  // Display the countdown timer
-                                  document.getElementById("countdown-timer").innerHTML = `d h m s`;
-                              }
+  }
 
-                              // Update the countdown every second
-                              setInterval(updateCountdown, 1000);
-                              updateCountdown(); // Call once to display immediately
-                          </script>
-                      <?php endif; ?>
+        // Update the countdown every second
+        setInterval(updateCountdown, 1000);
+        updateCountdown(); // Call once to display immediately
+    </script>
+<?php endif; ?>
+
               <?php endif; ?>
 
 
@@ -269,6 +295,35 @@ if ($userId) {
     var modal = new bootstrap.Modal(document.getElementById(modalId));
     modal.show();
   }
+
+function submitVote(bookId, userId) {
+    if (!userId) {
+        alert("Please log in to vote.");
+        return;
+    }
+
+    const voteButton = document.getElementById("voteBtn");
+
+    fetch('../../../process/index/submit_vote.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `book_id=${bookId}&user_id=${userId}&vote_value=1`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const voteCountElement = document.getElementById("voteCount");
+            voteCountElement.textContent = data.new_vote_count;
+            voteButton.classList.add("voted");
+        } else {
+            alert(data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error voting:', error);
+        alert("Something went wrong. Try again.");
+    });
+}
 
 </script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js"></script>
