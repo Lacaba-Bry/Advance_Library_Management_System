@@ -15,7 +15,7 @@ $logout_url = 'backend/logout.php';
 // Capture the search term
 $searchTerm = isset($_GET['search']) ? $_GET['search'] : '';
 
-// Modify the getBooks function to filter based on search
+// Function to get books based on the search term
 function getBooks($conn, $searchTerm = '') {
     $books = [];
     $sql = "SELECT Book_ID, Title, Author, Book_Cover, Genre, Price, Plan_type, Stock FROM books";
@@ -23,10 +23,12 @@ function getBooks($conn, $searchTerm = '') {
         $sql .= " WHERE Title LIKE ? OR Author LIKE ?";
     }
     $stmt = $conn->prepare($sql);
+
     if ($searchTerm) {
         $searchTerm = "%$searchTerm%"; // Add wildcards for partial matching
         $stmt->bind_param("ss", $searchTerm, $searchTerm);  // Bind parameters for Title and Author search
     }
+
     $stmt->execute();
     $result = $stmt->get_result();
 
@@ -39,6 +41,7 @@ function getBooks($conn, $searchTerm = '') {
     return $books;
 }
 
+// Fetch books based on search term
 $books = getBooks($conn, $searchTerm);
 
 // Check if the book is favorited
@@ -101,25 +104,25 @@ function isBookFavorited($conn, $account_id, $book_id) {
     </div>
 
     <div class="filter-group">
-      <h3>🏢 Choose Publisher</h3>
+      <h3>🏢 Choose Paid Book</h3>
       <select>
-        <option>All Publishers</option>
-        <option>Publisher A</option>
-        <option>Publisher B</option>
+        <option>All Price</option>
+        <option>-50 Below</option>
+        <option>P50 Above</option>
       </select>
     </div>
 
     <div class="filter-group">
-      <h3>📅 Select Year</h3>
+      <h3>📅 Select Plan</h3>
       <select>
-        <option>All Years</option>
-        <option>2025</option>
-        <option>2024</option>
+        <option>All Plan</option>
+        <option>Free</option>
+        <option>Premium</option>
       </select>
     </div>
 
     <div class="filter-group">
-      <h3>📚 Shop by Category</h3>
+      <h3>📚 Shop by Genre</h3>
       <div class="checkbox-group">
         <label><input type="checkbox"> Action</label>
         <label><input type="checkbox"> Comedy</label>
@@ -130,118 +133,120 @@ function isBookFavorited($conn, $account_id, $book_id) {
   </div>
 
   <div class="main-content">
-    <form class="search-container" method="GET">
+    <form class="search-container" method="GET" id="search-form">
       <div class="search">
         <span class="search-icon material-symbols-outlined">search</span>
-        <input class="search-input" type="search" name="search" placeholder="Search books by title, author or keyword..." value="<?= htmlspecialchars($searchTerm) ?>">
+        <input class="search-input" type="search" id="search-input" name="search" placeholder="Search books by title, author or keyword..." value="<?= htmlspecialchars($searchTerm) ?>">
       </div>
-      <ul class="suggestions">
-        <!-- Dynamically populated suggestions can be added here if needed -->
-      </ul>
     </form>
 
-    <div class="book-wrapper">
-<?php
-$cardsPerPage = 14; // 14 books per page
-$totalBooks = count($books);
-$totalPages = ceil($totalBooks / $cardsPerPage);
-$currentPage = isset($_GET['page']) && is_numeric($_GET['page']) ? (int)$_GET['page'] : 1;
-$currentPage = max(1, min($currentPage, $totalPages));
-$startIndex = ($currentPage - 1) * $cardsPerPage;
-$booksOnCurrentPage = array_slice($books, $startIndex, $cardsPerPage);
+    <div class="book-wrapper" id="book-wrapper">
+      <?php
+      $cardsPerPage = 14; // 14 books per page
+      $totalBooks = count($books);
+      $totalPages = ceil($totalBooks / $cardsPerPage);
+      $currentPage = isset($_GET['page']) && is_numeric($_GET['page']) ? (int)$_GET['page'] : 1;
+      $currentPage = max(1, min($currentPage, $totalPages));
+      $startIndex = ($currentPage - 1) * $cardsPerPage;
+      $booksOnCurrentPage = array_slice($books, $startIndex, $cardsPerPage);
 
-foreach ($booksOnCurrentPage as $book):
-    $planType = strtolower($book['Plan_type']);
-    $filename = basename($book['Book_Cover']);
-    $filename = preg_replace("/[^a-zA-Z0-9._-]/", "", $filename);
-    $encodedFilename = urlencode($filename);
+      foreach ($booksOnCurrentPage as $book):
+          $planType = strtolower($book['Plan_type']);
+          $filename = basename($book['Book_Cover']);
+          $filename = preg_replace("/[^a-zA-Z0-9._-]/", "", $filename);
+          $encodedFilename = urlencode($filename);
 
-    // Construct URL and file path for the book cover
-    $imageUrl = "/BryanCodeX/Book/" . ucfirst($planType) . "/Book_Cover/" . $encodedFilename;
-    $serverPath = $_SERVER['DOCUMENT_ROOT'] . "/BryanCodeX/Book/" . ucfirst($planType) . "/Book_Cover/" . $filename;
+          // Construct URL and file path for the book cover
+          $imageUrl = "/BryanCodeX/Book/" . ucfirst($planType) . "/Book_Cover/" . $encodedFilename;
+          $serverPath = $_SERVER['DOCUMENT_ROOT'] . "/BryanCodeX/Book/" . ucfirst($planType) . "/Book_Cover/" . $filename;
 
-    // Check if the book is favorited
-    $isFavorited = isBookFavorited($conn, $accountId, $book['Book_ID']);
-    $heartIcon = $isFavorited ? 'fa-heart' : 'fa-heart-o';
-?>
+          // Check if the book is favorited
+          $isFavorited = isBookFavorited($conn, $accountId, $book['Book_ID']);
+          $heartIcon = $isFavorited ? 'fa-heart' : 'fa-heart-o';
+      ?>
 
-<div class="book-card">
-    <div class="book-cover">
-        <?php if (!empty($filename) && file_exists($serverPath)): ?>
-            <img src="<?= htmlspecialchars($imageUrl) ?>" alt="Book Cover" width="150">
-        <?php else: ?>
-            <img src="/BryanCodeX/assets/images/placeholder.jpg" alt="Placeholder Cover" width="150">
-        <?php endif; ?>
+      <div class="book-card">
+          <div class="book-cover">
+              <?php if (!empty($filename) && file_exists($serverPath)): ?>
+                  <img src="<?= htmlspecialchars($imageUrl) ?>" alt="Book Cover" width="150">
+              <?php else: ?>
+                  <img src="/BryanCodeX/assets/images/placeholder.jpg" alt="Placeholder Cover" width="150">
+              <?php endif; ?>
+          </div>
+          <div class="book-info">
+              <h5><?= htmlspecialchars($book['Title']) ?></h5>
+              <p><?= htmlspecialchars($book['Author']) ?></p>
+               <button class="favorite-btn" data-book-id="<?= htmlspecialchars($book['Book_ID']); ?>">
+                  <i class="fa <?= $heartIcon ?>" aria-hidden="true"></i>
+              </button>
+              <?php if ($isFavorited): ?>
+                  <button class="btn btn-sm btn-danger">♥ Favorited</button>
+              <?php endif; ?>
+          </div>
+      </div>
+
+      <?php endforeach; ?>
+
+      <!-- Pagination -->
+      <div class="pagination">
+          <?php if ($totalPages > 1): ?>
+              <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                  <button class="<?= $i == $currentPage ? 'active' : '' ?>" 
+                          <?= $i == $currentPage ? 'disabled' : '' ?> 
+                          onclick="window.location.href='?page=<?= $i ?>&search=<?= urlencode($searchTerm) ?>'">
+                      <?= $i ?>
+                  </button>
+              <?php endfor; ?>
+          <?php endif; ?>
+      </div>
+
     </div>
-    <div class="book-info">
-        <h5><?= htmlspecialchars($book['Title']) ?></h5>
-        <p><?= htmlspecialchars($book['Author']) ?></p>
-        
-        <button class="favorite-btn" data-book-id="<?= htmlspecialchars($book['Book_ID']); ?>">
-            <i class="fa <?= $heartIcon ?>" aria-hidden="true"></i>
-        </button>
-        <?php if ($isFavorited): ?>
-            <button class="btn btn-sm btn-danger">♥ Favorited</button>
-        <?php endif; ?>
-    </div>
-</div>
-
-<?php endforeach; ?>
-
-<!-- Pagination -->
-<div class="pagination">
-    <?php if ($totalPages > 1): ?>
-        <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-            <button class="<?= $i == $currentPage ? 'active' : '' ?>" 
-                    <?= $i == $currentPage ? 'disabled' : '' ?> 
-                    onclick="window.location.href='?page=<?= $i ?>'">
-                <?= $i ?>
-            </button>
-        <?php endfor; ?>
-    <?php endif; ?>
+  </div>
 </div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-  function goToPage(page) {
-      window.location.href = '?page=' + page;
-  }
+$(document).ready(function() {
+  // Prevent form submission with Enter key
+  $('#search-input').on('keydown', function(e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+    }
+  });
 
-  function changePage(offset) {
-      let currentPage = <?php echo $currentPage; ?>;
-      let totalPages = <?php echo $totalPages; ?>;
-      let newPage = Math.min(Math.max(1, currentPage + offset), totalPages);
-      window.location.href = '?page=' + newPage;
-  }
+  // Live search on input
+  $('#search-input').on('input', function() {
+    var searchTerm = $(this).val();
+    window.location.href = '?search=' + encodeURIComponent(searchTerm); // Update URL with the search term
+  });
 
-  $(document).ready(function() {
-    $(".favorite-btn").click(function() {
-      var bookId = $(this).data('book-id');
-      var icon = $(this).find('i');
-      var isFavorited = icon.hasClass('fa-heart');
+  $(".favorite-btn").click(function() {
+    var bookId = $(this).data('book-id');
+    var icon = $(this).find('i');
+    var isFavorited = icon.hasClass('fa-heart');
 
-      $.ajax({
-        url: 'process/index/addfavorite.php',
-        type: 'POST',
-        data: { book_id: bookId, is_favorited: isFavorited ? 1 : 0 },
-        dataType: 'json',
-        success: function(response) {
-          if (response.success) {
-            if (isFavorited) {
-              icon.removeClass('fa-heart').addClass('fa-heart-o');
-            } else {
-              icon.removeClass('fa-heart-o').addClass('fa-heart');
-            }
+    $.ajax({
+      url: 'process/index/addfavorite.php',
+      type: 'POST',
+      data: { book_id: bookId, is_favorited: isFavorited ? 1 : 0 },
+      dataType: 'json',
+      success: function(response) {
+        if (response.success) {
+          if (isFavorited) {
+            icon.removeClass('fa-heart').addClass('fa-heart-o');
           } else {
-            alert('Error: ' + response.message);
+            icon.removeClass('fa-heart-o').addClass('fa-heart');
           }
-        },
-        error: function(jqXHR, textStatus, errorThrown) {
-          alert('Error: ' + textStatus);
+        } else {
+          alert('Error: ' + response.message);
         }
-      });
+      },
+      error: function(jqXHR, textStatus, errorThrown) {
+        alert('Error: ' + textStatus);
+      }
     });
   });
+});
 </script>
 </body>
 </html>

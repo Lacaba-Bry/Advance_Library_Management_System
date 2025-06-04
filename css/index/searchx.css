@@ -8,10 +8,9 @@ body {
 .main-layout {
   display: flex;
   min-height: 100vh;
-  gap: 2rem;
   flex-wrap: wrap;
+  
 }
-
 .sidebar {
   width: 260px;
   background: #fff;
