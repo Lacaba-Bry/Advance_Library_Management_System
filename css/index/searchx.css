@@ -9,9 +9,9 @@ body {
   display: flex;
   min-height: 100vh;
   gap: 2rem;
+  flex-wrap: wrap;
 }
 
-/* Sidebar */
 .sidebar {
   width: 260px;
   background: #fff;
@@ -43,9 +43,11 @@ body {
   color: #007bff;
   text-decoration: none;
   font-size: 14px;
+  transition: color 0.3s;
 }
 
 .sidebar a:hover {
+  color: #0056b3;
   text-decoration: underline;
 }
 
@@ -163,9 +165,9 @@ body {
 
 /* Book Card */
 .book-card {
-  width: 200px;
-  min-height: auto; /* Adjust as needed */
-  background: #fff;
+  width: calc(100% / 7 - 20px); /* 7 cards per row */
+  min-height: 250px;
+  background: #7d6ce3;
   border-radius: 12px;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
   overflow: hidden;
@@ -173,17 +175,18 @@ body {
   position: relative;
   display: flex;
   flex-direction: column;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.book-card img {
-  width: 100%;
-  height: 280px;
-  object-fit: cover;
-  border-top-left-radius: 12px;
-  border-top-right-radius: 12px;
+.book-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.15);
 }
+
+
 
 .book-details {
+  background: #7d6ce3;
   padding: 10px;
   flex-grow: 1;
   display: flex;
@@ -191,7 +194,7 @@ body {
   justify-content: flex-start;
 }
 
-.book-title {
+.book-info h5 {
   font-size: 18px;
   font-weight: 600;
   margin-bottom: 4px;
@@ -201,12 +204,9 @@ body {
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
+  color: #fff;
 }
 
-.book-author {
-  font-size: 14px;
-  color: #777;
-}
 
 /* Favorite Button */
 .favorite-btn {
@@ -222,7 +222,11 @@ body {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: background-color 0.3s, transform 0.3s;
+}
+
+.favorite-btn:hover {
+  transform: scale(1.1);
 }
 
 .favorite-btn svg {
@@ -244,7 +248,7 @@ body {
   gap: 6px;
   justify-content: center;
   padding: 10px;
-  margin-top: auto; /* KEY LINE */
+  margin-top: auto;
 }
 
 .book-actions .btn {
@@ -256,36 +260,23 @@ body {
   border-radius: 6px;
   cursor: pointer;
   white-space: nowrap;
-  transition: background 0.3s;
+  transition: background 0.3s, transform 0.3s;
 }
 
-.cart-btn {
-  background-color: #007bff;
-  color: #fff;
-}
-
-.cart-btn:hover {
+.book-actions .btn:hover {
   background-color: #0056b3;
+  transform: scale(1.05);
 }
 
-.rent-btn {
-  background-color: #28a745;
-  color: #fff;
+.book-info h5{
+  font-size: 13px;
+  margin: 5px;
 }
-
-.rent-btn:hover {
-  background-color: #1e7e34;
+.book-info p{
+  font-size: 12px;
+    color: #fff;
 }
-
-.reserve-btn {
-  background-color: #ffc107;
-  color: #000;
-}
-
-.reserve-btn:hover {
-  background-color: #e0a800;
-}
-
+/* Pagination */
 .pagination {
   text-align: center;
   margin-top: 20px;
@@ -300,6 +291,12 @@ body {
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  transition: background 0.3s, transform 0.3s;
+}
+
+.pagination button:hover {
+  background-color: #0056b3;
+  transform: scale(1.05);
 }
 
 .pagination button.active {
@@ -309,4 +306,36 @@ body {
 .pagination button:disabled {
   background-color: #ccc;
   cursor: not-allowed;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .book-card {
+    width: calc(100% / 5 - 20px); /* 5 cards per row on tablets */
+  }
+}
+
+@media (max-width: 768px) {
+  .book-card {
+    width: calc(100% / 4 - 20px); /* 4 cards per row on small tablets */
+  }
+
+  .sidebar {
+    width: 100%;
+    margin: 1rem 0;
+  }
+
+  .main-layout {
+    flex-direction: column;
+  }
+
+  .search-container {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .book-card {
+    width: calc(100% / 2 - 20px); /* 2 cards per row on phones */
+  }
 }

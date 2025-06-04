@@ -53,7 +53,6 @@ $avatar = $avatar ?: 'image/profile/defaultprofile.jpg';
 function getBooksByPlanType($conn, $planType) {
     $books = [];
     $sql = "SELECT Book_ID, Title, Author, Book_Cover, Genre, Price, Plan_type FROM books WHERE Plan_type = ?";
-
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("s", $planType);
     $stmt->execute();
