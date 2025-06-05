@@ -1,7 +1,10 @@
 <?php
 session_start();  // Start the session at the top of the script
+error_log("User ID: " . $_SESSION['user_id']);
+error_log("Book ID: " . $Book_ID);
 require_once('../../../backend/config/config.php');
 include '../../../reusable/header.php';
+
 
 // Define the ISBN and prepare the query
 $isbn = '978-1-23-456790-6';
@@ -112,6 +115,7 @@ if ($userId) {
 </button>
 
 <?php if (!$canRead && $hasChecked): ?>
+    
     <?php if ($book['Plan_type'] === 'Free' || $book['Plan_type'] === 'Premium'): ?>
         <div class="button-container">
              <input type="hidden" name="isbn" value="<?= $isbn ?>">
@@ -191,6 +195,27 @@ if ($userId) {
                     <input type="hidden" name="isbn" value="<?= $isbn ?>">
                     <button class="btn add-btn" type="submit">Add to Cart</button>
                 </form>
+                 <?php
+                // Check if the user has rented the book and it’s ongoing
+                $hasRentedOngoing = false;
+                if ($userId) {
+                    $stmt = $conn->prepare("SELECT * FROM rent WHERE Account_ID = ? AND Book_ID = ? AND Status = 'ongoing'");
+                    $stmt->bind_param("ii", $userId, $Book_ID);
+                    $stmt->execute();
+                    $rentalRecord = $stmt->get_result()->fetch_assoc();
+                    $stmt->close();
+
+                    $hasRentedOngoing = !empty($rentalRecord);
+                }
+
+                if ($hasRentedOngoing):
+                ?>
+                    <form method="post" action="../../../process/index/return_book.php" onsubmit="return confirm('Are you sure you want to return this book?');" style="margin-top: 10px;">
+                        <input type="hidden" name="book_id" value="<?= $Book_ID ?>">
+                        <input type="hidden" name="account_id" value="<?= $userId ?>">
+                        <button type="submit" class="btn btn-danger">🔙 Return Book</button>
+                    </form>
+                <?php endif; ?>
             </div>
       
         <p style="color: #888;">Please rent or reserve this book to start reading.</p>
@@ -200,6 +225,8 @@ if ($userId) {
             <input type="hidden" name="price" value="<?= $book['Price'] ?>">
             <button class="buy-btn" type="submit">💳 Buy for $<?= $book['Price'] ?></button>
         </form>
+
+
         <p style="color: #888;">Purchase required to read this book.</p>
     <?php endif; ?>
 <?php elseif (!$userId): ?>

@@ -4,7 +4,7 @@ require_once('../../../backend/config/config.php');
 include '../../../reusable/header.php';
 
 // Define the ISBN and prepare the query
-$isbn = '978-1-23-456798-2';
+$isbn = '978-0-14-017739-8';
 $stmt = $conn->prepare("SELECT * FROM books WHERE ISBN = ?");
 $stmt->bind_param("s", $isbn);
 $stmt->execute();
@@ -21,18 +21,16 @@ $Book_ID = $book['Book_ID'];
 $Plan_type = $book['Plan_type'];
 $coverPath = "../../../Book/" . $Plan_type . "/Book_Cover/" . basename($book['Book_Cover']);
 $stock = $book['Stock'];
-// Get the user ID from the session if the user is logged in
-$userId = $_SESSION['user_id'] ?? null;  // Use null coalescing to handle an undefined session variable
 
-$stock = $book['Stock'];
-$returnDate = $_GET['return_date'] ?? null;
 
 
 // Get the user ID from the session if the user is logged in
 $userId = $_SESSION['user_id'] ?? null;  // Use null coalescing to handle an undefined session variable
 
+
 $stock = $book['Stock'];
 $returnDate = $_GET['return_date'] ?? null;
+
 
 // Get live vote count from the votes table
 $voteCountStmt = $conn->prepare("SELECT COUNT(*) AS vote_count FROM votes WHERE Book_ID = ?");
@@ -41,6 +39,7 @@ $voteCountStmt->execute();
 $voteResult = $voteCountStmt->get_result()->fetch_assoc();
 $voteCount = $voteResult['vote_count'] ?? 0;
 $voteCountStmt->close();
+
 // Get read count (number of rentals)
 $readCountStmt = $conn->prepare("SELECT COUNT(*) AS read_count FROM rent WHERE Book_ID = ?");
 $readCountStmt->bind_param("i", $Book_ID);
@@ -61,6 +60,7 @@ $readCountStmt->close();
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="../../../css/autogenerate/previewx.css">
+  <script src="../../../javascript/generatescript.js"></script>
   <style>
       .vote-btn {
         background: none;
@@ -299,32 +299,8 @@ if ($userId) {
 
 
 <script>
-  function openModal(modalId) {
-    var modal = new bootstrap.Modal(document.getElementById(modalId));
-    modal.show();
-  }
 
-  const voteButton = document.getElementById("voteBtn");
 
-    fetch('../../../process/index/submit_vote.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: `book_id=${bookId}&user_id=${userId}&vote_value=1`
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            const voteCountElement = document.getElementById("voteCount");
-            voteCountElement.textContent = data.new_vote_count;
-            voteButton.classList.add("voted");
-        } else {
-            alert(data.message);
-        }
-    })
-    .catch(error => {
-        console.error('Error voting:', error);
-        alert("Something went wrong. Try again.");
-    });
 
 </script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js"></script>

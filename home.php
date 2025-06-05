@@ -16,11 +16,12 @@ $userEmail = $_SESSION['user_email'] ?? 'Unknown';
 $userType = $_SESSION['user_type'] ?? 'Free';
 $userName = $_SESSION['fullname'] ?? 'User';
 
-// Get Plan Name and Avatar
+// Get Plan Name, Avatar, and Expiry Date
 $stmt = $conn->prepare("
-    SELECT p.Plan_Name, pr.Avatar
+    SELECT p.Plan_Name, pr.Avatar, up.Expiration_Date
     FROM accountlist a
-    LEFT JOIN plans p ON a.Plan_ID = p.Plan_ID
+    LEFT JOIN user_plans up ON a.Account_ID = up.Account_ID
+    LEFT JOIN plans p ON up.User_Plan_ID = p.Plan_ID
     LEFT JOIN profiles pr ON a.Account_ID = pr.Account_ID
     WHERE a.Account_ID = ?
 ");
@@ -38,12 +39,34 @@ if ($stmt->errno) {
     die("Database query failed: " . htmlspecialchars($stmt->error));
 }
 
-$stmt->bind_result($userType, $avatar);
+$stmt->bind_result($userType, $avatar, $expirationDate);
 $stmt->fetch();
 $stmt->close();
 
 $_SESSION['user_type'] = $userType ?? 'Free';
 $avatar = $avatar ?: 'image/profile/defaultprofile.jpg';
+// Echo the Expiry Date (for debugging purposes)
+
+
+// Check if the Premium plan has expired
+$isPremiumExpired = false;
+if (strcasecmp($userType, 'Premium') === 0) {
+    // If Expiration_Date is NULL, it means the plan is ongoing (no expiration)
+    if ($expirationDate !== NULL) {
+        $currentDate = new DateTime(); // Current date
+        $expirationDateTime = new DateTime($expirationDate); // Expiry date from DB
+
+        // Compare the expiration date with the current date
+        if ($expirationDateTime < $currentDate) {
+            $isPremiumExpired = true;
+            // Debugging log for the expired Premium plan
+            error_log("Premium plan expired for user: " . $accountId);
+        }
+    } else {
+        $isPremiumExpired = false; // No expiration date, active plan
+    }
+}
+
 
 // --------------------------------------------------------------------------
 // BOOK FETCH FUNCTIONS
@@ -105,6 +128,20 @@ $premiumBooks = getBooksByPlanType($conn, 'Premium');
 $paidBooks = getBooksByPlanType($conn, 'Paid');
 $bestSellerPaidBooks = getBestSellersPaid($conn);
 
+
+
+if (isset($_GET['success']) && $_GET['success'] === 'plan_renewed') {
+    echo "<div class='alert alert-success'>Your Premium plan has been renewed successfully for 1 month!</div>";
+}
+
+if (isset($_GET['error']) && $_GET['error'] === 'payment_failed') {
+    echo "<div class='alert alert-danger'>Payment failed. Please try again.</div>";
+}
+
+if (isset($_GET['error']) && $_GET['error'] === 'invalid_payment_details') {
+    echo "<div class='alert alert-warning'>Invalid payment details. Please check your information.</div>";
+}
+
 ?>
 
 
@@ -118,12 +155,106 @@ $bestSellerPaidBooks = getBestSellersPaid($conn);
   <link rel="stylesheet" href="css/index/homeX.css">
   <script src="javascript/home.js"></script>
   <title>Haven Library - User Dashboard</title>
-  
+  <style>
+              /* General Modal Styling */
+              .modal {
+                  display: none; /* Hidden by default */
+                  position: fixed; /* Fixed position on the screen */
+                  top: 0;
+                  left: 0;
+                  width: 100%;
+                  height: 100%;
+                  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+                  z-index: 9999; /* Make sure it's on top of other content */
+                  align-items: center;
+                  justify-content: center;
+              }
+
+              /* Modal Content Styling */
+              .modal-content {
+                  background-color: #fff;
+                  padding: 30px;
+                  border-radius: 8px;
+                  max-width: 500px;
+                  width: 90%; /* Responsive width */
+                  text-align: center;
+              }
+
+              /* Buttons Styling */
+              .btn {
+                  padding: 10px 20px;
+                  margin-top: 10px;
+                  cursor: pointer;
+                  border: none;
+                  border-radius: 5px;
+                  transition: background-color 0.3s ease;
+              }
+
+              .btn-primary {
+                  background-color: #007bff;
+                  color: white;
+              }
+
+              .btn-primary:hover {
+                  background-color: #0056b3;
+              }
+
+              .btn-secondary {
+                  background-color: #6c757d;
+                  color: white;
+              }
+
+              .btn-secondary:hover {
+                  background-color: #343a40;
+              }
+
+              /* Optional: Close button styling */
+              .modal-content button {
+                  margin-top: 20px;
+              }
+</style>
 </head>
 <body>
 
 
 <?php include('reusable/header.php'); ?>
+
+<!-- Modal for Expired Premium Plan -->
+<div id="premiumExpiredModal" class="modal">
+    <div class="modal-content">
+        <h3>Your Premium Plan Has Expired</h3>
+        <p>Expiration Date: <span id="expirationDate"></span></p>
+        <p>Your Premium plan has expired. Please renew your plan to continue enjoying the benefits.</p>
+
+        <!-- Renew Button (Triggers Payment Form) -->
+        <button id="renewBtn" class="btn btn-primary">Renew Plan</button>
+
+        <!-- Close Button (Cancel Subscription) -->
+        <button id="closeBtn" class="btn btn-secondary">Close</button>
+    </div>
+</div>
+<!-- Modal for Payment -->
+<div id="paymentModal" class="modal">
+    <div class="modal-content">
+        <h3>Enter Payment Details</h3>
+        <form id="paymentForm" action="processPayment.php" method="POST">
+            <label for="cardNumber">Card Number</label>
+            <input type="text" id="cardNumber" name="cardNumber" placeholder="Enter card number" required />
+
+            <label for="expiryDate">Expiry Date</label>
+            <input type="text" id="expiryDate" name="expiryDate" placeholder="MM/YY" required />
+
+            <label for="cvv">CVV</label>
+            <input type="text" id="cvv" name="cvv" placeholder="Enter CVV" required />
+
+            <button type="submit" class="btn btn-success">Submit Payment</button>
+        </form>
+
+        <!-- Cancel button to go back to the expired plan modal -->
+        <button id="paymentCancelBtn" class="btn btn-secondary">Cancel</button>
+    </div>
+</div>
+
 
 
 <section class="best-seller-section">
@@ -546,7 +677,78 @@ $bestSellerPaidBooks = getBestSellersPaid($conn);
 </footer>
 
 
+<script>
 
+
+// Show the modal when the Premium plan has expired
+window.addEventListener("load", function() {
+    // If the Premium plan is expired, show the renewal modal
+    <?php if ($isPremiumExpired): ?>
+        document.getElementById("premiumExpiredModal").style.display = "flex";
+        // Set expiration date in the modal (you can also use PHP for this)
+        document.getElementById("expirationDate").innerText = "<?php echo htmlspecialchars($expirationDate); ?>";
+    <?php endif; ?>
+
+    // Event listener for renewing the plan
+    document.getElementById("renewBtn").addEventListener("click", function() {
+        document.getElementById("premiumExpiredModal").style.display = "none"; // Close the expired modal
+        document.getElementById("paymentModal").style.display = "flex"; // Show the payment modal
+    });
+
+    // Event listener for the "Close" button in the expired plan modal
+    document.getElementById("closeBtn").addEventListener("click", function() {
+        // Show confirmation alert
+        let confirmClose = confirm("Your subscription will be canceled and demoted to the Free plan. Do you want to proceed?");
+        
+        if (confirmClose) {
+            // If the user confirms, update the plan to Free
+            cancelSubscription();
+            // Hide the modal
+            document.getElementById("premiumExpiredModal").style.display = "none";
+        }
+    });
+
+    // Event listener for the "Cancel" button in the payment modal
+    document.getElementById("paymentCancelBtn").addEventListener("click", function() {
+        // Close the payment modal and show the expired plan modal again
+        document.getElementById("paymentModal").style.display = "none";
+        document.getElementById("premiumExpiredModal").style.display = "flex"; // Show the expired plan modal
+    });
+});
+
+// Function to cancel subscription (demote to Free plan)
+function cancelSubscription() {
+    // Make an AJAX request to update the user's plan to Free (send a request to PHP backend)
+    fetch('process/index/cancelsubscription.php', {
+        method: 'POST',
+        body: JSON.stringify({ action: 'cancel' }),
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Your subscription has been canceled and your plan is now Free.');
+        } else {
+            // If there's an error, show it in an alert
+            alert('Error: ' + (data.error || 'An unexpected error occurred.'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error occurred. Please try again later.');
+    });
+}
+
+// Close modals when the user clicks cancel or outside the modal
+function closeModal() {
+    document.getElementById("premiumExpiredModal").style.display = "none";
+    document.getElementById("paymentModal").style.display = "none";
+}
+
+
+</script>
 
 </body>
 </html>

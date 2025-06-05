@@ -1,5 +1,6 @@
 <?php
-require_once __DIR__ . '/../backend/config/config.php';
+require_once __DIR__ . '/../backend/config/config.php'; // Database connection
+
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
@@ -12,8 +13,24 @@ if (!isset($_SESSION['user_id'])) {
 // Fetch user details from the session
 $accountId = $_SESSION['user_id'];
 $userEmail = $_SESSION['user_email'] ?? 'Unknown';
-$userType = $_SESSION['user_type'] ?? 'Free'; // Plan name: Free, Premium, or VIP
-$userName = $_SESSION['fullname'] ?? 'User';
+$userType = $_SESSION['user_type'] ?? 'Free'; // Default to Free plan if user_type is not set
+
+// Fetch user's full name and Plan_Name from the database
+$stmt = $conn->prepare("
+    SELECT r.Fullname, p.Plan_Name
+    FROM register r
+    JOIN accountlist a ON r.Register_ID = a.Register_ID
+    JOIN plans p ON a.Plan_ID = p.Plan_ID
+    WHERE a.Account_ID = ?
+");
+$stmt->bind_param("i", $accountId);
+$stmt->execute();
+$stmt->bind_result($userName, $planName);
+$stmt->fetch();
+$stmt->close();
+
+// Set the user plan type from the result
+$userType = $planName ?? 'Free';  // If no plan is found, default to Free
 
 // Fetch avatar from the 'profiles' table
 $stmt = $conn->prepare("
@@ -38,7 +55,6 @@ if (!$avatar || empty($avatar)) {
 // Debugging: Output avatar path (optional, remove in production)
 error_log("Avatar Path: " . $avatar);
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -257,7 +273,7 @@ error_log("Avatar Path: " . $avatar);
 
     <div class="right-section">
         <button class="premium-btn">⚡ Upgrade Plan</button>
-
+        <span class="user-type"><?php echo htmlspecialchars($userType); ?> Plan</span>
         <div class="profile dropdown">
             <div class="user-info">
                 <!-- Display User Avatar -->
@@ -268,8 +284,7 @@ error_log("Avatar Path: " . $avatar);
                 <a href="backend/logout.php">Logout</a>
             </div>
         </div>
-
-        <span class="user-type"><?php echo htmlspecialchars($userType); ?></span>
+        <span class="user-type"><?php echo htmlspecialchars($userName); ?></span>
     </div>
   </header>
 </body>
