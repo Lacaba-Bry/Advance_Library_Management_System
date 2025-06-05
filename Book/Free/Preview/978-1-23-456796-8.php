@@ -4,7 +4,7 @@ require_once('../../../backend/config/config.php');
 include '../../../reusable/header.php';
 
 // Define the ISBN and prepare the query
-$isbn = '978-971-542-231-4';
+$isbn = '978-1-23-456796-8';
 $stmt = $conn->prepare("SELECT * FROM books WHERE ISBN = ?");
 $stmt->bind_param("s", $isbn);
 $stmt->execute();
@@ -21,7 +21,6 @@ $Book_ID = $book['Book_ID'];
 $Plan_type = $book['Plan_type'];
 $coverPath = "../../../Book/" . $Plan_type . "/Book_Cover/" . basename($book['Book_Cover']);
 $stock = $book['Stock'];
-
 
 
 // Get the user ID from the session if the user is logged in
@@ -241,8 +240,6 @@ $purchasedStmt->close();
     <?php endif; ?>
 </div>
 </div>
-
-
 
 <div id="rentModal" class="modal fade" tabindex="-1" aria-labelledby="rentModalLabel" aria-hidden="true">
   <div class="modal-dialog">

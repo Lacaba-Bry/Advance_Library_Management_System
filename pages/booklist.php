@@ -215,7 +215,7 @@ foreach ($books as $book) {
     echo '<td>
               <div class="action-buttons">
                   <a href="' . htmlspecialchars($previewPath) . '" class="btn btn-info btn-sm">View</a>  <!-- View button links to preview page -->
-                  <button class="btn btn-warning btn-sm" onclick="updateBook(\'' . $book['Book_ID'] . '\')">Update</button>
+                  <button class="btn btn-warning btn-sm" onclick="updateBook(\'' . $book['Book_ID'] . '\')">Restock</button>
                   <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteConfirmationModal" data-book-id="' . $book['Book_ID'] . '">Delete</button>
               </div>
           </td>';

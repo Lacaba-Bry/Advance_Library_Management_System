@@ -15,19 +15,29 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['book_id'])) {
         exit;
     }
 
-// Check if the book is currently rented (in a rental transaction)
-$checkRentQuery = "SELECT COUNT(*) FROM rent WHERE Book_ID = ? AND Status = 'Ongoing'"; // 'Status' column and 'Ongoing' value
-$stmt = $conn->prepare($checkRentQuery);
-$stmt->bind_param("i", $bookId);
-$stmt->execute();
-$stmt->bind_result($rentedCount);
-$stmt->fetch();
-$stmt->close();
+    // Check if the book is currently rented (in a rental transaction)
+    $checkRentQuery = "SELECT COUNT(*) FROM rent WHERE Book_ID = ? AND Status = 'Ongoing'"; // 'Status' column and 'Ongoing' value
+    $stmt = $conn->prepare($checkRentQuery);
+    $stmt->bind_param("i", $bookId);
+    $stmt->execute();
+    $stmt->bind_result($rentedCount);
+    $stmt->fetch();
+    $stmt->close();
 
-if ($rentedCount > 0) {
-    echo "This book is currently rented and cannot be deleted.";
-    exit;
-}
+    // Check if the book is purchased in transaction_book table
+    $checkPurchaseQuery = "SELECT COUNT(*) FROM transaction_book WHERE book_id = ?";
+    $stmt = $conn->prepare($checkPurchaseQuery);
+    $stmt->bind_param("i", $bookId);
+    $stmt->execute();
+    $stmt->bind_result($purchaseCount);
+    $stmt->fetch();
+    $stmt->close();
+
+    // Prevent deletion if the book is rented or purchased
+    if ($rentedCount > 0 || $purchaseCount > 0) {
+        echo "This book is either rented or purchased and cannot be deleted.";
+        exit;
+    }
 
     // Fetch book details BEFORE deleting (for file paths)
     $sql = "SELECT Book_Cover, Plan_type, File_Path, ISBN FROM books WHERE Book_ID = ?";  // Removed Story from select

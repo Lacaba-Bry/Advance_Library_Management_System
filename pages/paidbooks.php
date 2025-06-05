@@ -1,3 +1,49 @@
+<?php
+require_once(__DIR__ . '/../backend/config/config.php');
+
+// Fetch data from the transaction_book table
+$query = "SELECT tb.paidbook_id, tb.user_id, tb.book_id, tb.purchase_date, tb.price, 
+                 p.Fullname, p.avatar, b.Title, b.Author 
+          FROM transaction_book tb
+          JOIN profiles p ON tb.user_id = p.Account_ID
+          JOIN books b ON tb.book_id = b.Book_ID";
+
+$stmt = $conn->prepare($query);
+$stmt->execute();
+$result = $stmt->get_result();
+
+// Calculate Total Paid Books and Total Earnings
+$total_transactions_query = "SELECT COUNT(*) AS total_paid_books, SUM(price) AS total_earnings FROM transaction_book";
+$total_stmt = $conn->prepare($total_transactions_query);
+$total_stmt->execute();
+$total_result = $total_stmt->get_result()->fetch_assoc();
+
+// Assign values to variables
+$total_paid_books = $total_result['total_paid_books'] ?? 0;
+$total_earnings = $total_result['total_earnings'] ?? 0;
+
+// Fetch avatar from the 'profiles' table
+$stmt = $conn->prepare("
+    SELECT pr.Avatar
+    FROM profiles pr
+    WHERE pr.Account_ID = ?
+");
+$stmt->bind_param("i", $accountId);
+$stmt->execute();
+$stmt->bind_result($avatar); // Retrieve avatar
+$stmt->fetch();
+$stmt->close();
+
+// Check if avatar is set; if not, use default avatar
+if (!$avatar || empty($avatar)) {
+    $avatar = 'image/profile/defaultprofile.jpg'; // Default image if avatar is not set
+} else {
+    // Ensure the avatar path is correct and safe
+    $avatar = "image/profile/" . $avatar; // Adjust path to match your file structure
+}
+
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -125,6 +171,37 @@
             font-size: 13px;
         }
     }
+    
+   .summary-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 20px;
+  margin-top: 10px;
+}
+
+.summary-cards .card {
+  flex: 1 1 150px;
+  background: var(--card-bg);
+  border: 1px solid var(--border-clr);
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+  text-align: center;
+}
+
+.summary-cards .card h3 {
+  font-size: 14px;
+  color: var(--muted-clr);
+  margin-bottom: 8px;
+}
+
+.summary-cards .card p {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-clr);
+  margin: 0;
+}
   </style>
 </head>
 <body>
@@ -141,56 +218,56 @@
     </div>
   </header>
 
+<div class="summary-cards">
+      <div class="card">
+        <h3>Total Paid Books</h3>
+        <p><?php echo $total_paid_books; ?></p> <!-- Display dynamic total paid books -->
+      </div>
+      <div class="card">
+        <h3>Total Earnings</h3>
+        <p>$<?php echo number_format($total_earnings, 2); ?></p> <!-- Display dynamic total earnings -->
+      </div>
+    </div>
+
   <div class="header-row">
     <h1>Paid Books</h1>
-    <div class="right-controls">
-      <div class="search-bar">
-        <input type="text" placeholder="Search by Title or Author...">
-      </div>
-      <button class="add-button">Add New Book</button>
-    </div>
   </div>
 
   <div class="table-container">
     <table>
       <thead>
         <tr>
-          <th>#</th>
+          <th>No.</th>
+          <th>Profile</th>
+          <th>Name</th>
           <th>Title</th>
           <th>Author</th>
-          <th>Genre</th>
           <th>Price</th>
-          <th>Availability</th>
+          <th>Purchase Date</th>
         </tr>
       </thead>
       <tbody>
-        <tr>
-          <td>1</td>
-          <td>The Lost Forest</td>
-          <td>Jane Ellis</td>
-          <td>Mystery</td>
-          <td>$4.99</td>
-          <td><span class="badge available">Available</span></td>
-        </tr>
-        <tr>
-          <td>2</td>
-          <td>AI & The Future</td>
-          <td>David Lim</td>
-          <td>Non-Fiction</td>
-          <td>$7.50</td>
-          <td><span class="badge unavailable">Unavailable</span></td>
-        </tr>
-        <tr>
-          <td>3</td>
-          <td>Moonlight Romance</td>
-          <td>Eva Torres</td>
-          <td>Romance</td>
-          <td>$3.99</td>
-          <td><span class="badge available">Available</span></td>
-        </tr>
+        <?php while ($row = $result->fetch_assoc()) : ?>
+          <tr>
+            <td><?= $row['paidbook_id'] ?></td>
+            <td>
+              <img src="<?php echo htmlspecialchars($avatar); ?>" alt="User Avatar" class="profile-avatar"  style="width: 30px; height: 30px; border-radius: 50%; margin-right: 5px;">
+            </td>
+            <td><?= htmlspecialchars($row['Fullname']) ?></td>
+            <td><?= htmlspecialchars($row['Title']) ?></td>
+            <td><?= htmlspecialchars($row['Author']) ?></td>
+            <td>$<?= number_format($row['price'], 2) ?></td>
+            <td><?= date('F j, Y', strtotime($row['purchase_date'])) ?></td>
+          </tr>
+        <?php endwhile; ?>
       </tbody>
     </table>
   </div>
 </main>
 </body>
 </html>
+
+<?php
+// Close the connection after all queries
+$conn->close();
+?>

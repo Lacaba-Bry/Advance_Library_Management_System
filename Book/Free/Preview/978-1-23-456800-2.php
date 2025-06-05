@@ -4,7 +4,7 @@ require_once('../../../backend/config/config.php');
 include '../../../reusable/header.php';
 
 // Define the ISBN and prepare the query
-$isbn = '978-1-23-456790-6';
+$isbn = '978-1-23-456800-2';
 $stmt = $conn->prepare("SELECT * FROM books WHERE ISBN = ?");
 $stmt->bind_param("s", $isbn);
 $stmt->execute();
@@ -142,7 +142,7 @@ $purchasedStmt->close();
                   <?php if ($stock > 0): ?>
                   <button class="btn rent-btn" type="button" onclick="openModal('rentModal')">Rent</button>
                   <?php else: ?>
-                    <p style="color: #888;">This book is out of stock. You can only reserve it.</p>
+                    <p style="color: #888;">This book is out of stock.<br>You can only reserve it.</p>
                   <?php endif; ?>
                 </form>
                <?php if ($stock === 0): ?>
@@ -159,10 +159,11 @@ $purchasedStmt->close();
                   </form>
               <?php endif; ?>
                 <!-- Add to Cart Button (Always available) -->
-                <form method="post" action="reserve_rent_book.php">
-                    <input type="hidden" name="isbn" value="<?= $isbn ?>">
-                    <button class="btn add-btn" type="submit">Add to Cart</button>
-                </form>
+             <form method="POST" action="../../../process/Book/add_cart.php" id="addToCartForm">
+              <input type="hidden" name="book_id" value="<?= $book['Book_ID'] ?>">
+              <button type="submit" class="btn add-btn">Add to Cart</button>
+            </form>
+
             </div>
       
         <p style="color: #888;">Please rent or reserve this book to start reading.</p>
@@ -340,6 +341,33 @@ document.getElementById('paymentForm').addEventListener('submit', function (even
     paymentModal.hide(); // Hide the payment modal
 });
 
+
+
+document.getElementById('addToCartForm').addEventListener('submit', function(event) {
+    event.preventDefault(); // Prevent form submission
+
+    const formData = new FormData(this);
+
+    // Send the request to add the book to the cart
+    fetch('../../../process/Book/add_cart.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Show success message and keep the user on the same page
+            alert(data.message);
+        } else {
+            // Show the message if the book is already in the cart
+            alert(data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred. Please try again later.');
+    });
+});
 </script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js"></script>
 
