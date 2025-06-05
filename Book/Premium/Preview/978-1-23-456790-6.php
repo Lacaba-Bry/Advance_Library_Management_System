@@ -324,6 +324,40 @@ if ($userId) {
   </div>
 </div>
 
+<!-- Payment Modal -->
+<div id="paymentModal" class="modal fade" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="paymentModalLabel">Payment</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="paymentForm" method="POST" action="../../../process/Book/paybook.php">
+          <input type="hidden" name="isbn" value="<?= $isbn ?>">
+          <input type="hidden" name="price" value="<?= $book['Price'] ?>">
+          <div class="form-group">
+            <label for="cardNumber">Card Number</label>
+            <input type="text" id="cardNumber" name="cardNumber" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label for="expiryDate">Expiry Date (MM/YY)</label>
+            <input type="text" id="expiryDate" name="expiryDate" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label for="cvv">CVV</label>
+            <input type="text" id="cvv" name="cvv" class="form-control" required>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-primary">Confirm Payment</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 <script>
 function submitVote(bookId, userId) {
@@ -354,6 +388,36 @@ function submitVote(bookId, userId) {
         alert("Something went wrong. Try again.");
     });
 }
+
+// JavaScript to handle the form submission
+document.getElementById('paymentForm').addEventListener('submit', function (event) {
+    event.preventDefault();
+
+    const formData = new FormData(this);
+    const paymentModal = new bootstrap.Modal(document.getElementById('paymentModal'));
+
+    fetch('../../../process/Book/paybook.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            window.location.href = 'book_page.php'; // Redirect to the book page or library
+        } else {
+            alert(data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred. Please try again later.');
+    });
+
+    paymentModal.hide(); // Hide the payment modal
+});
+
+
 </script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js"></script>
 

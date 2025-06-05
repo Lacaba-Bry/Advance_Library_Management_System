@@ -122,7 +122,6 @@ if (!\$book) {
 \$stock = \$book['Stock'];
 
 
-
 // Get the user ID from the session if the user is logged in
 \$userId = \$_SESSION['user_id'] ?? null;  // Use null coalescing to handle an undefined session variable
 
@@ -139,15 +138,25 @@ if (!\$book) {
 \$voteCount = \$voteResult['vote_count'] ?? 0;
 \$voteCountStmt->close();
 
-// Get read count (number of rentals)
-\$readCountStmt = \$conn->prepare("SELECT COUNT(*) AS read_count FROM rent WHERE Book_ID = ?");
-\$readCountStmt->bind_param("i", \$Book_ID);
+// Get read count (number of rentals and purchases)
+\$readCountStmt = \$conn->prepare("
+    SELECT COUNT(*) AS read_count 
+    FROM (
+        -- Count rentals
+        SELECT 1 FROM rent WHERE Book_ID = ? AND Account_ID = ? AND Status = 'ongoing' AND Return_Date > NOW()
+
+        UNION ALL
+
+        -- Count purchases
+        SELECT 1 FROM transaction_book WHERE book_id = ? AND user_id = ?
+    ) AS combined_read
+");
+
+\$readCountStmt->bind_param("iiii", \$Book_ID, \$userId, \$Book_ID, \$userId);
 \$readCountStmt->execute();
 \$readResult = \$readCountStmt->get_result()->fetch_assoc();
 \$readCount = \$readResult['read_count'] ?? 0;
 \$readCountStmt->close();
-
-
 
 ?>
 
@@ -200,15 +209,29 @@ if (\$userId) {
     \$canRead = \$checkStmt->num_rows > 0;
     \$checkStmt->close();
     \$hasChecked = true;
+
+    
+// Check if the user has already purchased the book (permanent access)
+\$purchasedStmt = \$conn->prepare("SELECT * FROM transaction_book WHERE user_id = ? AND book_id = ?");
+\$purchasedStmt->bind_param("ii", \$userId, \$Book_ID);
+\$purchasedStmt->execute();
+\$purchasedResult = \$purchasedStmt->get_result();
+
+// If the user has purchased the book, enable the "Start Reading" button
+\$canRead = \$purchasedResult->num_rows > 0;
+\$purchasedStmt->close();
+
+
 }
 ?>
 
 <button 
     class="start-btn" 
     onclick="location.href='../../../Book/<?= \$book['Plan_type'] ?>/Story/<?= \$isbn ?>_story.php'" 
-    <?php echo (\$canRead || !\$hasChecked) ? '' : 'disabled style="opacity: 0.5; cursor: not-allowed;"'; ?>>
+    <?php echo (\$canRead) ? '' : 'disabled style="opacity: 0.5; cursor: not-allowed;"'; ?>>
     ▶ Start Reading
 </button>
+
 
 <?php if (!\$canRead && \$hasChecked): ?>
     <?php if (\$book['Plan_type'] === 'Free' || \$book['Plan_type'] === 'Premium'): ?>
@@ -221,57 +244,6 @@ if (\$userId) {
                     <p style="color: #888;">This book is out of stock. You can only reserve it.</p>
                   <?php endif; ?>
                 </form>
-
-               <?php if (\$userId): ?>
-                  <?php
-                      // Query to fetch the rental details for the logged-in user
-                      \$stmt = \$conn->prepare("SELECT Rent_Date, Return_Date FROM rent WHERE Account_ID = ? AND Book_ID = ? AND Status = 'ongoing'");
-                      \$stmt->bind_param("ii", \$userId, \$book['Book_ID']);
-                      \$stmt->execute();
-                      \$rental = \$stmt->get_result()->fetch_assoc();
-                      \$stmt->close();
-                      
-                      // Check if the user has rented the book and has a return date
-                      if (\$rental && \$rental['Return_Date']) {
-                          \$returnDate = \$rental['Return_Date']; // Get the return date from the database
-                      }
-                  ?>
-
-                  <!-- Display Countdown Timer if the user has rented the book -->
-                      <?php if (\$returnDate): ?>
-                          <p>Countdown Days: <span id="countdown-timer"></span></p>
-
-                          <script>
-                              // JavaScript function to update the countdown
-                              function updateCountdown() {
-                                  const returnDate = new Date("<?php echo \$returnDate; ?> 23:59:59"); // Set return date from PHP
-                                  const currentDate = new Date();
-                                  const timeDifference = returnDate - currentDate;
-
-                                  if (timeDifference <= 0) {
-                                      document.getElementById("countdown-timer").innerHTML = "Your rental has expired!";
-                                      return;
-                                  }
-
-                                  // Calculate remaining time
-                                  const days = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
-                                  const hours = Math.floor((timeDifference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                                  const minutes = Math.floor((timeDifference % (1000 * 60 * 60)) / (1000 * 60));
-                                  const seconds = Math.floor((timeDifference % (1000 * 60)) / 1000);
-
-                                  // Display the countdown timer
-                                  document.getElementById("countdown-timer").innerHTML = `\${days}d \${hours}h \${minutes}m \${seconds}s`;
-                              }
-
-                              // Update the countdown every second
-                              setInterval(updateCountdown, 1000);
-                              updateCountdown(); // Call once to display immediately
-                          </script>
-                      <?php endif; ?>
-              <?php endif; ?>
-
-
-
                <?php if (\$stock === 0): ?>
                   <!-- Reserve Button (Enabled when stock is 0) -->
                   <form method="post" action="reserve_rent_book.php">
@@ -294,10 +266,12 @@ if (\$userId) {
       
         <p style="color: #888;">Please rent or reserve this book to start reading.</p>
     <?php elseif (\$book['Plan_type'] === 'Paid'): ?>
-        <form method="post" action="../../../payment/process_payment.php">
+        <form method="post" action="../../../process/Book/paybook.php">
             <input type="hidden" name="isbn" value="<?= \$isbn ?>">
             <input type="hidden" name="price" value="<?= \$book['Price'] ?>">
-            <button class="buy-btn" type="submit">💳 Buy for $<?= \$book['Price'] ?></button>
+            <button class="buy-btn" type="button" data-bs-toggle="modal" data-bs-target="#paymentModal">
+        💳 Buy for $<?= \$book['Price'] ?>
+    </button>
         </form>
         <p style="color: #888;">Purchase required to read this book.</p>
     <?php endif; ?>
@@ -305,9 +279,8 @@ if (\$userId) {
     <p style="color: #888;">Please log in to continue.</p>
 <?php endif; ?>
 </div>
-
-    </div>
-  </div>
+</div>
+</div>
 
   <div class="book-content">
     <h3>Story Snippet</h3>
@@ -367,8 +340,6 @@ if (\$userId) {
 </div>
 </div>
 
-
-
 <div id="rentModal" class="modal fade" tabindex="-1" aria-labelledby="rentModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -397,9 +368,76 @@ if (\$userId) {
 </div>
 
 
+<!-- Payment Modal -->
+<div id="paymentModal" class="modal fade" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="paymentModalLabel">Payment</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="paymentForm" method="POST" action="../../../process/Book/paybook.php">
+          <input type="hidden" name="isbn" value="<?= \$isbn ?>">
+          <input type="hidden" name="price" value="<?= \$book['Price'] ?>">
+
+          <div class="form-group">
+            <label for="cardNumber">Card Number</label>
+            <input type="text" id="cardNumber" name="cardNumber" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label for="expiryDate">Expiry Date (MM/YY)</label>
+            <input type="text" id="expiryDate" name="expiryDate" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label for="cvv">CVV</label>
+            <input type="text" id="cvv" name="cvv" class="form-control" required>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-primary">Confirm Payment</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 <script>
 
 
+document.getElementById('paymentForm').addEventListener('submit', function (event) {
+    event.preventDefault();
+
+    const formData = new FormData(this);
+    const paymentModal = new bootstrap.Modal(document.getElementById('paymentModal'));
+
+    console.log("Form data being sent to server:", formData);  // Log data to debug
+
+    fetch('../../../process/Book/paybook.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);  // Display success message
+            
+            // Reload the page to show the updated state after payment
+            window.location.reload(); // This will reload the current page
+        } else {
+            console.error('Payment failed:', data);  // Log error response
+            alert(data.message);  // Display error message
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred. Please try again later.');  // Show generic error message
+    });
+
+    paymentModal.hide(); // Hide the payment modal
+});
 
 </script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js"></script>
@@ -411,6 +449,7 @@ if (\$userId) {
 // Close the connection after all queries
 \$conn->close();
 ?>
+
 PHP;
 
 
