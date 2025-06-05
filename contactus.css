@@ -227,6 +227,7 @@
   align-items: center;
   justify-content: center;
   color: white;
+  border-radius: 5px;
 }
 
 .contact_us_8 .workik-contact-bigbox {
@@ -427,6 +428,7 @@
   margin-bottom: 20px;
 }
 
+/* Modal */
 .modal {
   position: fixed;
   top: 0;
@@ -437,15 +439,16 @@
   align-items: center;
   justify-content: center;
   z-index: 9999;
-  /* Removed background */
-  background-color: transparent; /* or remove this line entirely */
+  background-color: rgba(0, 0, 0, 0.5); /* Add a dark background overlay */
 }
 
 .modal-content {
-  /* No background color, border radius, or shadow */
-  width: 100%;
-  max-width: none;
-  position: relative;
+  background-color: #fff; /* Ensure the content has a background */
+  width: 80%;
+  max-width: 600px;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 .close-btn {
