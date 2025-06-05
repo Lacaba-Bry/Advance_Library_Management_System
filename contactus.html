@@ -7,75 +7,89 @@
   <link rel="stylesheet" href="contactus.css" />
 </head>
 <body>
-  <main>
-    <div class="contact_us_8">
-        <div class="responsive-container-block container">
-            <form class="form-box">
+    <div id="contactModal" class="modal hidden">
+        <div class="modal-content">
+                <main>
+                    <div class="contact_us_8">
+                        <div class="responsive-container-block container">
+                            <form class="form-box">
+                                <div class="container-block form-wrapper">
+                                    <button onclick="closeModal()" class="close-btn">&times;</button>
+                                    <p class="text-blk getintouch-head">Get in Touch</p>
+                                    <div class="responsive-container-block">
+                                        <div class="responsive-cell-block wk-tab-12 wk-mobile-12 wk-desk-8 wk-ipadp-12" id="i10mt-9">
+                                            <input class="input" id="ijowk-9" name="FirstName" placeholder="First Name">
+                                        </div>
+                                        <div class="responsive-cell-block wk-tab-12 wk-mobile-12 wk-desk-8 wk-ipadp-12" id="ieakm">
+                                            <input class="input" id="indfi-7" name="Last Name" placeholder="Last Name">
+                                        </div>
+                                        <div class="responsive-cell-block wk-tab-12 wk-mobile-12 wk-desk-8 wk-ipadp-12" id="iajvf">
+                                            <input class="input" id="ipmgh-9" name="Email" placeholder="Email">
+                                        </div>
 
-                <div class="container-block form-wrapper">
-                    <p class="text-blk getintouch-head">Get in Touch</p>
-                    <div class="responsive-container-block">
-                        <div class="responsive-cell-block wk-tab-12 wk-mobile-12 wk-desk-8 wk-ipadp-12" id="i10mt-9">
-                            <input class="input" id="ijowk-9" name="FirstName" placeholder="First Name">
-                        </div>
-                        <div class="responsive-cell-block wk-tab-12 wk-mobile-12 wk-desk-8 wk-ipadp-12" id="ieakm">
-                            <input class="input" id="indfi-7" name="Last Name" placeholder="Last Name">
-                        </div>
-                        <div class="responsive-cell-block wk-tab-12 wk-mobile-12 wk-desk-8 wk-ipadp-12" id="iajvf">
-                            <input class="input" id="ipmgh-9" name="Email" placeholder="Email">
-                        </div>
+                                        <div class="responsive-cell-block wk-tab-12 wk-mobile-12 wk-desk-8 wk-ipadp-12" id="i0txn">
+                                            <input class="input" id="imgis-8" name="PhoneNumber" placeholder="Phone Number">
+                                        </div>
+                                        <div class="responsive-cell-block wk-tab-12 wk-mobile-12 wk-desk-8 wk-ipadp-12" id="i634i-9">
+                                            <textarea aria-placeholder="What’s on your mind?" class="textinput" id="i5vyy-9" placeholder="What’s on your mind?"></textarea>
+                                        </div>
+                                    </div>
 
-                        <div class="responsive-cell-block wk-tab-12 wk-mobile-12 wk-desk-8 wk-ipadp-12" id="i0txn">
-                            <input class="input" id="imgis-8" name="PhoneNumber" placeholder="Phone Number">
+                                    <div class="responsive-cell-block wk-tab-12 wk-mobile-12 wk-desk-8 wk-ipadp-12" id="i0txn-2">
+                                        <button class="submit-btn">Submit</button>
+                                    </div>
+
+                                    <div class="right-side-text">
+                                        <p class="text-blk contactus-head">Contact Us</p>
+                                        <p class="text-blk contactus-subhead">Your questions and feedback are welcome!</p>
+                                        <div class="workik-contact-box">
+                                            <div class="phone text-box">
+                                                <img class="contact-svg" src="https://workik-widget-assets.s3.amazonaws.com/widget-assets/images/ET21.jpg">
+                                                <p class="contact-text">09202756052</p>
+                                            </div>
+                                            <div class="address text-box">
+                                                <img class="contact-svg" src="https://workik-widget-assets.s3.amazonaws.com/widget-assets/images/ET22.jpg">
+                                                <p class="contact-text">havenlibrary@admin.com</p>
+                                            </div>
+                                            <div class="mail text-box">
+                                                <img class="contact-svg" src="https://workik-widget-assets.s3.amazonaws.com/widget-assets/images/ET23.jpg">
+                                                <p class="contact-text">Cavite State University, Imus, Cavite</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
                         </div>
-                        <div class="responsive-cell-block wk-tab-12 wk-mobile-12 wk-desk-8 wk-ipadp-12" id="i634i-9">
-                            <textarea aria-placeholder="What’s on your mind?" class="textinput" id="i5vyy-9" placeholder="What’s on your mind?"></textarea>
-                        </div>
-                    </div>
-
-                    <div class="responsive-cell-block wk-tab-12 wk-mobile-12 wk-desk-8 wk-ipadp-12" id="i0txn-2">
-                        <button class="submit-btn">Submit</button>
-                    </div>
-
-                    <div class="right-side-text">
-                        <p class="text-blk contactus-head">Contact Us</p>
-                        <p class="text-blk contactus-subhead">Your questions and feedback are welcome!</p>
-                        <div class="workik-contact-box">
-                            <div class="phone text-box">
-                                <img class="contact-svg" src="https://workik-widget-assets.s3.amazonaws.com/widget-assets/images/ET21.jpg">
-                                <p class="contact-text">09202756052</p>
-                            </div>
-                            <div class="address text-box">
-                                <img class="contact-svg" src="https://workik-widget-assets.s3.amazonaws.com/widget-assets/images/ET22.jpg">
-                                <p class="contact-text">havenlibrary@admin.com</p>
-                            </div>
-                            <div class="mail text-box">
-                                <img class="contact-svg" src="https://workik-widget-assets.s3.amazonaws.com/widget-assets/images/ET23.jpg">
-                                <p class="contact-text">Cavite State University, Imus, Cavite</p>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-
-            </form>
+                    </div>      
+                </main>
         </div>
-     </div>      
-  </main>
+    </div>
   <footer class="footer">
         <div class="footer-links">
             <a href="#">About Us</a>
             <a href="#">Privacy Policy</a>
             <a href="#">Terms of Service</a>
-            <a href="#">Contact Us</a>
+            <a href="#" onclick="openModal()">Contact Us</a>
         </div>
         <p class="footer-text">&copy; 2025 Haven Library. All rights reserved.</p>
     </footer>
 
   <script>
-    function toggleFavorite(button) {
-      button.classList.toggle('active');
+    function openModal() {
+    document.getElementById('contactModal').classList.remove('hidden');
     }
+
+    function closeModal() {
+        document.getElementById('contactModal').classList.add('hidden');
+    }
+
+  // Optional: click outside to close
+    window.addEventListener('click', function(event) {
+        const modal = document.getElementById('contactModal');
+        if (event.target === modal) {
+        closeModal();
+        }
+    });
   </script>
 
 </body>
