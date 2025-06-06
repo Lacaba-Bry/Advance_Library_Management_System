@@ -356,8 +356,6 @@ $result = $conn->query($query);
 </section>
 
 
-
-
 <!-- Top Free Section -->
 <section class="free-section">
   <h2>Top Free</h2>

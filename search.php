@@ -18,7 +18,7 @@ $searchTerm = isset($_GET['search']) ? $_GET['search'] : '';
 // Function to get books based on the search term
 function getBooks($conn, $searchTerm = '') {
     $books = [];
-    $sql = "SELECT Book_ID, Title, Author, Book_Cover, Genre, Price, Plan_type, Stock FROM books";
+    $sql = "SELECT Book_ID, Title, Author, Book_Cover, Genre, Price, Plan_type, Stock, ISBN FROM books";
     if ($searchTerm) {
         $sql .= " WHERE Title LIKE ? OR Author LIKE ?";
     }
@@ -59,6 +59,110 @@ function isBookFavorited($conn, $account_id, $book_id) {
     }
     return $count > 0;
 }
+
+function getBooksByPlanType($conn, $planType) {
+    $books = [];
+    $sql = "SELECT Book_ID, Title, Author, Book_Cover, Genre, Price, Plan_type, ISBN FROM books WHERE Plan_type = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("s", $planType);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    while ($row = $result->fetch_assoc()) {
+        $books[] = $row;
+    }
+
+    return $books;
+}
+function fetchFilteredBooks($conn, $filters) {
+    $params = [];
+    $types = "";
+    $conditions = [];
+
+    $baseQuery = "SELECT b.* FROM books b";
+
+    // JOINs for editor picks
+    switch ($filters['editor']) {
+        case 'best-sales':
+            $baseQuery .= " JOIN transaction_plan t ON b.Book_ID = t.plan_id";
+            $conditions[] = "t.payment_status = 'completed' AND t.amount > 0";
+            $groupBy = " GROUP BY b.Book_ID ORDER BY COUNT(t.transaction_id) DESC";
+            break;
+        case 'most-commented':
+            $baseQuery .= " JOIN reviews r ON b.Book_ID = r.Book_ID";
+            $groupBy = " GROUP BY b.Book_ID ORDER BY COUNT(r.Review_ID) DESC";
+            break;
+        case 'watch-history':
+            $baseQuery .= " JOIN rent r ON b.Book_ID = r.Book_ID";
+            $groupBy = " GROUP BY b.Book_ID ORDER BY COUNT(r.Rent_ID) DESC";
+            break;
+        case 'best-books':
+            $baseQuery .= " JOIN votes v ON b.Book_ID = v.Book_ID";
+            $groupBy = " GROUP BY b.Book_ID ORDER BY SUM(v.Vote_Value) DESC";
+            break;
+        case 'newest-books':
+            $groupBy = " ORDER BY b.Book_ID DESC";
+            break;
+        default:
+            $groupBy = " ORDER BY b.Book_ID DESC";
+    }
+
+    if (!empty($filters['search'])) {
+        $conditions[] = "(b.Title LIKE ? OR b.Author LIKE ?)";
+        $params[] = '%' . $filters['search'] . '%';
+        $params[] = '%' . $filters['search'] . '%';
+        $types .= "ss";
+    }
+
+if (!empty($filters['price'])) {
+    // Ensure you're only fetching Paid books for the price filter
+    $conditions[] = "b.Plan_type = 'Paid'";
+
+    if ($filters['price'] == 'below-300') {
+        $conditions[] = "b.Price < 300";
+    } elseif ($filters['price'] == 'above-300') {
+        $conditions[] = "b.Price >= 300";
+    }
+}
+
+
+
+    if (!empty($filters['plan'])) {
+        $conditions[] = "b.Plan_type = ?";
+        $params[] = $filters['plan'];
+        $types .= "s";
+    }
+
+    if (!empty($conditions)) {
+        $baseQuery .= " WHERE " . implode(" AND ", $conditions);
+    }
+
+    $baseQuery .= $groupBy . " LIMIT 100"; // Optional limit
+
+    $stmt = $conn->prepare($baseQuery);
+    if ($types) {
+        $stmt->bind_param($types, ...$params);
+    }
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $books = $result->fetch_all(MYSQLI_ASSOC);
+    $stmt->close();
+
+    return $books;
+}
+
+// Fetch filters
+$filters = [
+    'search' => $_GET['search'] ?? '',
+    'editor' => $_GET['editor'] ?? '',
+    'price'  => $_GET['price-filter'] ?? '',
+    'plan'   => $_GET['plan-filter'] ?? '',
+];
+
+// Final book result
+$books = fetchFilteredBooks($conn, $filters);
+
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -66,60 +170,50 @@ function isBookFavorited($conn, $account_id, $book_id) {
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Book List</title>
-  <link rel="stylesheet" href="css/index/searchx.css"/>
+  <link rel="stylesheet" href="css/index/search.css"/>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
-    .book-card img {
-        width: 200px;
-        height: 200px;
-        object-fit: cover;
-    }
-    .no-cover {
-        width: 150px;
-        height: 200px;
-        background-color: #f0f0f0;
-        text-align: center;
-        line-height: 200px;
-        color: #888;
-        font-size: 14px;
-    }
   </style>
 </head>
 <body>
 
 <div class="main-layout">
   <div class="sidebar">
-    <div class="form-group">
-      <label for="editor-picks">🎯 Editor Picks</label>
-      <select id="editor-picks" name="editor-picks">
-        <option value="">Select</option>
-        <option value="best-sales">🔥 Best Sales (105)</option>
-        <option value="most-commented">💬 Most Commented (21)</option>
-        <option value="newest-books">🆕 Newest Books (32)</option>
-        <option value="featured">⭐ Featured (129)</option>
-        <option value="watch-history">👁️ Watch History (21)</option>
-        <option value="best-books">🏆 Best Books (44)</option>
-      </select>
-    </div>
+  <div class="form-group">
+  <label for="editor-picks">🎯 Editor Picks</label>
+  <form method="GET" id="filter-form">
+    <select id="editor-picks" name="editor" onchange="document.getElementById('filter-form').submit();">
+      <option value="">Select</option>
+      <option value="best-sales">🔥 Best Sales</option>
+      <option value="most-commented">💬 Most Commented</option>
+      <option value="newest-books">🆕 Newest Books</option>
+      <option value="watch-history">👁️ Watch History</option>
+      <option value="best-books">🏆 Best Books</option>
+    </select>
+  </form>
+</div>
 
-    <div class="filter-group">
-      <h3>🏢 Choose Paid Book</h3>
-      <select>
-        <option>All Price</option>
-        <option>-50 Below</option>
-        <option>P50 Above</option>
-      </select>
-    </div>
+<form method="GET" id="filter-form">
+<div class="filter-group">
+ <h3>🏢 Filter Paid Books by Price</h3>
+  <select name="price-filter" id="price-filter" onchange="this.form.submit()">
+    <option value="">All Price</option>
+   <option value="below-300" <?= $_GET['price-filter'] == 'below-300' ? 'selected' : '' ?>>P300 Below</option>
+<option value="above-300" <?= $_GET['price-filter'] == 'above-300' ? 'selected' : '' ?>>P300 Above</option>
 
-    <div class="filter-group">
-      <h3>📅 Select Plan</h3>
-      <select>
-        <option>All Plan</option>
-        <option>Free</option>
-        <option>Premium</option>
-      </select>
-    </div>
+  </select>
+</div>
+
+<div class="filter-group">
+  <h3>📅 Select Plan</h3>
+  <select name="plan-filter" id="plan-filter" onchange="this.form.submit()">
+    <option value="">All Plan</option>
+    <option value="Free" <?= $_GET['plan-filter'] == 'Free' ? 'selected' : '' ?>>Free</option>
+    <option value="Premium" <?= $_GET['plan-filter'] == 'Premium' ? 'selected' : '' ?>>Premium</option>
+  </select>
+</div>
+</form>
 
     <div class="filter-group">
       <h3>📚 Shop by Genre</h3>
@@ -142,13 +236,12 @@ function isBookFavorited($conn, $account_id, $book_id) {
 
     <div class="book-wrapper" id="book-wrapper">
       <?php
-      $cardsPerPage = 14; // 14 books per page
-      $totalBooks = count($books);
-      $totalPages = ceil($totalBooks / $cardsPerPage);
-      $currentPage = isset($_GET['page']) && is_numeric($_GET['page']) ? (int)$_GET['page'] : 1;
-      $currentPage = max(1, min($currentPage, $totalPages));
-      $startIndex = ($currentPage - 1) * $cardsPerPage;
-      $booksOnCurrentPage = array_slice($books, $startIndex, $cardsPerPage);
+          $cardsPerPage = 21;
+        $totalBooks = count($books);
+        $totalPages = ceil($totalBooks / $cardsPerPage);
+        $currentPage = max(1, min((int)($_GET['page'] ?? 1), $totalPages));
+        $startIndex = ($currentPage - 1) * $cardsPerPage;
+        $booksOnCurrentPage = array_slice($books, $startIndex, $cardsPerPage);
 
       foreach ($booksOnCurrentPage as $book):
           $planType = strtolower($book['Plan_type']);
@@ -163,15 +256,22 @@ function isBookFavorited($conn, $account_id, $book_id) {
           // Check if the book is favorited
           $isFavorited = isBookFavorited($conn, $accountId, $book['Book_ID']);
           $heartIcon = $isFavorited ? 'fa-heart' : 'fa-heart-o';
+
+
+      $isbn = $book['ISBN']; // use $book['ISBN'] for proper preview link
+      $planFolder = ucfirst(strtolower($book['Plan_type']));
+      $previewPath = "/BryanCodeX/Book/$planFolder/Preview/$isbn.php";
       ?>
 
       <div class="book-card">
+        <a href="<?= htmlspecialchars($previewPath) ?>" class="book-link">
           <div class="book-cover">
               <?php if (!empty($filename) && file_exists($serverPath)): ?>
                   <img src="<?= htmlspecialchars($imageUrl) ?>" alt="Book Cover" width="150">
               <?php else: ?>
                   <img src="/BryanCodeX/assets/images/placeholder.jpg" alt="Placeholder Cover" width="150">
               <?php endif; ?>
+              </a>
           </div>
           <div class="book-info">
               <h5><?= htmlspecialchars($book['Title']) ?></h5>
@@ -187,18 +287,24 @@ function isBookFavorited($conn, $account_id, $book_id) {
 
       <?php endforeach; ?>
 
-      <!-- Pagination -->
-      <div class="pagination">
-          <?php if ($totalPages > 1): ?>
-              <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-                  <button class="<?= $i == $currentPage ? 'active' : '' ?>" 
-                          <?= $i == $currentPage ? 'disabled' : '' ?> 
-                          onclick="window.location.href='?page=<?= $i ?>&search=<?= urlencode($searchTerm) ?>'">
-                      <?= $i ?>
-                  </button>
-              <?php endfor; ?>
-          <?php endif; ?>
-      </div>
+<!-- Pagination -->
+
+<div class="pagination">
+    <?php if ($totalPages > 1): ?>
+        <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+            <button class="<?= $i == $currentPage ? 'active' : '' ?>" 
+                    <?= $i == $currentPage ? 'disabled' : '' ?> 
+                    onclick="window.location.href='?page=<?= $i ?>
+                        &search=<?= urlencode($searchTerm) ?>
+                        &editor=<?= urlencode($editorPick) ?>
+                        &price-filter=<?= urlencode($priceFilter) ?>
+                        &plan-filter=<?= urlencode($planFilter) ?>'">
+                <?= $i ?>
+            </button>
+        <?php endfor; ?>
+    <?php endif; ?>
+</div>
+
 
     </div>
   </div>

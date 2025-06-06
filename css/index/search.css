@@ -338,3 +338,18 @@ body {
     width: calc(100% / 2 - 20px); /* 2 cards per row on phones */
   }
 }
+   .book-card img {
+        width: 200px;
+        height: 200px;
+        object-fit: cover;
+    }
+    .no-cover {
+        width: 150px;
+        height: 200px;
+        background-color: #f0f0f0;
+        text-align: center;
+        line-height: 200px;
+        color: #888;
+        font-size: 14px;
+    }
+ 
