@@ -142,6 +142,15 @@ if (isset($_GET['error']) && $_GET['error'] === 'invalid_payment_details') {
     echo "<div class='alert alert-warning'>Invalid payment details. Please check your information.</div>";
 }
 
+
+$query = "SELECT b.Book_ID, b.Title, b.Author, b.Book_Cover, b.Genre, b.Price, COUNT(r.Review_ID) AS ReviewCount
+          FROM books b
+          LEFT JOIN reviews r ON b.Book_ID = r.Book_ID
+          GROUP BY b.Book_ID
+          ORDER BY ReviewCount DESC
+          LIMIT 10"; // Adjust the limit as needed
+
+
 ?>
 
 
@@ -152,7 +161,7 @@ if (isset($_GET['error']) && $_GET['error'] === 'invalid_payment_details') {
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer" />
  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <link rel="stylesheet" href="css/index/homeX.css">
+  <link rel="stylesheet" href="css/index/home.css">
   <script src="javascript/home.js"></script>
   <title>Haven Library - User Dashboard</title>
   <style>
@@ -292,14 +301,62 @@ if (isset($_GET['error']) && $_GET['error'] === 'invalid_payment_details') {
     <button class="carousel-btn next-btn" onclick="moveBestSellerCarousel(1)">&#8250;</button>
   </div>
 </section>
+<?php
+// Fetch the book details along with the review count, Plan_type, and ISBN
+$query = "
+    SELECT 
+        b.Book_ID, 
+        b.Title, 
+        b.Author, 
+        b.Book_Cover, 
+        b.Genre, 
+        b.Price, 
+        COUNT(r.Review_ID) AS ReviewCount, 
+        b.Plan_type, 
+        b.ISBN
+    FROM books b
+    LEFT JOIN reviews r ON b.Book_ID = r.Book_ID
+    GROUP BY b.Book_ID
+    ORDER BY ReviewCount DESC 
+    LIMIT 10
+";
+
+$result = $conn->query($query);
+?>
 
 <section class="trending-section">
-  <h2>Trending Now</h2>
+    <h2>Trending Now</h2>
+    <div class="trending-items-container">
+        <?php 
+        // Check if the query returned any rows
+        if ($result && $result->num_rows > 0) { 
+            $rank = 1; // Initialize rank
+            while ($book = $result->fetch_assoc()): 
+                // Construct preview path for each book
+                $previewPath = "Book/" . ucfirst(strtolower($book['Plan_type'])) . "/Preview/" . $book['ISBN'] . ".php";
+        ?>
+                <div class="trending-item">
+                    <!-- Add ranking -->
+                    <div class="rank"><?= $rank ?></div>
+                    <a href="<?= htmlspecialchars($previewPath) ?>">
+                        <img src="<?= htmlspecialchars($book['Book_Cover']) ?>" alt="<?= htmlspecialchars($book['Title']) ?>">
+                    </a>
+                    <div class="trending-info">
+                        <!-- Plan Type and Reviews on the same line -->
+                        <span class="plan-type"><?= htmlspecialchars($book['Plan_type']) ?></span>
+                        <span class="reviews"><?= $book['ReviewCount'] ?> reviews</span>
+                    </div>
+                </div>
+        <?php 
+                $rank++; // Increment rank
+            endwhile; // End of while loop
+        } // Closing brace for if statement
+        ?>
+    </div>
 </section>
 
-<section class="continue-reading-section">
-  <h2>Continue Reading</h2>
-</section>
+
+
 
 <!-- Top Free Section -->
 <section class="free-section">

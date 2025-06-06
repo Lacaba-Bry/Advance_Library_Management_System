@@ -257,11 +257,11 @@ if (\$userId) {
                       <button class="btn reserve-btn" type="submit" disabled style="opacity: 0.5; cursor: not-allowed;">Reserve</button>
                   </form>
               <?php endif; ?>
-                <!-- Add to Cart Button (Always available) -->
-                <form method="post" action="reserve_rent_book.php">
-                    <input type="hidden" name="isbn" value="<?= \$isbn ?>">
-                    <button class="btn add-btn" type="submit">Add to Cart</button>
-                </form>
+                 <!-- Add to Cart Button (Always available) -->
+                  <form method="POST" action="../../../process/Book/add_cart.php" id="addToCartForm">
+                    <input type="hidden" name="book_id" value="<?= \$book['Book_ID'] ?>">
+                    <button type="submit" class="btn add-btn">Add to Cart</button>
+                  </form>
             </div>
       
         <p style="color: #888;">Please rent or reserve this book to start reading.</p>
@@ -439,6 +439,31 @@ document.getElementById('paymentForm').addEventListener('submit', function (even
     paymentModal.hide(); // Hide the payment modal
 });
 
+document.getElementById('addToCartForm').addEventListener('submit', function(event) {
+    event.preventDefault(); // Prevent form submission
+
+    const formData = new FormData(this);
+
+    // Send the request to add the book to the cart
+    fetch('../../../process/Book/add_cart.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Show success message and keep the user on the same page
+            alert(data.message);
+        } else {
+            // Show the message if the book is already in the cart
+            alert(data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred. Please try again later.');
+    });
+});
 </script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js"></script>
 

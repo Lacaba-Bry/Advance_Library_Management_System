@@ -4,7 +4,7 @@ require_once('../../../backend/config/config.php');
 include '../../../reusable/header.php';
 
 // Define the ISBN and prepare the query
-$isbn = '978-1-23-456800-2';
+$isbn = '978-1-23-456799-9';
 $stmt = $conn->prepare("SELECT * FROM books WHERE ISBN = ?");
 $stmt->bind_param("s", $isbn);
 $stmt->execute();
@@ -142,7 +142,7 @@ $purchasedStmt->close();
                   <?php if ($stock > 0): ?>
                   <button class="btn rent-btn" type="button" onclick="openModal('rentModal')">Rent</button>
                   <?php else: ?>
-                    <p style="color: #888;">This book is out of stock.<br>You can only reserve it.</p>
+                    <p style="color: #888;">This book is out of stock. You can only reserve it.</p>
                   <?php endif; ?>
                 </form>
                <?php if ($stock === 0): ?>
@@ -158,12 +158,11 @@ $purchasedStmt->close();
                       <button class="btn reserve-btn" type="submit" disabled style="opacity: 0.5; cursor: not-allowed;">Reserve</button>
                   </form>
               <?php endif; ?>
-                <!-- Add to Cart Button (Always available) -->
-             <form method="POST" action="../../../process/Book/add_cart.php" id="addToCartForm">
-              <input type="hidden" name="book_id" value="<?= $book['Book_ID'] ?>">
-              <button type="submit" class="btn add-btn">Add to Cart</button>
-            </form>
-
+                 <!-- Add to Cart Button (Always available) -->
+                  <form method="POST" action="../../../process/Book/add_cart.php" id="addToCartForm">
+                    <input type="hidden" name="book_id" value="<?= $book['Book_ID'] ?>">
+                    <button type="submit" class="btn add-btn">Add to Cart</button>
+                  </form>
             </div>
       
         <p style="color: #888;">Please rent or reserve this book to start reading.</p>
@@ -340,8 +339,6 @@ document.getElementById('paymentForm').addEventListener('submit', function (even
 
     paymentModal.hide(); // Hide the payment modal
 });
-
-
 
 document.getElementById('addToCartForm').addEventListener('submit', function(event) {
     event.preventDefault(); // Prevent form submission
