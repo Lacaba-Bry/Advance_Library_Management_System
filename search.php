@@ -170,10 +170,25 @@ $books = fetchFilteredBooks($conn, $filters);
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Book List</title>
-  <link rel="stylesheet" href="css/index/search.css"/>
+  <link rel="stylesheet" href="css/index/searchxx.css"/>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
+    .reset-btn {
+  margin-top: 150px;
+  background-color: #f44336; /* Red color */
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  border-radius: 5px;
+}
+
+.reset-btn:hover {
+  background-color: #e53935; /* Darker red */
+}
+
   </style>
 </head>
 <body>
@@ -199,8 +214,8 @@ $books = fetchFilteredBooks($conn, $filters);
  <h3>🏢 Filter Paid Books by Price</h3>
   <select name="price-filter" id="price-filter" onchange="this.form.submit()">
     <option value="">All Price</option>
-   <option value="below-300" <?= $_GET['price-filter'] == 'below-300' ? 'selected' : '' ?>>P300 Below</option>
-<option value="above-300" <?= $_GET['price-filter'] == 'above-300' ? 'selected' : '' ?>>P300 Above</option>
+   <option value="below-300" <?= isset($_GET['price-filter']) && $_GET['price-filter'] == 'below-300' ? 'selected' : '' ?>>P300 Below</option>
+<option value="above-300" <?= isset($_GET['price-filter']) && $_GET['price-filter'] == 'above-300' ? 'selected' : '' ?>>P300 Above</option>
 
   </select>
 </div>
@@ -224,15 +239,21 @@ $books = fetchFilteredBooks($conn, $filters);
         <label><input type="checkbox"> Fantasy</label>
       </div>
     </div>
+
+     <div class="filter-group">
+        <button type="reset" onclick="window.location.href = window.location.pathname" class="reset-btn">Reset Filters</button>
+      </div>
   </div>
+  
 
   <div class="main-content">
     <form class="search-container" method="GET" id="search-form">
-      <div class="search">
-        <span class="search-icon material-symbols-outlined">search</span>
-        <input class="search-input" type="search" id="search-input" name="search" placeholder="Search books by title, author or keyword..." value="<?= htmlspecialchars($searchTerm) ?>">
-      </div>
-    </form>
+  <div class="search">
+    <span class="search-icon material-symbols-outlined">search</span>
+    <input class="search-input" type="search" id="search-input" name="search" placeholder="Search books by title, author or keyword..." value="<?= htmlspecialchars($searchTerm) ?>">
+  </div>
+</form>
+
 
     <div class="book-wrapper" id="book-wrapper">
       <?php
@@ -316,16 +337,30 @@ $(document).ready(function() {
   // Prevent form submission with Enter key
   $('#search-input').on('keydown', function(e) {
     if (e.key === 'Enter') {
-      e.preventDefault();
+      e.preventDefault(); // Prevents form submission on Enter
     }
   });
 
   // Live search on input
   $('#search-input').on('input', function() {
     var searchTerm = $(this).val();
-    window.location.href = '?search=' + encodeURIComponent(searchTerm); // Update URL with the search term
+
+    // Update the URL with the search term without reloading the page
+    history.pushState(null, null, '?search=' + encodeURIComponent(searchTerm)); // Update the URL with search term
+
+    // Perform the search via AJAX to update book list dynamically without reloading the page
+    $.ajax({
+      url: window.location.href, // Use the current URL to keep the search term
+      type: 'GET',
+      data: { search: searchTerm },  // Send the search term via GET request
+      success: function(response) {
+        // Update the book list with the updated content
+        $('#book-wrapper').html($(response).find('#book-wrapper').html());  // Only replace the book list content
+      }
+    });
   });
 
+  // Handle the favorite button click (this part is already correct)
   $(".favorite-btn").click(function() {
     var bookId = $(this).data('book-id');
     var icon = $(this).find('i');
@@ -353,6 +388,7 @@ $(document).ready(function() {
     });
   });
 });
+
 </script>
 </body>
 </html>

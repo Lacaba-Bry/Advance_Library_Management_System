@@ -268,8 +268,9 @@ error_log("Avatar Path: " . $avatar);
     </div>
 
     <div class="center-section">
-        <input type="text" class="search-bar" placeholder="Search" />
-    </div>
+    <input type="text" class="search-bar" id="search-input" placeholder="Search" />
+    <div id="search-results"></div>
+</div>
 
     <div class="right-section">
         <button class="premium-btn">⚡ Upgrade Plan</button>
@@ -287,5 +288,29 @@ error_log("Avatar Path: " . $avatar);
         <span class="user-type"><?php echo htmlspecialchars($userName); ?></span>
     </div>
   </header>
+
+
+<script>
+$(document).ready(function() {
+    $('#search-input').on('input', function() {
+        var searchTerm = $(this).val();
+
+        if (searchTerm.length > 2) { // Start searching after 3 characters
+            $.ajax({
+                url: 'search.php',
+                method: 'GET',
+                data: { search: searchTerm },
+                success: function(response) {
+                    $('#search-results').html(response);  // Display search results
+                }
+            });
+        } else {
+            $('#search-results').html(''); // Clear results if input is too short
+        }
+    });
+});
+
+
+</script>
 </body>
 </html>
