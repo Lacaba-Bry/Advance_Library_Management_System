@@ -1,0 +1,205 @@
+/* General Layout */
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f7f7f7;
+    color: #333;
+}
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #fff;
+    padding: 10px 30px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+
+
+.search-bar input {
+    padding: 8px;
+    width: 300px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+}
+
+.notifications {
+    position: relative;
+    margin-right: 20px;
+}
+
+.notification-icon {
+    font-size: 24px;
+}
+
+.notification-count {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background-color: red;
+    color: white;
+    font-size: 12px;
+    padding: 2px 6px;
+    border-radius: 50%;
+}
+
+.user-profile {
+    display: flex;
+    align-items: center;
+}
+
+.profile-img {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.user-name {
+    font-weight: bold;
+}
+
+.user-role {
+    font-size: 12px;
+    color: gray;
+}
+.container {
+    display: flex;
+}
+
+/* Sidebar Styling */
+.sidebar {
+    width: 250px;
+    background-color:white;
+    height: 100vh;
+
+}
+
+.sidebar .logo {
+    text-align: center;
+    font-size: 24px;
+    margin-bottom: 30px;
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+}
+
+.sidebar ul li {
+    padding: 15px;
+    text-align: center;
+    font-size: 18px;
+}
+
+.sidebar ul li a {
+    text-decoration: none;
+    color: black;
+    display: block;
+}
+
+.sidebar ul li a:hover {
+    background-color: #f09ca1;
+}
+
+/* Main Content */
+.main-content {
+
+    padding: 30px;
+    width: 100%;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.header .greeting {
+    font-size: 24px;
+}
+
+.header .search input {
+    padding: 10px;
+    font-size: 16px;
+    width: 250px;
+}
+
+/* Stats Section */
+.stats {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 30px;
+}
+
+.stats .card {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    width: 23%;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.stats .card h3 {
+    font-size: 18px;
+}
+
+.stats .card p {
+    font-size: 24px;
+    margin-top: 10px;
+}
+
+/* Books List */
+.books-list table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 30px;
+}
+
+.books-list table, .books-list th, .books-list td {
+    border: 1px solid #ddd;
+}
+
+.books-list th, .books-list td {
+    padding: 12px;
+    text-align: left;
+}
+
+.books-list th {
+    background-color: #ff8e9e;
+    color: white;
+}
+
+/* Overdue Books Section */
+.overdue-books table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 30px;
+}
+
+.overdue-books table, .overdue-books th, .overdue-books td {
+    border: 1px solid #ddd;
+}
+
+.overdue-books th, .overdue-books td {
+    padding: 12px;
+    text-align: left;
+}
+
+.overdue-books th {
+    background-color: #ff8e9e;
+    color: white;
+}
+
+/* Chart Section */
+.charts .chart {
+    width: 100%;
+    margin-top: 20px;
+}
