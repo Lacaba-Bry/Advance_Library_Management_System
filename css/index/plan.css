@@ -1,0 +1,169 @@
+ :root {
+      --base-clr: #ffffff;
+      --text-clr: #333333;
+      --accent-clr: #5e63ff;
+      --secondary-text-clr: #6c6f80;
+      --line-clr: #ddd;
+      --hover-clr: #f4f4f4;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f9f9f9;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .pricing-cards {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 30px;
+      justify-content: center;
+    }
+
+    .card {
+      background: #fff;
+      border: 1px solid var(--line-clr);
+      border-radius: 12px;
+      padding: 30px;
+      width: 280px;
+      text-align: center;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+      transition: transform 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+    }
+
+    .card.popular {
+      border: 2px solid var(--accent-clr);
+      box-shadow: 0 6px 12px rgba(94, 99, 255, 0.3);
+    }
+
+    .card.vip-card {
+      border: 2px solid #d4af37;
+      background-color: #fffbea;
+      box-shadow: 0 6px 12px rgba(212, 175, 55, 0.3);
+    }
+
+    .card h2 {
+      font-size: 20px;
+      margin-bottom: 10px;
+      color: var(--accent-clr);
+    }
+
+    .card.vip-card h2 {
+      color: #c49b28;
+    }
+
+    .price {
+      font-size: 24px;
+      font-weight: 600;
+      margin: 10px 0 20px;
+    }
+
+    .price span {
+      font-size: 14px;
+      color: var(--secondary-text-clr);
+    }
+
+    .features {
+      margin-top: 15px;
+      font-size: 14px;
+      color: var(--secondary-text-clr);
+      line-height: 1.6;
+    }
+
+    .card button {
+      padding: 12px 20px;
+      font-size: 14px;
+      font-weight: 600;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .free-btn {
+      background: transparent;
+      color: var(--accent-clr);
+      border: 1px solid var(--accent-clr);
+    }
+
+    .free-btn:hover {
+      background: var(--accent-clr);
+      color: white;
+    }
+
+    .premium-btn {
+      background: var(--accent-clr);
+      color: white;
+    }
+
+    .premium-btn:hover {
+      background: #4a4eff;
+    }
+
+    .vip-btn {
+      background: #d4af37;
+      color: white;
+    }
+
+    .vip-btn:hover {
+      background: #c49b28;
+    }
+
+    #checkoutModal {
+      display: none;
+      max-width: 400px;
+      margin: 40px auto;
+      padding: 50px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    }
+
+    #checkoutModal.active {
+      display: block;
+    }
+
+    .checkout-field {
+      margin-bottom: 15px;
+      text-align: left;
+    }
+
+    .checkout-field label {
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .checkout-field input {
+      width: 100%;
+      padding: 10px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    .total {
+      font-size: 18px;
+      font-weight: bold;
+      margin-top: 15px;
+    }
+
+    .checkout-submit {
+      margin-top: 20px;
+      background: #22c55e;
+      color: white;
+      padding: 10px 25px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }

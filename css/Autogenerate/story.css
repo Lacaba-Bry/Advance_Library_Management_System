@@ -1,0 +1,120 @@
+body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #fff;
+      color: #222;
+    }
+.photos-container {
+  position: relative;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+.photos-container img{
+    height: 350px;
+}
+
+
+/* Centered image */
+.book-cover-lg {
+  width: 300px; /* Adjust size as needed */
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  position: relative;
+  z-index: 1;
+}
+
+
+    /* HEADER SECTION */
+    .story-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background-color: #fff;
+      padding: 10px 20px;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .story-info {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .story-info img {
+      height: 45px;
+      border-radius: 5px;
+    }
+
+    .story-meta {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .story-meta .title {
+      font-weight: bold;
+      font-size: 1rem;
+    }
+
+    .story-meta .author {
+      font-size: 0.85rem;
+      color: #666;
+    }
+
+    .story-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .story-actions button,
+    .story-actions .vote {
+      background: #ff5c00;
+      border: none;
+      color: white;
+      padding: 8px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .story-actions .vote {
+      background: none;
+      color: #ff5c00;
+      font-size: 0.95rem;
+    }
+
+    /* MAIN STORY CONTENT */
+    .story-container {
+      max-width: 700px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+
+    .story-text {
+      font-size: 1.1rem;
+      line-height: 1.8;
+      text-align: justify;
+    }
+
+    .continue-btn {
+      margin-top: 40px;
+      text-align: center;
+    }
+
+    .continue-btn button {
+      background-color: #222;
+      color: white;
+      padding: 12px 25px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .continue-btn button:hover {
+      background-color: #444;
+    }
