@@ -331,6 +331,17 @@ error_log("Avatar Path: " . $avatar);
 
 
 
+<<<<<<< HEAD
+=======
+=======
+<<<<<<< HEAD
+
+=======
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin
+>>>>>>> d267a5df912fd4d99fe0e868129d7f50ff8a03b1
 <script>
 $(document).ready(function() {
     $('#search-input').on('input', function() {
@@ -356,6 +367,5 @@ $(document).ready(function() {
 
 
 </script>
-
 </body>
 </html>

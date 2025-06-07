@@ -295,7 +295,7 @@
   </div>
 </div>
 
-<!-- Forgot Password Modal -->
+
 <div id="forgotPasswordModal" class="modal">
   <div class="modal-content">
     <span class="close" onclick="closeModal('forgotPasswordModal')">&times;</span>
@@ -306,6 +306,7 @@
     </form>
   </div>
 </div>
+
 
 <!-- Verify Code Modal -->
 <div id="verifyCodeModal" class="modal">
@@ -349,11 +350,16 @@
 
 
 
+
 <script>
-  // Array of recommended books with their image paths
-  const recommendedBooks = [
-    'Books/cpp.jpg', 'Books/Java.jpg', 'Books/Python.jpeg', 'Books/Csharp.jpg', 'Books/Ruby.jpg'
-  ];
+
+
+
+
+const recommendedBooks = [
+  'Books/cpp.jpg', 'Books/Java.jpg', 'Books/Python.jpeg', 'Books/Csharp.jpg', 'Books/Ruby.jpg'
+];
+
 
   // Array of popular books with their image paths
   const popularBooks = [
@@ -430,7 +436,6 @@
       history.pushState("", document.title, window.location.pathname + window.location.search);
     }
 </script>
-
 
 
 </body>
