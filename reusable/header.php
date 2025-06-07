@@ -330,6 +330,38 @@ error_log("Avatar Path: " . $avatar);
   </header>
 
 
+<<<<<<< HEAD
 
+=======
+<<<<<<< HEAD
+
+=======
+<script>
+$(document).ready(function() {
+    $('#search-input').on('input', function() {
+        var searchTerm = $(this).val().trim();
+
+        if (searchTerm.length > 2) { // Trigger search after typing 3 characters
+            $.ajax({
+                url: 'process/header/search.php', // Correct path to the search.php
+                method: 'GET',
+                data: { search: searchTerm },
+                success: function(response) {
+                    $('#search-results').html(response);  // Display search results inside the div
+                },
+                error: function() {
+                    $('#search-results').html("<p>An error occurred while fetching search results.</p>");
+                }
+            });
+        } else {
+            $('#search-results').html('');  // Clear results if input is too short
+        }
+    });
+});
+
+
+</script>
+>>>>>>> origin
+>>>>>>> dfd0217866f01bb60d2c492165e4246f70188abb
 </body>
 </html>
