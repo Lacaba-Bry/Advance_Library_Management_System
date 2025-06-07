@@ -41,7 +41,6 @@ if (strcasecmp($planName, 'Premium') === 0) {
     $planBorderClass = 'border-vip';
 }
 
-
 // Fetch rented books for this user
 $rentQuery = $conn->prepare("
     SELECT b.Book_Cover, b.Title, b.Author, r.Rent_Date, r.Return_Date, b.ISBN, b.Book_ID, b.Plan_type
@@ -49,7 +48,6 @@ $rentQuery = $conn->prepare("
     JOIN books b ON r.Book_ID = b.Book_ID
     WHERE r.Account_ID = ? AND r.Status = 'Ongoing'
 ");
-
 $rentQuery->bind_param("i", $accountId);
 $rentQuery->execute();
 $rentResult = $rentQuery->get_result();
@@ -60,9 +58,32 @@ while ($row = $rentResult->fetch_assoc()) {
     $rentedBooks[] = $row;
 }
 
-
 $rentQuery->close();
+
+// Fetch Purchased Books
+$purchasedBooksStmt = $conn->prepare("SELECT b.Title, b.Author, b.ISBN, tb.purchase_date, tb.price, b.Book_Cover, b.Plan_type, b.Book_ID
+                                      FROM transaction_book tb
+                                      JOIN books b ON tb.book_id = b.Book_ID
+                                      WHERE tb.user_id = ?");
+$purchasedBooksStmt->bind_param("i", $accountId);
+$purchasedBooksStmt->execute();
+$purchasedBooksResult = $purchasedBooksStmt->get_result();
+
+
+// Fetch Cart Books
+$cartBooksStmt = $conn->prepare("SELECT b.Title, b.Author, b.ISBN, c.Date_Added, b.Book_Cover, b.Plan_type, b.Book_ID, c.Cart_ID
+                                 FROM cart c
+                                 JOIN books b ON c.Book_ID = b.Book_ID
+                                 WHERE c.Account_ID = ?");
+$cartBooksStmt->bind_param("i", $accountId);  // Ensure you're using the correct Account_ID
+$cartBooksStmt->execute();
+$cartBooksResult = $cartBooksStmt->get_result();
+
+
+
+
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -162,8 +183,9 @@ $rentQuery->close();
 <div class="profile-nav-bar">
     <div class="tabs">
         <a href="#" class="tab active" data-tab="about-tab">About</a>
-        <a href="#" class="tab" data-tab="conversations-tab">Books</a>
-        <a href="#" class="tab" data-tab="following-tab">Following</a>
+        <a href="#" class="tab" data-tab="conversations-tab">Book Rented</a>
+        <a href="#" class="tab" data-tab="purchase-book">Purchase Book</a>
+        <a href="#" class="tab" data-tab="cart-book">Cart-Book</a>
     </div>
     <div class="profile-actions">
         <div class="plan-bubble"><p>⚡ Upgrade plan</p></div>
@@ -245,7 +267,7 @@ $rentQuery->close();
                         <td><?php echo date("F j, Y", strtotime($book['Rent_Date'])); ?></td>
                         <td><?php echo date("F j, Y", strtotime($book['Return_Date'])); ?></td>
                         <td>
-                            <a href="preview/<?php echo htmlspecialchars($book['ISBN']); ?>.php" class="btn btn-sm btn-info">View</a>
+                            <a href="/BryanCodeX/Book/<?php echo ucfirst($planType); ?>/Preview/<?php echo htmlspecialchars($book['ISBN']); ?>.php" class="btn btn-sm btn-info">View</a>
                         <button class="btn btn-danger btn-sm return-btn" data-book-id="<?php echo htmlspecialchars($book['Book_ID']); ?>">Return</button>
                         <?php if (isset($_GET['success']) && $_GET['success'] === 'returned'): ?>
                             <div class="alert alert-success" style="margin: 20px;">
@@ -264,17 +286,98 @@ $rentQuery->close();
 
 </div>
 
-<!-- Following Tab -->
-<div id="following-tab" class="tab-section" style="display: none;">
+<!-- Purchase Books Tab -->
+<div id="purchase-book" class="tab-section" style="display: none;">
     <div class="centered-content profile-body">
-        <h3>Following</h3>
-        <ul>
-            <li>@UserOne</li>
-            <li>@UserTwo</li>
-            <li>@AuthorXYZ</li>
-        </ul>
+        <h3>Purchased Books</h3>
+        <?php if ($purchasedBooksResult->num_rows > 0): ?>
+            
+            <table class="table-rentals">
+                <thead>
+                    <tr>
+                        <th>Cover</th>
+                        <th>Title</th>
+                        <th>Author</th>
+                        <th>Purchase Date</th>
+                        <th>Price</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php while ($book = $purchasedBooksResult->fetch_assoc()): ?>
+                        <?php
+        $planType = strtolower($book['Plan_type']);
+        $filename = basename($book['Book_Cover']);
+        $baseDir = $_SERVER['DOCUMENT_ROOT'] . "/BryanCodeX/Book/";
+        $imagePath = $baseDir . ucfirst($planType) . "/Book_Cover/" . $filename;
+        $imageUrl = "/BryanCodeX/Book/" . ucfirst($planType) . "/Book_Cover/" . $filename;
+        error_log("profile.php: File Exists: " . file_exists($imagePath));
+        ?>
+            
+                        <tr>
+                            <td><img src="<?php echo $imageUrl; ?>" alt="Cover" style="height: 50px;"></td>
+                            <td><?php echo htmlspecialchars($book['Title']); ?></td>
+                            <td><?php echo htmlspecialchars($book['Author']); ?></td>
+                            <td><?php echo date("F j, Y", strtotime($book['purchase_date'])); ?></td>
+                            <td><?php echo "$" . number_format($book['price'], 2); ?></td>
+                            <td>
+                              <a href="/BryanCodeX/Book/<?php echo ucfirst($planType); ?>/Preview/<?php echo htmlspecialchars($book['ISBN']); ?>.php" class="btn btn-sm btn-info">View</a>
+                            </td>
+                        </tr>
+                    <?php endwhile; ?>
+                </tbody>
+            </table>
+        <?php else: ?>
+            <p>You haven't purchased any books yet.</p>
+        <?php endif; ?>
     </div>
 </div>
+
+<!-- Cart Books Tab -->
+<div id="cart-book" class="tab-section" style="display: none;">
+    <div class="centered-content profile-body">
+        <h3>Your Cart</h3>
+  <?php if ($cartBooksResult->num_rows > 0): ?>
+    <table class="table-rentals">
+        <thead>
+            <tr>
+                <th>Cover</th>
+                <th>Title</th>
+                <th>Author</th>
+                <th>Date Added</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php while ($book = $cartBooksResult->fetch_assoc()): ?>
+       <?php
+        $planType = strtolower($book['Plan_type']);
+        $filename = basename($book['Book_Cover']);
+        $baseDir = $_SERVER['DOCUMENT_ROOT'] . "/BryanCodeX/Book/";
+        $imagePath = $baseDir . ucfirst($planType) . "/Book_Cover/" . $filename;
+        $imageUrl = "/BryanCodeX/Book/" . ucfirst($planType) . "/Book_Cover/" . $filename;
+        error_log("profile.php: File Exists: " . file_exists($imagePath));
+        ?>
+                <tr>
+                  <td><img src="<?php echo $imageUrl; ?>" alt="Cover" style="height: 50px;"></td>
+                    <td><?php echo htmlspecialchars($book['Title']); ?></td>
+                    <td><?php echo htmlspecialchars($book['Author']); ?></td>
+                    <td><?php echo date("F j, Y", strtotime($book['Date_Added'])); ?></td>
+                    <td>
+                        <a href="/BryanCodeX/Book/<?php echo ucfirst($planType); ?>/Preview/<?php echo htmlspecialchars($book['ISBN']); ?>.php" class="btn btn-sm btn-info">View</a>
+                        <button class="btn btn-danger btn-sm remove-cart-btn" data-cart-id="<?php echo htmlspecialchars($book['Cart_ID']); ?>">Delete</button>
+                    </td>
+
+                </tr>
+            <?php endwhile; ?>
+        </tbody>
+    </table>
+<?php else: ?>
+    <p>Your cart is empty.</p>
+<?php endif; ?>
+    </div>
+</div>
+
 
 
 <!-- Modal for Editing Profile -->
@@ -423,6 +526,41 @@ document.querySelectorAll(".return-btn").forEach(button => {
         modal.style.display = "flex";
     });
 });
+
+// Add event listener to all delete buttons
+document.querySelectorAll('.remove-cart-btn').forEach(button => {
+    button.addEventListener('click', function() {
+        const cartId = this.getAttribute('data-cart-id'); // Get the Cart_ID from data attribute
+        const row = this.closest('tr'); // Get the row that contains the button
+
+        // Show confirmation dialog
+        const confirmDelete = confirm("Are you sure you want to delete this book from your cart?");
+        
+        if (confirmDelete) {
+            const xhr = new XMLHttpRequest();
+            xhr.open("POST", "process/book/remove-from-cart.php", true);
+            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    const response = xhr.responseText;
+                    if (response === "success") {
+                        row.remove(); // Remove the row from the table
+                        alert('Book removed from cart.');
+                    } else {
+                        alert('Failed to remove the book from the cart.');
+                    }
+                }
+            };
+
+            xhr.send("cart_id=" + cartId);  // Send the Cart_ID to the server
+        } else {
+            // If user clicks "Cancel", no action is performed
+            console.log("Book deletion canceled.");
+        }
+    });
+});
+
 
 
 </script>
