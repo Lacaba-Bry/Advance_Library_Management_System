@@ -1,8 +1,11 @@
+<<<<<<< HEAD
 <?php
 
 
 ?>
 
+=======
+>>>>>>> origin
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -295,7 +298,11 @@
   </div>
 </div>
 
+<<<<<<< HEAD
 <!-- Forgot Password Modal -->
+=======
+<!-- Forgot Password Modal (optional) -->
+>>>>>>> origin
 <div id="forgotPasswordModal" class="modal">
   <div class="modal-content">
     <span class="close" onclick="closeModal('forgotPasswordModal')">&times;</span>
@@ -307,6 +314,7 @@
   </div>
 </div>
 
+<<<<<<< HEAD
 <!-- Verify Code Modal -->
 <div id="verifyCodeModal" class="modal">
   <div class="modal-content">
@@ -343,6 +351,9 @@
     </form>
   </div>
 </div>
+=======
+
+>>>>>>> origin
 
 
 
@@ -350,6 +361,7 @@
 
 
 <script>
+<<<<<<< HEAD
   // Array of recommended books with their image paths
   const recommendedBooks = [
     'Books/cpp.jpg', 'Books/Java.jpg', 'Books/Python.jpeg', 'Books/Csharp.jpg', 'Books/Ruby.jpg'
@@ -433,5 +445,78 @@
 
 
 
+=======
+const recommendedBooks = [
+  'Books/cpp.jpg', 'Books/Java.jpg', 'Books/Python.jpeg', 'Books/Csharp.jpg', 'Books/Ruby.jpg'
+];
+
+const popularBooks = [
+  'Books/Popular2025/Php.jpg', 'Books/Popular2025/Data.jpg', 'Books/Popular2025/Sql.jpg', 'Books/Popular2025/Ubuntu.jpg', 'Books/Popular2025/Git.jpg'
+];
+
+let recommendedIndex = 0;
+let popularIndex = 0;
+
+function renderBooks(containerId, books, index) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = ''; // Clear current content
+  const current = books.slice(index, index + 4); // Get a slice of 4 books
+  current.forEach((imgSrc, i) => {
+    const div = document.createElement('div');
+    div.className = 'book-card ' + ['red', 'blue', 'yellow', 'pink'][i % 4];
+
+    // Create an image element for the book cover
+    const img = document.createElement('img');
+    img.src = imgSrc; // Set the image source to the current book cover
+    img.alt = 'Book Cover'; // Alt text for accessibility
+    img.className = 'book-cover'; // Optional: Add a class for styling
+
+    div.appendChild(img); // Append the image to the div
+    container.appendChild(div); // Append the div to the container
+  });
+}
+
+function changeSet(type, direction) {
+  const books = type === 'recommended' ? recommendedBooks : popularBooks;
+  const maxIndex = Math.max(0, books.length - 4);
+  if (type === 'recommended') {
+    recommendedIndex = Math.min(Math.max(0, recommendedIndex + direction * 4), maxIndex);
+    renderBooks('recommended-set', books, recommendedIndex);
+  } else {
+    popularIndex = Math.min(Math.max(0, popularIndex + direction * 4), maxIndex);
+    renderBooks('popular-set', books, popularIndex);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  renderBooks('recommended-set', recommendedBooks, recommendedIndex);
+  renderBooks('popular-set', popularBooks, popularIndex);
+});
+
+function openModal(id) {
+  document.getElementById(id).style.display = 'block';
+}
+
+function closeModal(id) {
+  document.getElementById(id).style.display = 'none';
+}
+
+// Close modal on outside click
+window.onclick = function(event) {
+  ['loginModal', 'forgotPasswordModal'].forEach(id => {
+    const modal = document.getElementById(id);
+    if (event.target === modal) modal.style.display = "none";
+  });
+};
+
+// Function to open the Forgot Password modal
+function openForgotPasswordModal() {
+  closeModal('loginModal');
+  openModal('forgotPasswordModal');
+}
+</script>
+
+
+>>>>>>> origin
 </body>
 </html>
