@@ -196,32 +196,29 @@ if (!\$book) {
       </div>
 <div class="start-reading">
 <?php
-\$canRead = false;
-\$hasChecked = false;
+\$hasChecked = false;  // Initialize it at the start
 
-// Check if the user has rented the book
+// Then inside your checks, you can set it to true after the rental check
 if (\$userId) {
-    // Prepare the query to check if the book is rented and status is ongoing
     \$checkStmt = \$conn->prepare("SELECT * FROM rent WHERE Account_ID = ? AND Book_ID = ? AND Status = 'ongoing' AND Return_Date > NOW()");
     \$checkStmt->bind_param("ii", \$userId, \$Book_ID);
     \$checkStmt->execute();
     \$checkStmt->store_result();
     \$canRead = \$checkStmt->num_rows > 0;
     \$checkStmt->close();
+
+    // After the rental check, mark that the check has been done
     \$hasChecked = true;
 
-    
-// Check if the user has already purchased the book (permanent access)
-\$purchasedStmt = \$conn->prepare("SELECT * FROM transaction_book WHERE user_id = ? AND book_id = ?");
-\$purchasedStmt->bind_param("ii", \$userId, \$Book_ID);
-\$purchasedStmt->execute();
-\$purchasedResult = \$purchasedStmt->get_result();
-
-// If the user has purchased the book, enable the "Start Reading" button
-\$canRead = \$purchasedResult->num_rows > 0;
-\$purchasedStmt->close();
-
-
+    // Check if the user has purchased the book
+    \$purchasedStmt = \$conn->prepare("SELECT * FROM transaction_book WHERE user_id = ? AND book_id = ?");
+    \$purchasedStmt->bind_param("ii", \$userId, \$Book_ID);
+    \$purchasedStmt->execute();
+    \$purchasedResult = \$purchasedStmt->get_result();
+    if (\$purchasedResult->num_rows > 0) {
+        \$canRead = true;
+    }
+    \$purchasedStmt->close();
 }
 ?>
 
