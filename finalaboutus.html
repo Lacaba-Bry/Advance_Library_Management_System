@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Unified Library Page</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: linear-gradient(to bottom, #f5f5f5, #e0e0ff);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
+      background: linear-gradient(to bottom, #f4f0ff, #ffffff);
+      color: #2e1065;
+    }
+
+    .wrapper {
+      width: 85%;
+      max-width: 1400px;
+    }
+
+    /* Services Card */
+    .services-card {
+      background-color: #6a0dad;
+      border-top-left-radius: 40px;
+      border-bottom-right-radius: 40px;
+      color: white;
+      padding: 60px;
+      margin-bottom: 40px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .services-card h2 {
+      font-size: 40px;
+      margin-bottom: 10px;
+    }
+
+    .services-card p {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    .curve-design {
+      position: absolute;
+      right: 20px;
+      bottom: 20px;
+      width: 150px;
+      height: 150px;
+      background: radial-gradient(circle at center, rgba(255,255,255,0.2) 40%, transparent 41%);
+      border-radius: 50%;
+      box-shadow: 0 0 0 10px rgba(255,255,255,0.15),
+                  0 0 0 25px rgba(255,255,255,0.1);
+    }
+
+    /* Hero Section */
+    .hero {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      background: linear-gradient(to right, #f6f2ff, #ffffff);
+      padding: 60px;
+      border-radius: 30px;
+      margin-bottom: 40px;
+    }
+
+    .hero-text {
+      flex: 1;
+    }
+
+    .badge {
+      background-color: #e6dbff;
+      color: #6a0dad;
+      padding: 6px 12px;
+      border-radius: 16px;
+      font-size: 14px;
+      display: inline-block;
+      margin-bottom: 16px;
+    }
+
+    .hero-text h1 {
+      font-size: 42px;
+      color: #222;
+      margin-bottom: 16px;
+    }
+
+    .hero-text p {
+      font-size: 16px;
+      color: #555;
+      margin-bottom: 24px;
+    }
+
+    .btn {
+      background-color: #6a0dad;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 30px;
+      text-decoration: none;
+      font-weight: bold;
+      display: inline-block;
+      margin-top: 16px;
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      background-color: #4b0082;
+    }
+
+    .stats {
+      display: flex;
+      gap: 40px;
+      font-size: 16px;
+      margin-top: 24px;
+    }
+
+    .stats span {
+      font-weight: bold;
+      font-size: 24px;
+      color: #6a0dad;
+    }
+
+    .image-card {
+      width: 200px;
+      height: 120px;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .image-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 12px;
+    }
+
+    .doctor-card {
+      background-color: #6a0dad;
+      border-radius: 20px;
+      border-bottom-right-radius: 100px;
+      padding: 20px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .doctor-card img {
+      width: 240px;
+      border-radius: 12px;
+    }
+
+    .curves {
+      position: absolute;
+      right: 10px;
+      bottom: 10px;
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,255,255,0.2) 40%, transparent 41%);
+      box-shadow: 0 0 0 10px rgba(255,255,255,0.15),
+                  0 0 0 25px rgba(255,255,255,0.1);
+    }
+
+    /* Library Services Section */
+    .library-container {
+      background: linear-gradient(135deg, #6a1b9a, #8e24aa);
+      border-radius: 30px;
+      color: white;
+      padding: 40px;
+      margin-bottom: 40px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 40px;
+    }
+
+    .library-left {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .library-left h4 {
+      text-transform: uppercase;
+      font-size: 13px;
+      opacity: 0.8;
+      margin-bottom: 10px;
+    }
+
+    .library-left h2 {
+      font-size: 28px;
+      font-weight: 800;
+      margin-bottom: 20px;
+      line-height: 1.4;
+    }
+
+    .library-left button {
+      background: white;
+      color: #6a1b9a;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 20px;
+      font-weight: 600;
+      width: fit-content;
+      cursor: pointer;
+      margin-bottom: 30px;
+    }
+
+    .library-left img {
+      width: 500px;
+      border-radius: 12px;
+    }
+
+    .library-right {
+      flex: 1.5;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+
+    .library-card {
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 20px;
+      color: #4a148c;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+    }
+
+    .library-card h3 {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .library-card p {
+      font-size: 13px;
+      color: #6a1b9a;
+    }
+
+    /* Library Section */
+    .library-container-alt {
+      display: flex;
+      flex-wrap: wrap;
+      background: white;
+      border-radius: 30px;
+      box-shadow: 0 0 30px rgba(0,0,0,0.08);
+      overflow: hidden;
+      margin-bottom: 40px;
+    }
+
+    .image-side, .text-side {
+      flex: 1;
+      min-width: 300px;
+    }
+
+    .image-side {
+      background: linear-gradient(to bottom right, #d8cfff, #eae6ff);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      padding: 40px;
+    }
+
+    .image-side img {
+      width: 200%;
+      max-width: 490px;
+      border-radius: 20px;
+    }
+
+    .image-side .badge {
+      position: absolute;
+      bottom: 30px;
+      left: 30px;
+      background: white;
+      padding: 12px 20px;
+      border-radius: 15px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      font-weight: 600;
+      font-size: 14px;
+      color: #4b0082;
+    }
+
+    .text-side {
+      padding: 60px 40px;
+    }
+
+    .text-side small {
+      color: #4b0082;
+      text-transform: uppercase;
+      font-weight: bold;
+      font-size: 13px;
+    }
+
+    .text-side h1 {
+      font-size: 28px;
+      color: #1e1e2f;
+      margin-top: 10px;
+    }
+
+    .text-side p {
+      color: #555;
+      margin: 15px 0;
+      line-height: 1.6;
+    }
+
+    .features {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-top: 20px;
+      font-size: 14px;
+      color: #4b0082;
+    }
+
+    .features div {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    /* Testimonials and Footer (unchanged) */
+    .section {
+      padding: 60px 20px;
+      text-align: center;
+    }
+
+    .section h2 {
+      font-size: 36px;
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+
+    .section small {
+      text-transform: uppercase;
+      color: #6b7280;
+      letter-spacing: 2px;
+    }
+
+    /* Plan Selection Styles */
+    .selection-container {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+    }
+
+    .selection-box {
+      width: 150px;
+      height: 150px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: white;
+      border: 2px solid #BAE94D;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: transform 0.3s, color 0.3s, background-image 0.3s;
+      color: #6A2C8B;
+      background-size: cover;
+      background-position: center;
+    }
+
+    .selection-box:hover {
+      background-color: #8e44ad;
+      color: white;
+      transform: scale(1.05);
+      background-image: url('https://via.placeholder.com/150');
+    }
+
+    .selection-box p {
+      font-size: 18px;
+      font-weight: bold;
+      margin: 0;
+    }
+
+    </style>
+</head>
+<body>
+  <div class="wrapper">
+
+    <!-- Services Card -->
+    <section class="services-card">
+      <h2>Explore Our Library Services</h2>
+      <p>Access thousands of books, digital media, and special collections at your fingertips.</p>
+      <div class="curve-design"></div>
+    </section>
+
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="hero-text">
+        <span class="badge">New</span>
+        <h1>Welcome to Haven Library</h1>
+        <p>Explore new ideas, enjoy great reads, and connect with your community at Haven Library.</p>
+        <button class="btn">Join Now</button>
+        <div class="stats">
+          <div><span>150,000+</span> Books</div>
+          <div><span>1000+</span> Members</div>
+        </div>
+      </div>
+      <div class="hero-media">
+        <div class="doctor-card">
+          <img src="liba.jpg" alt="Library Staff"/>
+          <div class="curves"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Library Services Section -->
+    <section class="library-container">
+      <div class="library-left">
+        <h4>Library Collections</h4>
+        <h2>Explore Our Vast Collection of Books!</h2>
+        <button>See All Collections</button>
+        <img src="coll.jpg" alt="Bookshelf" />
+      </div>
+      <div class="library-right">
+        <div class="library-card">
+          <h3>📖 Fiction & Literature</h3>
+          <p>Immerse yourself in a diverse and ever-growing collection of stories that spark imagination and stir emotion. From contemporary bestsellers and timeless classics to world literature and modern poetry, Haven Library offers something for every reader—young adult to seasoned book lover.</p>
+        </div>
+        <div class="library-card">
+          <h3>📚 Non-Fiction & Learning Resources</h3>
+          <p>Feed your curiosity with thousands of expertly curated non-fiction titles. Dive into topics like history, science, culture, self-development, and more. Discover biographies that inspire, deep research materials for lifelong learners, and practical guides for everyday life—all available at your fingertips.</p>
+        </div>
+        <div class="library-card">
+          <h3>💻 Digital Media & Online Access</h3>
+          <p>Enjoy seamless access to a wide range of digital formats—including e-books, audiobooks, videos, and scholarly databases. Whether you're reading on your phone, tablet, or desktop, Haven Library ensures learning and entertainment are just a click away—24/7, wherever you are.</p>
+        </div>
+        <div class="library-card">
+          <h3>👧 Children’s & Family Zone</h3>
+          <p>Designed to nurture young minds, our children’s section includes age-appropriate books, read-alongs, and interactive content for early readers. Parents and educators can also find valuable teaching tools, activity kits, and literacy-building resources to make learning fun and meaningful.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Library Info Section -->
+    <section class="library-container-alt">
+      <div class="image-side">
+        <img src="books.jpg" alt="Library Building" />
+        <div class="badge">Open to All</div>
+      </div>
+      <div class="text-side">
+        <small>Our Mission</small>
+        <h1>Providing Access to Knowledge for Everyone</h1>
+        <p>Haven Library is a digital gateway to knowledge, creativity, and connection. With free and premium access tiers, we bring the library experience to your fingertips—wherever you are.</p>
+        <p>Explore a universe of books, learning tools, and virtual community events designed to inspire and enrich lives.</p>
+        <div class="features">
+          <div>🔓 Access for All – Free, Premium & VIP options to suit every reader</div>
+          <div>📚 Vast Digital Collection – eBooks, audiobooks, research & more</div>
+          <div>👩‍💻 Expert Support – Curated recommendations and librarian help when you need it</div>
+          <div>👩‍🏫 Expert Librarians</div>
+        </div>
+      </div>
+</section>
+      </div>
+</body>
+</html> 

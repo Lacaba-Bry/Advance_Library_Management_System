@@ -1,3 +1,11 @@
+<<<<<<< HEAD
+<?php
+
+
+?>
+
+=======
+>>>>>>> origin
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -290,7 +298,11 @@
   </div>
 </div>
 
+<<<<<<< HEAD
+<!-- Forgot Password Modal -->
+=======
 <!-- Forgot Password Modal (optional) -->
+>>>>>>> origin
 <div id="forgotPasswordModal" class="modal">
   <div class="modal-content">
     <span class="close" onclick="closeModal('forgotPasswordModal')">&times;</span>
@@ -302,7 +314,46 @@
   </div>
 </div>
 
+<<<<<<< HEAD
+<!-- Verify Code Modal -->
+<div id="verifyCodeModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal('verifyCodeModal')">&times;</span>
+    <h2>Verify Code</h2>
+    <form id="verifyCodeForm" onsubmit="handleCodeVerification(event)">
+      <input type="text" name="code" placeholder="Enter the 6-digit code" required />
+      <button type="submit">Verify Code</button>
+    </form>
+  </div>
+</div>
 
+<!-- Verify Code Modal -->
+<div id="verifyCodeModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal('verifyCodeModal')">&times;</span>
+    <h2>Verify Code</h2>
+    <form id="verifyCodeForm" onsubmit="handleCodeVerification(event)">
+      <input type="text" name="code" placeholder="Enter the 6-digit code" required />
+      <button type="submit">Verify Code</button>
+    </form>
+  </div>
+</div>
+
+<!-- Change Password Modal -->
+<div id="changePasswordModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal('changePasswordModal')">&times;</span>
+    <h2>Change Password</h2>
+    <form id="changePasswordForm" onsubmit="handlePasswordReset(event)">
+      <input type="password" name="new_password" placeholder="Enter new password" required />
+      <input type="password" name="confirm_password" placeholder="Confirm new password" required />
+      <button type="submit">Reset Password</button>
+    </form>
+  </div>
+</div>
+=======
+
+>>>>>>> origin
 
 
 
@@ -310,6 +361,91 @@
 
 
 <script>
+<<<<<<< HEAD
+  // Array of recommended books with their image paths
+  const recommendedBooks = [
+    'Books/cpp.jpg', 'Books/Java.jpg', 'Books/Python.jpeg', 'Books/Csharp.jpg', 'Books/Ruby.jpg'
+  ];
+
+  // Array of popular books with their image paths
+  const popularBooks = [
+    'Books/Popular2025/Php.jpg', 'Books/Popular2025/Data.jpg', 'Books/Popular2025/Sql.jpg', 'Books/Popular2025/Ubuntu.jpg', 'Books/Popular2025/Git.jpg'
+  ];
+
+  // Initial indexes to track which set of books to render
+  let recommendedIndex = 0;
+  let popularIndex = 0;
+
+  // Function to render books to the specified container
+  function renderBooks(containerId, books, index) {
+    const container = document.getElementById(containerId);  // Get the container element by ID
+    container.innerHTML = ''; // Clear current content
+    const current = books.slice(index, index + 4); // Get a slice of 4 books starting from index
+    current.forEach((imgSrc, i) => {
+      const div = document.createElement('div'); // Create a new div for each book
+      div.className = 'book-card ' + ['red', 'blue', 'yellow', 'pink'][i % 4];  // Assign a color class to the book card
+
+      // Create an image element for the book cover
+      const img = document.createElement('img');
+      img.src = imgSrc; // Set the image source to the current book cover
+      img.alt = 'Book Cover'; // Alt text for accessibility
+      img.className = 'book-cover'; // Optional: Add a class for styling
+
+      div.appendChild(img); // Append the image to the div
+      container.appendChild(div); // Append the div to the container
+    });
+  }
+
+  // Function to change the book set by incrementing or decrementing the index
+  function changeSet(type, direction) {
+    const books = type === 'recommended' ? recommendedBooks : popularBooks; // Choose the books array based on the type
+    const maxIndex = Math.max(0, books.length - 4);  // Calculate the maximum index to prevent out-of-bounds
+    if (type === 'recommended') {
+      recommendedIndex = Math.min(Math.max(0, recommendedIndex + direction * 4), maxIndex);  // Update the recommended index
+      renderBooks('recommended-set', books, recommendedIndex);  // Render the recommended books
+    } else {
+      popularIndex = Math.min(Math.max(0, popularIndex + direction * 4), maxIndex);  // Update the popular index
+      renderBooks('popular-set', books, popularIndex);  // Render the popular books
+    }
+  }
+
+  // Event listener to render books when the page is loaded
+  document.addEventListener('DOMContentLoaded', () => {
+    renderBooks('recommended-set', recommendedBooks, recommendedIndex);  // Render recommended books on page load
+    renderBooks('popular-set', popularBooks, popularIndex);  // Render popular books on page load
+  });
+
+  // Function to open a modal by ID
+  function openModal(id) {
+    document.getElementById(id).style.display = 'block';  // Set the modal's display to block (visible)
+  }
+
+  // Function to close a modal by ID
+  function closeModal(id) {
+    document.getElementById(id).style.display = 'none';  // Set the modal's display to none (hidden)
+  }
+
+  // Close modals when clicking outside of them
+  window.onclick = function(event) {
+    ['loginModal', 'forgotPasswordModal'].forEach(id => {
+      const modal = document.getElementById(id);
+      if (event.target === modal) modal.style.display = "none";  // Close the modal if the user clicks outside
+    });
+  };
+
+  // Function to open the Forgot Password modal
+  function openForgotPasswordModal() {
+    closeModal('loginModal');  // Close the login modal if it's open
+    openModal('forgotPasswordModal');  // Open the forgot password modal
+  }
+  if (window.location.hash) {
+      history.pushState("", document.title, window.location.pathname + window.location.search);
+    }
+</script>
+
+
+
+=======
 const recommendedBooks = [
   'Books/cpp.jpg', 'Books/Java.jpg', 'Books/Python.jpeg', 'Books/Csharp.jpg', 'Books/Ruby.jpg'
 ];
@@ -381,5 +517,6 @@ function openForgotPasswordModal() {
 </script>
 
 
+>>>>>>> origin
 </body>
 </html>
