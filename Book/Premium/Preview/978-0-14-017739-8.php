@@ -4,7 +4,7 @@ require_once('../../../backend/config/config.php');
 include '../../../reusable/header.php';
 
 // Define the ISBN and prepare the query
-$isbn = '978-0-452-28424-1';
+$isbn = '978-0-14-017739-8';
 $stmt = $conn->prepare("SELECT * FROM books WHERE ISBN = ?");
 $stmt->bind_param("s", $isbn);
 $stmt->execute();
@@ -158,6 +158,8 @@ $purchasedResult = $purchasedStmt->get_result();
 $canRead = $purchasedResult->num_rows > 0;
 $purchasedStmt->close();
 
+  }
+}
 ?>
 
 <button 

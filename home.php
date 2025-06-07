@@ -43,42 +43,32 @@ $stmt->bind_result($userType, $avatar, $expirationDate);
 $stmt->fetch();
 $stmt->close();
 
-$_SESSION['user_type'] = $userType ?? 'Free';
+$_SESSION['user_type'] = $userType ?? 'Free'; // Store plan in the session
 $avatar = $avatar ?: 'image/profile/defaultprofile.jpg';
-// Echo the Expiry Date (for debugging purposes)
-
 
 // Check if the Premium plan has expired
 $isPremiumExpired = false;
 
-// Check if $userType is null or empty before using it
 if (!empty($userType) && strcasecmp($userType, 'Premium') === 0) {
-    // If Expiration_Date is NULL, it means the plan is ongoing (no expiration)
     if ($expirationDate !== NULL) {
         $currentDate = new DateTime(); // Current date
         $expirationDateTime = new DateTime($expirationDate); // Expiry date from DB
 
-        // Compare the expiration date with the current date
         if ($expirationDateTime < $currentDate) {
             $isPremiumExpired = true;
-            // Debugging log for the expired Premium plan
             error_log("Premium plan expired for user: " . $accountId);
         }
     } else {
         $isPremiumExpired = false; // No expiration date, active plan
     }
 } else {
-    // Handle the case where $userType is null or empty.  This is important!
-    $isPremiumExpired = false; // Or whatever makes sense for your logic
-    // Optionally log this condition for debugging:
-    error_log("User type is null or empty for user: " . $accountId);
+    $isPremiumExpired = false; // Handle case for other types of plans or null user type
 }
 
 // --------------------------------------------------------------------------
 // BOOK FETCH FUNCTIONS
 // --------------------------------------------------------------------------
 
-// Fetch books by plan type
 function getBooksByPlanType($conn, $planType) {
     $books = [];
     $sql = "SELECT Book_ID, Title, Author, Book_Cover, Genre, Price, Plan_type FROM books WHERE Plan_type = ?";
@@ -91,20 +81,6 @@ function getBooksByPlanType($conn, $planType) {
         $books[] = $row;
     }
 
-    return $books;
-}
-
-// Fetch all books
-function getBooks($conn) {
-    $books = [];
-    $sql = "SELECT Book_ID, Title, Author, Book_Cover, Genre, Price FROM books";
-    $result = $conn->query($sql);
-
-    if ($result && $result->num_rows > 0) {
-        while ($row = $result->fetch_assoc()) {
-            $books[] = $row;
-        }
-    }
     return $books;
 }
 
@@ -129,33 +105,58 @@ function getBestSellersPaid($conn, $limit = 10) {
     return $books;
 }
 
+// Fetch books by plan type
 $freeBooks = getBooksByPlanType($conn, 'Free');
 $premiumBooks = getBooksByPlanType($conn, 'Premium');
 $paidBooks = getBooksByPlanType($conn, 'Paid');
 $bestSellerPaidBooks = getBestSellersPaid($conn);
 
+// --------------------------------------------------------------------------
+// DISPLAY BOOKS BASED ON USER PLAN
+// --------------------------------------------------------------------------
 
+$userPlanType = $_SESSION['user_type'] ?? 'free';  // Default to 'Free' if not set
 
-if (isset($_GET['success']) && $_GET['success'] === 'plan_renewed') {
-    echo "<div class='alert alert-success'>Your Premium plan has been renewed successfully for 1 month!</div>";
+// Function to check if the user has access to the book
+function canAccessBook($userPlanType, $bookPlanType) {
+    // VIP and Premium users can access all books
+    if ($userPlanType === 'VIP' || $userPlanType === 'Premium') {
+        return true;
+    }
+
+    // Free users can access only Free and Paid books
+    if ($userPlanType === 'Free' && in_array($bookPlanType, ['Free', 'Paid'])) {
+        return true;
+    }
+
+    return false; // Deny access if none of the conditions match
 }
 
-if (isset($_GET['error']) && $_GET['error'] === 'payment_failed') {
-    echo "<div class='alert alert-danger'>Payment failed. Please try again.</div>";
+// Get books based on the user's plan type
+function getBooksByUserPlan($conn, $userPlanType) {
+    $books = [];
+    $sql = "SELECT Book_ID, Title, Author, Book_Cover, Genre, Price, Plan_type FROM books WHERE Plan_type IN ";
+
+    if ($userPlanType === 'VIP') {
+        $sql .= "('Free', 'Paid', 'Premium', 'VIP')";
+    } elseif ($userPlanType === 'Premium') {
+        $sql .= "('Free', 'Paid', 'Premium')";
+    } else {
+        $sql .= "('Free', 'Paid')";
+    }
+
+    $result = $conn->query($sql);
+
+    if ($result && $result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
+            $books[] = $row;
+        }
+    }
+    return $books;
 }
 
-if (isset($_GET['error']) && $_GET['error'] === 'invalid_payment_details') {
-    echo "<div class='alert alert-warning'>Invalid payment details. Please check your information.</div>";
-}
-
-
-$query = "SELECT b.Book_ID, b.Title, b.Author, b.Book_Cover, b.Genre, b.Price, COUNT(r.Review_ID) AS ReviewCount
-          FROM books b
-          LEFT JOIN reviews r ON b.Book_ID = r.Book_ID
-          GROUP BY b.Book_ID
-          ORDER BY ReviewCount DESC
-          LIMIT 10"; // Adjust the limit as needed
-
+// Fetch books based on the user's plan type
+$accessibleBooks = getBooksByUserPlan($conn, $userPlanType);
 
 ?>
 
@@ -167,6 +168,7 @@ $query = "SELECT b.Book_ID, b.Title, b.Author, b.Book_Cover, b.Genre, b.Price, C
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer" />
  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+ 
   <link rel="stylesheet" href="css/index/home.css">
   <script src="javascript/home.js"></script>
   <title>Haven Library - User Dashboard</title>
@@ -227,6 +229,54 @@ $query = "SELECT b.Book_ID, b.Title, b.Author, b.Book_Cover, b.Genre, b.Price, C
               .modal-content button {
                   margin-top: 20px;
               }
+              
+
+              /* Book cover container (image and lock overlay) */
+.book-cover-container {
+    position: relative;
+    display: inline-block;
+}
+
+.book-cover {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 10px; /* Optional: Rounded corners */
+}
+
+/* Lock overlay (appears when the book is locked) */
+.lock-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black background */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 2rem;
+    font-weight: bold;
+    border-radius: 10px;
+    opacity: 0; /* Initially hidden */
+    visibility: hidden; /* Initially hidden */
+}
+
+/* Show the lock overlay when the book is locked */
+.book-cover-container .lock-overlay {
+    visibility: visible;
+    opacity: 1;
+}
+
+.lock-overlay i {
+    font-size: 50px; /* Lock icon size */
+}
+
+/* Optional: Disable clicking on locked books */
+.book-cover-container.disabled {
+    pointer-events: none; /* Disables clicking on the book cover */
+}
 </style>
 </head>
 <body>
@@ -334,32 +384,55 @@ $result = $conn->query($query);
     <h2>Trending Now</h2>
     <div class="trending-items-container">
         <?php 
-        // Check if the query returned any rows
-        if ($result && $result->num_rows > 0) { 
-            $rank = 1; // Initialize rank
-            while ($book = $result->fetch_assoc()): 
-                // Construct preview path for each book
+        // Fetch trending books
+        $query = "
+            SELECT b.Book_ID,b.Title, b.Author, b.Book_Cover, 
+                b.Genre, 
+                b.Price, 
+                COUNT(r.Review_ID) AS ReviewCount, 
+                b.Plan_type, 
+                b.ISBN
+            FROM books b
+            LEFT JOIN reviews r ON b.Book_ID = r.Book_ID
+            GROUP BY b.Book_ID
+            ORDER BY ReviewCount DESC
+            LIMIT 10
+        ";
+        $result = $conn->query($query);
+
+        if ($result && $result->num_rows > 0) {
+            $rank = 1;
+            while ($book = $result->fetch_assoc()) {
                 $previewPath = "Book/" . ucfirst(strtolower($book['Plan_type'])) . "/Preview/" . $book['ISBN'] . ".php";
+                $hasAccess = canAccessBook($userPlanType, $book['Plan_type']);
         ?>
                 <div class="trending-item">
-                    <!-- Add ranking -->
                     <div class="rank"><?= $rank ?></div>
                     <a href="<?= htmlspecialchars($previewPath) ?>">
-                        <img src="<?= htmlspecialchars($book['Book_Cover']) ?>" alt="<?= htmlspecialchars($book['Title']) ?>">
+                        <div class="book-cover-container">
+                            <img src="<?= htmlspecialchars($book['Book_Cover']) ?>" alt="<?= htmlspecialchars($book['Title']) ?>">
+                            <?php if (!$hasAccess): ?>
+                                <div class="lock-overlay">
+                                    <i class="fas fa-lock"></i> <!-- Lock icon -->
+                                </div>
+                            <?php endif; ?>
+                        </div>
                     </a>
                     <div class="trending-info">
-                        <!-- Plan Type and Reviews on the same line -->
                         <span class="plan-type"><?= htmlspecialchars($book['Plan_type']) ?></span>
                         <span class="reviews"><?= $book['ReviewCount'] ?> reviews</span>
                     </div>
                 </div>
         <?php 
-                $rank++; // Increment rank
-            endwhile; // End of while loop
-        } // Closing brace for if statement
+                $rank++; 
+            }
+        } else {
+            echo "<p>No trending books found.</p>";
+        }
         ?>
     </div>
 </section>
+
 
 
 <!-- Top Free Section -->
@@ -421,7 +494,6 @@ $result = $conn->query($query);
     <button class="carousel-btn next-btn" onclick="moveFreeCarousel(1)">&#8250;</button>
   </div>
 </section>
-
 <!-- Top Premium Section -->
 <section class="premium-section">
     <h2>Top Premium</h2>
@@ -429,58 +501,71 @@ $result = $conn->query($query);
         <button class="carousel-btn prev-btn" onclick="movePremiumCarousel(-1)">&#8249;</button>
         <div class="premium-carousel" id="premiumCarousel">
             <?php
-        // Query to fetch Premium books
-        $query = "SELECT Book_ID, Title, Author, Book_Cover, Genre, Price, Plan_type, ISBN FROM books WHERE Plan_type = 'Premium' LIMIT 25";
-        $result = $conn->query($query);
+            // Query to fetch Premium books
+            $query = "SELECT Book_ID, Title, Author, Book_Cover, Genre, Price, Plan_type, ISBN FROM books WHERE Plan_type = 'Premium' LIMIT 25";
+            $result = $conn->query($query);
 
-        // Debugging: Log the query and result
-        error_log("Premium Section - SQL Query: " . $query);
-        if ($result) {
-            error_log("Premium Section - Number of rows: " . $result->num_rows);
-        } else {
-            error_log("Premium Section - Query failed: " . $conn->error);
-        }
+            // Debugging: Log the query and result
+            error_log("Premium Section - SQL Query: " . $query);
+            if ($result) {
+                error_log("Premium Section - Number of rows: " . $result->num_rows);
+            } else {
+                error_log("Premium Section - Query failed: " . $conn->error);
+            }
 
+            if ($result && $result->num_rows > 0) {
+                while ($book = $result->fetch_assoc()):
+                    // Construct the preview path
+                    $previewPath = "Book/" . ucfirst(strtolower($book['Plan_type'])) . "/Preview/";
+                    if (isset($book['ISBN'])) {
+                        $previewPath .= $book['ISBN'] . ".php";
+                    } else {
+                        // Handle the case where ISBN is missing
+                        $previewPath .= "default.php"; // Or some other default page
+                        error_log("ISBN is missing for book ID: " . $book['Book_ID']);
+                    }
 
-        if ($result && $result->num_rows > 0) {
-            while ($book = $result->fetch_assoc()):
-              // Construct the preview path
-              $previewPath = "Book/" . ucfirst(strtolower($book['Plan_type'])) . "/Preview/";
-              if (isset($book['ISBN'])) {
-                  $previewPath .= $book['ISBN'] . ".php";
-              } else {
-                  // Handle the case where ISBN is missing
-                  $previewPath .= "default.php"; // Or some other default page
-                  error_log("ISBN is missing for book ID: " . $book['Book_ID']);
-              }
+                    // Check if the user has access to the premium book
+                    $userPlanType = $_SESSION['user_type'] ?? 'Free'; // Get user plan type from session
+                    $hasAccess = canAccessBook($userPlanType, $book['Plan_type']);
+                    error_log("Premium Section - Book: " . $book['Title'] . ", Plan Type: " . $book['Plan_type'] . ", Has Access: " . ($hasAccess ? 'Yes' : 'No'));
+                    error_log("Premium Section - Preview Path: " . $previewPath);
 
-              // Debugging: Log book data and preview path
-              error_log("Premium Section - Book ID: " . $book['Book_ID'] . ", Title: " . $book['Title'] . ", ISBN: " . $book['ISBN'] . ", Plan_type: " . $book['Plan_type']);
-              error_log("Premium Section - Preview Path: " . $previewPath);
+                    // Use the full image path directly from the database
+                    $imagePath = htmlspecialchars($book['Book_Cover']);
 
-              // Use the full image path directly from the database
-              $imagePath = htmlspecialchars($book['Book_Cover']);
-
-              // Debugging: Log the image path
-              error_log("Premium Section - Image Path: " . $imagePath);
-
-               ?>
-            <div class="premium-item">
-                <a href="<?= htmlspecialchars($previewPath) ?>">
-                    <img src="<?php echo $imagePath; ?>" alt="<?php echo htmlspecialchars($book['Title']); ?>">
-                </a>
-            </div>
-        <?php
-            endwhile;
-        } else {
-            echo "<p>No premium books found.</p>";
-        }
-      ?>
+                    // Debugging: Log the image path
+                    error_log("Premium Section - Image Path: " . $imagePath);
+            ?>
+                    <div class="premium-item">
+                        <!-- Book cover with lock icon for restricted books -->
+                        <div class="book-cover-container <?php if (!$hasAccess) echo 'disabled'; ?>">
+                            <a href="<?= $hasAccess ? htmlspecialchars($previewPath) : '#' ?>">
+                                <img src="<?php echo $imagePath; ?>" alt="<?php echo htmlspecialchars($book['Title']); ?>" class="book-cover">
+                                <?php if (!$hasAccess): ?>
+                                    <div class="lock-overlay">
+                                        <i class="fas fa-lock"></i> <!-- Lock icon -->
+                                    </div>
+                                <?php endif; ?>
+                            </a>
+                        </div>
+                        <!-- Book info -->
+                        <div class="premium-info">
+                            <h3><?= htmlspecialchars($book['Title']) ?></h3>
+                            <p><?= htmlspecialchars($book['Author']) ?></p>
+                            <p class="price">₱<?= htmlspecialchars($book['Price']) ?></p>
+                        </div>
+                    </div>
+            <?php
+                endwhile;
+            } else {
+                echo "<p>No premium books found.</p>";
+            }
+            ?>
         </div>
         <button class="carousel-btn next-btn" onclick="movePremiumCarousel(1)">&#8250;</button>
     </div>
 </section>
-
 
 <section class="fiction-section">
   <h2>Top in Fiction</h2>
@@ -699,42 +784,20 @@ $result = $conn->query($query);
   </div>
 </section>
 
-
+<!-- Footer Section -->
 <footer class="footer">
-  <div class="footer-container">
-    <!-- Left Section: Haven Library Information -->
-    <div class="footer-left">
-      <h2>Haven Library</h2>
-      <p>Advanced Library Management System</p>
-    </div>
-
- <div class="footer-right">
-      <h3>Follow Us</h3>
-      <div class="social-media">
-        <a href="#" class="social-icon">Facebook</a>
-        <a href="#" class="social-icon">Twitter</a>
-        <a href="#" class="social-icon">LinkedIn</a>
-        <a href="#" class="social-icon">Instagram</a>
-      </div>
-      <p>&copy; 2025 Haven Library. All Rights Reserved.</p>
-    </div>
-
-    <!-- Center Section: Quick Links -->
-    <div class="footer-center">
-      <div class="footer-links">
-        <div class="footer-links-group">
-          <h3>About</h3>
-          <ul>
-            <li><a href="#">About Us</a></li>
-            <li><a href="#">Our Services</a></li>
-            <li><a href="#">Careers</a></li>
-          </ul>
-        </div>
-      </div>
-    </div>
-
-
+  <div class="footer-links">
+    <a href="#">About Us</a>
+    <a href="#">Privacy Policy</a>
+    <a href="#">Terms of Service</a>
+    <a href="#">Contact</a>
   </div>
+  <div class="footer-social">
+    <a href="#" class="social-icon">Facebook</a>
+    <a href="#" class="social-icon">Instagram</a>
+    <a href="#" class="social-icon">Twitter</a>
+  </div>
+  <p class="footer-text">&copy; 2025 Haven Library. All rights reserved.</p>
 </footer>
 
 
@@ -808,6 +871,13 @@ function closeModal() {
     document.getElementById("paymentModal").style.display = "none";
 }
 
+// Add this JavaScript to handle click prevention for locked books
+document.querySelectorAll('.book-cover-container').forEach(function(container) {
+    // Check if the container has the lock overlay
+    if (container.querySelector('.lock-overlay')) {
+        container.classList.add('disabled');
+    }
+});
 
 </script>
 
