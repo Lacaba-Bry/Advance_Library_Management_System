@@ -247,6 +247,46 @@ error_log("Avatar Path: " . $avatar);
         .btn:hover {
             background-color: darkred;
         }
+
+        .search-result {
+    padding: 10px;
+    margin: 5px 0;
+    border-bottom: 1px solid #ddd;
+}
+
+.search-result h4 {
+    margin: 0;
+    font-size: 16px;
+    color: #333;
+}
+
+.search-result p {
+    font-size: 14px;
+    color: #666;
+}
+
+.search-result a {
+    display: inline-block;
+    margin-top: 5px;
+    padding: 6px 12px;
+    background-color: #007bff;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+}
+
+.search-result a:hover {
+    background-color: #0056b3;
+}
+#search-results {
+    max-height: 300px;
+    overflow-y: auto;  /* Enables scrolling if results exceed max height */
+    border: 1px solid #ccc;
+    background-color: #f9f9f9;
+    padding: 10px;
+    border-radius: 5px;
+}
+
     </style>
 </head>
 <body>
@@ -293,19 +333,22 @@ error_log("Avatar Path: " . $avatar);
 <script>
 $(document).ready(function() {
     $('#search-input').on('input', function() {
-        var searchTerm = $(this).val();
+        var searchTerm = $(this).val().trim();
 
-        if (searchTerm.length > 2) { // Start searching after 3 characters
+        if (searchTerm.length > 2) { // Trigger search after typing 3 characters
             $.ajax({
-                url: 'search.php',
+                url: 'process/header/search.php', // Correct path to the search.php
                 method: 'GET',
                 data: { search: searchTerm },
                 success: function(response) {
-                    $('#search-results').html(response);  // Display search results
+                    $('#search-results').html(response);  // Display search results inside the div
+                },
+                error: function() {
+                    $('#search-results').html("<p>An error occurred while fetching search results.</p>");
                 }
             });
         } else {
-            $('#search-results').html(''); // Clear results if input is too short
+            $('#search-results').html('');  // Clear results if input is too short
         }
     });
 });
