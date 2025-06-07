@@ -1,3 +1,16 @@
+<?php
+require_once(__DIR__ . '/../backend/config/config.php');
+
+// Fetch the user activity log data from the database
+$query = "SELECT name, email, role, status, login_time FROM user_activity_log ORDER BY login_time DESC LIMIT 10"; // Fetch last 10 logs
+$result = $conn->query($query);
+
+// Check if there are results
+if (!$result) {
+    die("Database query failed: " . $conn->error);
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -64,24 +77,22 @@
 </head>
 <body>
 <main>
-      <header class="header">
-        <span class="logo-section">
-          <span class="logo">Home</span>
-        </span>
+  <header class="header">
+    <span class="logo-section">
+      <span class="logo">Home</span>
+    </span>
 
-        <div class="search-bar">
-          <input type="text" placeholder="Search ..." aria-label="Search">
-        </div>
+    <div class="search-bar">
+      <input type="text" placeholder="Search ..." aria-label="Search">
+    </div>
 
-        <div class="user-info">
-          <div class="user-profile">
-            <img src="./sample1.jpg" alt="Profile picture of Arafat Hossain" class="profile-img">
-            <span class="user-name">Bryan Lacaba</span>
-
-          </div>
-        </div>
-      </header>
-
+    <div class="user-info">
+      <div class="user-profile">
+        <img src="./sample1.jpg" alt="Profile picture of Arafat Hossain" class="profile-img">
+        <span class="user-name">Bryan Lacaba</span>
+      </div>
+    </div>
+  </header>
 
   <h1>User Activity Log</h1>
   <div class="table-responsive">
@@ -96,60 +107,26 @@
           <th>Activity</th>
         </tr>
       </thead>
-      <tbody id="logTableBody">
-        <!-- Rows inserted by JavaScript -->
+      <tbody>
+        <?php while ($row = $result->fetch_assoc()): ?>
+          <tr>
+            <td><?php echo htmlspecialchars($row['name']); ?></td>
+            <td><?php echo htmlspecialchars($row['email']); ?></td>
+            <td><span class="badge <?php echo strtolower($row['role']); ?>"><?php echo htmlspecialchars($row['role']); ?></span></td>
+            <td><span class="badge <?php echo strtolower($row['status']); ?>"><?php echo htmlspecialchars($row['status']); ?></span></td>
+            <td><?php echo htmlspecialchars($row['login_time']); ?></td>
+            <td>Active</td> <!-- You can modify activity based on your logic -->
+          </tr>
+        <?php endwhile; ?>
       </tbody>
     </table>
   </div>
 </main>
 
-<script>
-  const logData = [
-    {
-      name: "Arafat Hossain",
-      email: "arafat@example.com",
-      role: "Admin",
-      status: "Active",
-      loginTime: new Date().toLocaleTimeString(),
-      activity: "Browsing"
-    },
-    {
-      name: "Jane Smith",
-      email: "jane@example.com",
-      role: "User",
-      status: "Inactive",
-      loginTime: new Date(Date.now() - 600000).toLocaleTimeString(), // 10 minutes ago
-      activity: "Idle"
-    },
-    {
-      name: "Michael Doe",
-      email: "michael@example.com",
-      role: "User",
-      status: "Active",
-      loginTime: new Date(Date.now() - 300000).toLocaleTimeString(), // 5 minutes ago
-      activity: "Reading"
-    }
-  ];
-
-  function renderTable(data) {
-    const tbody = document.getElementById("logTableBody");
-    tbody.innerHTML = "";
-    data.forEach(user => {
-      const row = document.createElement("tr");
-      row.innerHTML = `
-        <td>${user.name}</td>
-        <td>${user.email}</td>
-        <td><span class="badge ${user.role.toLowerCase()}">${user.role}</span></td>
-        <td><span class="badge ${user.status.toLowerCase()}">${user.status}</span></td>
-        <td>${user.loginTime}</td>
-        <td>${user.activity}</td>
-      `;
-      tbody.appendChild(row);
-    });
-  }
-
-  renderTable(logData);
-</script>
-
 </body>
 </html>
+
+<?php
+// Close database connection
+$conn->close();
+?>

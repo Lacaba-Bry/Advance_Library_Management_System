@@ -50,7 +50,9 @@ $avatar = $avatar ?: 'image/profile/defaultprofile.jpg';
 
 // Check if the Premium plan has expired
 $isPremiumExpired = false;
-if (strcasecmp($userType, 'Premium') === 0) {
+
+// Check if $userType is null or empty before using it
+if (!empty($userType) && strcasecmp($userType, 'Premium') === 0) {
     // If Expiration_Date is NULL, it means the plan is ongoing (no expiration)
     if ($expirationDate !== NULL) {
         $currentDate = new DateTime(); // Current date
@@ -65,8 +67,12 @@ if (strcasecmp($userType, 'Premium') === 0) {
     } else {
         $isPremiumExpired = false; // No expiration date, active plan
     }
+} else {
+    // Handle the case where $userType is null or empty.  This is important!
+    $isPremiumExpired = false; // Or whatever makes sense for your logic
+    // Optionally log this condition for debugging:
+    error_log("User type is null or empty for user: " . $accountId);
 }
-
 
 // --------------------------------------------------------------------------
 // BOOK FETCH FUNCTIONS

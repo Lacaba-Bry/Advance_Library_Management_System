@@ -1,55 +1,69 @@
 <?php
 session_start();
+require_once __DIR__ . '/config/config.php';
 
-// Ensure the email is passed in the POST request
-if (isset($_POST['email'])) {
-    $email = $_POST['email'];  // Get the email from the POST data
-} else {
-    echo "Error: No email provided.";
-    exit();
-}
+// Enable error reporting (remove after debugging)
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
-// Check if the form is submitted to change the password
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Get the new password and confirm password from the form
-    $newPassword = $_POST['new_password']; 
-    $confirmPassword = $_POST['confirm_password']; 
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['email'], $_POST['new_password'], $_POST['confirm_password'])) {
+    $email = $_POST['email'];
+    $newPassword = $_POST['new_password'];
+    $confirmPassword = $_POST['confirm_password'];
 
-    // Check if the passwords match
-    if ($newPassword === $confirmPassword) {
-        // Hash the new password securely
-        $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+    echo "Email: " . htmlspecialchars($email) . "<br>"; // Debugging
+    echo "New Password: " . htmlspecialchars($newPassword) . "<br>"; // Debugging
+    echo "Confirm Password: " . htmlspecialchars($confirmPassword) . "<br>"; // Debugging
 
-        // Include your database connection
-        require_once './config/config.php';  // Your database connection file
-
-        // Prepare the SQL query to update the password in both tables (only password)
-        $stmt1 = $conn->prepare("UPDATE accountlist SET Password = ? WHERE email = ?");
-        $stmt1->bind_param("ss", $hashedPassword, $email);  // Update the password in accountlist
-
-        $stmt2 = $conn->prepare("UPDATE register SET Password = ? WHERE email = ?");
-        $stmt2->bind_param("ss", $hashedPassword, $email);  // Update the password in register
-
-        // Execute both queries
-        if ($stmt1->execute() && $stmt2->execute()) {
-            // Check if any rows were affected
-            if ($stmt1->affected_rows > 0 || $stmt2->affected_rows > 0) {
-                // If the password is successfully updated, update the session and redirect the user to login
-                $_SESSION['password_updated'] = true;
-                header("Location: login.php?message=Password updated successfully. Please log in again.");
-                exit();
-            } else {
-                echo "No rows were updated. Please check if the email exists in the database.";
-            }
-        } else {
-            echo "Error updating password: " . $conn->error;  // Show the error if any
-        }
-
-        $stmt1->close();
-        $stmt2->close();
-        $conn->close();
-    } else {
-        echo "Passwords do not match. Please try again.";
+    if ($newPassword !== $confirmPassword) {
+        $_SESSION['reset_status'] = 'password_mismatch';
+        header('Location: ../index.php?email=' . urlencode($email) . '&showChangePasswordModal=2');
+        exit();
     }
+
+    $hashedPassword = password_hash($newPassword, PASSWORD_BCRYPT);
+
+    // Update password in accountlist table
+    $sql1 = "UPDATE accountlist SET password = ? WHERE email = ?";
+    $stmt = $conn->prepare($sql1);
+    $stmt->bind_param("ss", $hashedPassword, $email);
+
+    echo "SQL 1: " . htmlspecialchars($sql1) . "<br>"; // Debugging
+
+    if ($stmt->execute()) {
+        echo "accountlist update successful<br>"; // Debugging
+    } else {
+        $error = "Error updating password in accountlist: " . $stmt->error;
+        error_log($error); // Log the error for debugging
+        $_SESSION['reset_status'] = 'db_error';
+        header('Location: ../index.php?email=' . urlencode($email) . '&showChangePasswordModal=2');
+        exit();
+    }
+
+    // Update password in register table
+    $sql2 = "UPDATE register SET password = ? WHERE email = ?";
+    $stmt2 = $conn->prepare($sql2);
+    $stmt2->bind_param("ss", $hashedPassword, $email);
+
+    echo "SQL 2: " . htmlspecialchars($sql2) . "<br>"; // Debugging
+
+    if ($stmt2->execute()) {
+        echo "register update successful<br>"; // Debugging
+        $_SESSION['reset_status'] = 'success';
+        header('Location: ../index.php');
+        exit();
+    } else {
+        $error = "Error updating password in register: " . $stmt2->error;
+        error_log($error); // Log the error for debugging
+        $_SESSION['reset_status'] = 'db_error';
+        header('Location: ../index.php?email=' . urlencode($email) . '&showChangePasswordModal=2');
+        exit();
+    }
+} else {
+    // Handle cases where the form wasn't submitted correctly
+    echo "Form not submitted correctly<br>"; // Debugging
+    header('Location: ../index.php'); // Or display an error
+    exit();
 }
 ?>

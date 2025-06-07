@@ -23,6 +23,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
       $_SESSION['admin_id'] = $admin_id;
       $_SESSION['admin_email'] = $email; // Store email of admin
 
+      // Log admin activity
+      $logStmt = $conn->prepare("INSERT INTO user_activity_log (name, email, role, status) VALUES (?, ?, ?, ?)");
+      $logStmt->bind_param("ssss", $name, $email, $role, $status);
+      $name = 'Admin'; // Admin name
+      $role = 'Admin';
+      $status = 'Active';
+      $logStmt->execute();
+      $logStmt->close();
+
       echo "<script>
         alert('Welcome Admin!');
         window.location.href = '../admin.php';
@@ -59,6 +68,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
       $_SESSION['user_id'] = $account_id;
       $_SESSION['user_email'] = $email; // Store email of user
       $_SESSION['user_plan'] = $plan_name; // Store plan type
+
+      // Log user activity
+      $logStmt = $conn->prepare("INSERT INTO user_activity_log (name, email, role, status) VALUES (?, ?, ?, ?)");
+      $logStmt->bind_param("ssss", $name, $email, $role, $status);
+      $name = 'User'; // User name
+      $role = 'User';
+      $status = 'Active';
+      $logStmt->execute();
+      $logStmt->close();
 
       echo "<script>
         alert('Welcome User! Plan: " . $plan_name . "');
