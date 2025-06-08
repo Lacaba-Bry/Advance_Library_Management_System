@@ -47,7 +47,15 @@ $previousRevenueQuery->execute();
 $previousRevenueResult = $previousRevenueQuery->get_result();
 $previousRevenue = $previousRevenueResult->fetch_row()[0];
 
-$growth = (($totalRevenue - $previousRevenue) / $previousRevenue) * 100;
+// Calculate growth percentage
+$growth = 0;  // Default to 0
+if ($previousRevenue > 0) {
+    $growth = (($totalRevenue - $previousRevenue) / $previousRevenue) * 100;
+} else {
+    // If previousRevenue is 0, handle the division by zero gracefully
+    $growth = 0;
+}
+
 
 $topSellingBooksQuery = $conn->prepare("
     SELECT b.Title, b.price, COUNT(tb.book_id) as sales_count, SUM(tb.price) as total_sales

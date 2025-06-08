@@ -32,15 +32,17 @@ try {
 }
 
 
-// Query to get the total number of transactions
-$total_transactions_query = "SELECT COUNT(*) AS total_transactions FROM transaction_plan";
-$total_transactions_result = $conn->query($total_transactions_query);
-$total_transactions = 0; // Default value if the query fails
+// Query to get the total number of books
+$total_books_query = "SELECT COUNT(*) AS total_books FROM books";
+$total_books_result = $conn->query($total_books_query);
+$total_books = 0; // Default value if the query fails
 
-if ($total_transactions_result) {
-    $row = $total_transactions_result->fetch_assoc();
-    $total_transactions = $row['total_transactions'];
+if ($total_books_result) {
+    $row = $total_books_result->fetch_assoc();
+    $total_books = $row['total_books'];
 }
+
+
 
 // Query to get the total earnings (sum of the amounts)
 $total_earnings_query = "SELECT SUM(amount) AS total_earnings FROM transaction_plan WHERE payment_status = 'completed'";
@@ -117,8 +119,8 @@ if ($book_count_result) {
                   <!-- Summary Cards (Total Transactions and Earnings) -->
                         <div class="summary-cards">
                             <div class="card">
-                                <h3>Total Transactions</h3>
-                                <p><?php echo $total_transactions; ?></p> <!-- Display dynamic total transactions -->
+                                <h3>Total Books</h3>
+                                <p><?php echo $total_books; ?></p> <!-- Display dynamic total transactions -->
                             </div>
                             <div class="card">
                                 <h3>Free Books</h3>

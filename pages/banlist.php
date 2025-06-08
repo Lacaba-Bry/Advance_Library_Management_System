@@ -1,3 +1,14 @@
+<?php
+require_once(__DIR__ . '/../backend/config/config.php');
+
+// Fetch all banned users from the database
+$query = "SELECT * FROM banned_users";
+$stmt = $conn->prepare($query);
+$stmt->execute();
+$bannedUsersResult = $stmt->get_result();
+
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -44,13 +55,6 @@
         display: flex;
         gap: 10px;
         align-items: center;
-    }
-
-    .search-bar input {
-        padding: 10px 15px;
-        border: 1px solid var(--border-clr);
-        border-radius: 6px;
-        font-size: 14px;
     }
 
     .ban-button {
@@ -121,8 +125,8 @@
             padding: 10px;
         }
 
-        .search-bar input {
-            font-size: 13px;
+        .ban-button {
+            font-size: 12px;
         }
     }
   </style>
@@ -143,14 +147,12 @@
     </div>
   </header>
 
+  <!-- Modified header-row to align 'Ban List' and 'Ban Button' in the same row -->
   <div class="header-row">
     <h1>Ban List</h1>
     <div class="right-controls">
-        <div class="search-bar">
-            <input type="text" placeholder="Search by Name or Email...">
-        </div>
-        <!-- Ban Button added here -->
-        <button class="ban-button">Ban Account</button>
+        <!-- Ban Account Button to trigger Modal -->
+        <button class="ban-button" data-bs-toggle="modal" data-bs-target="#banModal">Ban Account</button>
     </div>
   </div>
 
@@ -164,31 +166,108 @@
                 <th>Date Banned</th>
                 <th>Reason</th>
                 <th>Status</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
+            <?php while ($bannedUser = $bannedUsersResult->fetch_assoc()): ?>
             <tr>
-                <td>1</td>
-                <td>John Santos</td>
-                <td>john@example.com</td>
-                <td>02/15/2024</td>
-                <td>Repeated violations of community guidelines</td>
+                <td><?php echo $bannedUser['user_id']; ?></td>
+                <td><?php echo htmlspecialchars($bannedUser['name']); ?></td>
+                <td><?php echo htmlspecialchars($bannedUser['email']); ?></td>
+                <td><?php echo date('m/d/Y', strtotime($bannedUser['date_banned'])); ?></td>
+                <td><?php echo htmlspecialchars($bannedUser['reason']); ?></td>
                 <td><span class="badge inactive">Banned</span></td>
+                <td><button class="ban-button" data-user-id="<?php echo $bannedUser['user_id']; ?>" onclick="unbanUser(this)">Unban</button></td>
             </tr>
-            <tr>
-                <td>2</td>
-                <td>Mary Cruz</td>
-                <td>marycruz@email.com</td>
-                <td>02/18/2024</td>
-                <td>Spamming</td>
-                <td><span class="badge inactive">Banned</span></td>
-            </tr>
-            <!-- Add more rows as needed -->
+            <?php endwhile; ?>
         </tbody>
     </table>
   </div>
 
 </main>
+
+<!-- Ban Account Modal -->
+<div class="modal fade" id="banModal" tabindex="-1" aria-labelledby="banModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="banModalLabel">Ban Account</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="banForm" method="POST">
+          <div class="mb-3">
+            <label for="userEmail" class="form-label">Enter Email to Ban:</label>
+            <input type="email" class="form-control" id="userEmail" name="userEmail" required>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-danger">Ban Account</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// JavaScript to handle banning of users
+function unbanUser(button) {
+    const userId = button.getAttribute('data-user-id'); // Get the user ID from data attribute
+    
+    if (confirm('Are you sure you want to unban this user?')) {
+        const formData = new FormData();
+        formData.append('user_id', userId);
+
+        fetch('unban_user.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.text())
+        .then(data => {
+            if (data.includes('successfully')) {
+                alert('User has been unbanned!');
+                window.location.reload();  // Reload the page to show the updated status
+            } else {
+                alert('Error: ' + data);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('There was an error unbanning the user.');
+        });
+    }
+}
+
+// JavaScript to handle Ban Account form submission
+document.getElementById('banForm').addEventListener('submit', function (event) {
+    event.preventDefault(); // Prevent default form submission
+
+    const userEmail = document.getElementById('userEmail').value;
+
+    const formData = new FormData();
+    formData.append('email', userEmail);
+
+   fetch('process/admin/ban_user.php', {
+    method: 'POST',
+    body: formData
+})
+.then(response => response.text())
+.then(data => {
+    if (data.includes('successfully')) {
+        alert('User has been banned!');
+        window.location.reload(); // Reload the page to reflect the changes
+    } else {
+        alert('Error: ' + data);
+    }
+})
+.catch(error => {
+    console.error('Error:', error);
+    alert('There was an error banning the user.');
+});
+
+</script>
 
 </body>
 </html>
