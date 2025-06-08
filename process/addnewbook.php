@@ -1,9 +1,6 @@
 <?php 
 require_once('../backend/config/config.php');
 
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
 
 // Handle POST request
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
