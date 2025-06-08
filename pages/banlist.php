@@ -1,12 +1,13 @@
 <?php
 require_once(__DIR__ . '/../backend/config/config.php');
 
-// Fetch all banned users from the database
-$query = "SELECT * FROM banned_users";
+// Fetch banned users with details from the register table
+$query = "SELECT b.id, r.Fullname, b.email, b.date_banned, b.status 
+          FROM banned_users b 
+          JOIN register r ON r.email = b.email";
 $stmt = $conn->prepare($query);
 $stmt->execute();
 $bannedUsersResult = $stmt->get_result();
-
 ?>
 
 <!DOCTYPE html>
@@ -14,7 +15,7 @@ $bannedUsersResult = $stmt->get_result();
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Member List | Admin Panel</title>
+  <title>Ban List | Admin Panel</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/adminheader.css">
   <style>
@@ -142,16 +143,13 @@ $bannedUsersResult = $stmt->get_result();
        <div class="user-profile">
             <img src="./sample1.jpg" alt="Profile picture of Arafat Hossain" class="profile-img">
             <span class="user-name">Bryan Lacaba</span>
-
-          </div>
+        </div>
     </div>
   </header>
 
-  <!-- Modified header-row to align 'Ban List' and 'Ban Button' in the same row -->
   <div class="header-row">
     <h1>Ban List</h1>
     <div class="right-controls">
-        <!-- Ban Account Button to trigger Modal -->
         <button class="ban-button" data-bs-toggle="modal" data-bs-target="#banModal">Ban Account</button>
     </div>
   </div>
@@ -164,7 +162,6 @@ $bannedUsersResult = $stmt->get_result();
                 <th>Name</th>
                 <th>Email</th>
                 <th>Date Banned</th>
-                <th>Reason</th>
                 <th>Status</th>
                 <th>Actions</th>
             </tr>
@@ -172,13 +169,12 @@ $bannedUsersResult = $stmt->get_result();
         <tbody>
             <?php while ($bannedUser = $bannedUsersResult->fetch_assoc()): ?>
             <tr>
-                <td><?php echo $bannedUser['user_id']; ?></td>
-                <td><?php echo htmlspecialchars($bannedUser['name']); ?></td>
+                <td><?php echo $bannedUser['id']; ?></td>
+                <td><?php echo htmlspecialchars($bannedUser['Fullname']); ?></td>
                 <td><?php echo htmlspecialchars($bannedUser['email']); ?></td>
                 <td><?php echo date('m/d/Y', strtotime($bannedUser['date_banned'])); ?></td>
-                <td><?php echo htmlspecialchars($bannedUser['reason']); ?></td>
                 <td><span class="badge inactive">Banned</span></td>
-                <td><button class="ban-button" data-user-id="<?php echo $bannedUser['user_id']; ?>" onclick="unbanUser(this)">Unban</button></td>
+                <td><button class="ban-button" data-user-id="<?php echo $bannedUser['id']; ?>" onclick="unbanUser(this)">Unban</button></td>
             </tr>
             <?php endwhile; ?>
         </tbody>
@@ -199,7 +195,7 @@ $bannedUsersResult = $stmt->get_result();
         <form id="banForm" method="POST">
           <div class="mb-3">
             <label for="userEmail" class="form-label">Enter Email to Ban:</label>
-            <input type="email" class="form-control" id="userEmail" name="userEmail" required>
+            <input type="email" class="form-control" id="userEmail" name="email" required>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -215,22 +211,23 @@ $bannedUsersResult = $stmt->get_result();
 // JavaScript to handle banning of users
 function unbanUser(button) {
     const userId = button.getAttribute('data-user-id'); // Get the user ID from data attribute
-    
+
     if (confirm('Are you sure you want to unban this user?')) {
         const formData = new FormData();
         formData.append('user_id', userId);
 
-        fetch('unban_user.php', {
+        fetch('process/admin/unban_user.php', { // Corrected path
             method: 'POST',
             body: formData
         })
         .then(response => response.text())
         .then(data => {
-            if (data.includes('successfully')) {
+            if (data.includes('User unbanned successfully!')) { // Check for specific success message
                 alert('User has been unbanned!');
                 window.location.reload();  // Reload the page to show the updated status
             } else {
                 alert('Error: ' + data);
+                console.error('Unban error:', data); // Log the error
             }
         })
         .catch(error => {
@@ -249,25 +246,27 @@ document.getElementById('banForm').addEventListener('submit', function (event) {
     const formData = new FormData();
     formData.append('email', userEmail);
 
-   fetch('process/admin/ban_user.php', {
-    method: 'POST',
-    body: formData
-})
-.then(response => response.text())
-.then(data => {
-    if (data.includes('successfully')) {
-        alert('User has been banned!');
-        window.location.reload(); // Reload the page to reflect the changes
-    } else {
-        alert('Error: ' + data);
-    }
-})
-.catch(error => {
-    console.error('Error:', error);
-    alert('There was an error banning the user.');
+    fetch('process/admin/ban_user.php', { // Corrected path (already correct)
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.text())
+        .then(data => {
+            if (data.includes('User has been banned successfully!')) { // Check for specific success message
+                alert('User has been banned!');
+                window.location.reload(); // Reload the page to reflect the changes
+            } else {
+                alert('Error: ' + data);
+                console.error('Ban error:', data); // Log the error
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('There was an error banning the user.');
+        });
 });
-
 </script>
+
 
 </body>
 </html>

@@ -65,9 +65,6 @@
         <ul class="sub-menu">
           <div>
             <li><a href="?page=booklist">Book List</a></li>
-            <li><a href="?page=bookfeatures">Features Book</a></li>
-            <li><a href="?page=bookrented">Book rented</a></li>
-            <li><a href="?page=paidbook">Paid Book</a></li>
           </div>
         </ul>
       </li>
