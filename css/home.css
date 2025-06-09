@@ -592,3 +592,156 @@ footer {
 .carousel-btn:hover {
   background-color: #32229e;
 }
+             /* General Modal Styling */
+              .modal {
+                  display: none; /* Hidden by default */
+                  position: fixed; /* Fixed position on the screen */
+                  top: 0;
+                  left: 0;
+                  width: 100%;
+                  height: 100%;
+                  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+                  z-index: 9999; /* Make sure it's on top of other content */
+                  align-items: center;
+                  justify-content: center;
+              }
+
+              /* Modal Content Styling */
+              .modal-content {
+                  background-color: #fff;
+                  padding: 30px;
+                  border-radius: 8px;
+                  max-width: 500px;
+                  width: 90%; /* Responsive width */
+                  text-align: center;
+              }
+
+              /* Buttons Styling */
+              .btn {
+                  padding: 10px 20px;
+                  margin-top: 10px;
+                  cursor: pointer;
+                  border: none;
+                  border-radius: 5px;
+                  transition: background-color 0.3s ease;
+              }
+
+              .btn-primary {
+                  background-color: #007bff;
+                  color: white;
+              }
+
+              .btn-primary:hover {
+                  background-color: #0056b3;
+              }
+
+              .btn-secondary {
+                  background-color: #6c757d;
+                  color: white;
+              }
+
+              .btn-secondary:hover {
+                  background-color: #343a40;
+              }
+
+              /* Optional: Close button styling */
+              .modal-content button {
+                  margin-top: 20px;
+              }
+              
+
+              /* Book cover container (image and lock overlay) */
+.book-cover-container {
+    position: relative;
+    display: inline-block;
+}
+
+.book-cover {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 10px; /* Optional: Rounded corners */
+}
+
+/* Lock overlay (appears when the book is locked) */
+.lock-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black background */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 2rem;
+    font-weight: bold;
+    border-radius: 10px;
+    opacity: 0; /* Initially hidden */
+    visibility: hidden; /* Initially hidden */
+}
+
+/* Show the lock overlay when the book is locked */
+.book-cover-container .lock-overlay {
+    visibility: visible;
+    opacity: 1;
+}
+
+.lock-overlay i {
+    font-size: 50px; /* Lock icon size */
+}
+
+/* Optional: Disable clicking on locked books */
+.book-cover-container.disabled {
+    pointer-events: none; /* Disables clicking on the book cover */
+}
+
+/* Footer Styles */
+.footer {
+background-color: #4e3bcf;
+color: white;
+padding: 40px 20px;
+text-align: center;
+display: flex;
+flex-direction: column;
+align-items: center;
+gap: 20px;
+}
+
+.footer-links {
+display: flex;
+gap: 20px;
+justify-content: center;
+}
+
+.footer-links a {
+color: white;
+text-decoration: none;
+font-weight: 500;
+}
+
+.footer-links a:hover {
+text-decoration: underline;
+}
+
+.footer-social {
+display: flex;
+gap: 20px;
+justify-content: center;
+}
+
+.footer-social .social-icon {
+color: white;
+text-decoration: none;
+font-weight: 600;
+}
+
+.footer-social .social-icon:hover {
+color: #f7c948; /* Change to a hover color of your choice */
+}
+
+.footer-text {
+font-size: 0.9rem;
+color: #dcdcdc;
+}

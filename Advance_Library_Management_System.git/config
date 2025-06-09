@@ -1,0 +1,14 @@
+[core]
+	repositoryformatversion = 0
+	filemode = false
+	bare = true
+	symlinks = false
+	ignorecase = true
+[remote "origin"]
+	url = https://github.com/Lacaba-Bry/Advance_Library_Management_System.git
+	tagOpt = --no-tags
+	fetch = +refs/*:refs/*
+	mirror = true
+[remote "cvsu-origin"]
+	url = https://github.com/CVSU-BSIT-2B/Library_Management_SystemX
+	fetch = +refs/heads/*:refs/remotes/cvsu-origin/*

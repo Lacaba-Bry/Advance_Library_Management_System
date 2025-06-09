@@ -342,7 +342,7 @@ $resetEmailJson = json_encode($resetEmail);
 
 <!-- Success/Error Modal -->
 <div id="resetStatusModal" class="modalv" style="display: none;">
-    <div class="modal-contentv">
+    <div class="modal-content">
         <span class="close" onclick="closeModal('resetStatusModal')">&times;</span>
         <h2 id="resetStatusTitle"></h2>
         <p id="resetStatusMessage"></p>
@@ -377,8 +377,8 @@ $resetEmailJson = json_encode($resetEmail);
 
 
 <!-- Forgot Password Modal -->
-  <div id="forgotPasswordModal" class="modalv">
-    <div class="modal-contentv">
+  <div id="forgotPasswordModal" class="modal">
+    <div class="modal-content">
       <span class="close" onclick="closeModal('forgotPasswordModal')">&times;</span>
       <h2>Forgot Password</h2>
       <form action="backend/forgot-password.php" method="POST">
@@ -389,8 +389,8 @@ $resetEmailJson = json_encode($resetEmail);
   </div>
 
  <!-- Verification Code Modal -->
-<div id="verifyCodeModal" class="modalv" style="display: none;">
-    <div class="modal-contentv">
+<div id="verifyCodeModal" class="modal" style="display: none;">
+    <div class="modal-content">
         <span class="close" onclick="closeModal('verifyCodeModal')">&times;</span>
         <h2>Enter Verification Code</h2>
         <form action="index.php" method="POST">
@@ -404,8 +404,8 @@ $resetEmailJson = json_encode($resetEmail);
 
 
 <!-- Change Password Modal -->
-<div id="changePasswordModal" class="modalv" style="display: none;">
-    <div class="modal-contentv">
+<div id="changePasswordModal" class="modal" style="display: none;">
+    <div class="modal-content">
         <span class="close" onclick="closeModal('changePasswordModal')">&times;</span>
         <h2>Change Password</h2>
         <form action="backend/change-password.php" method="POST">

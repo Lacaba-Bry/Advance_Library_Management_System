@@ -46,10 +46,10 @@ $stmt->close();
 
 // Check if avatar is set; if not, use default avatar
 if (!$avatar || empty($avatar)) {
-    $avatar = 'image/profile/defaultprofile.jpg'; // Default image if avatar is not set
+    $avatar = '/BRYANCODEX/image/profile/defaultprofile.jpg'; // Absolute path to default image
 } else {
     // Ensure the avatar path is correct and safe
-    $avatar = "image/profile/" . $avatar; // Adjust path to match your file structure
+    $avatar = "/BRYANCODEX/image/profile/" . $avatar; // Absolute path to user's avatar
 }
 
 // Debugging: Output avatar path (optional, remove in production)
@@ -292,7 +292,7 @@ error_log("Avatar Path: " . $avatar);
 <body>
   <header class="top-nav">
     <div class="left-section">
-        <img src="Logo.jpg" class="logo" alt="Logo" />
+        <img src="/BRYANCODEX/Logo.jpg" class="logo" alt="Logo" />
         <nav class="nav-links">
           <div class="dropdown">
             <button class="dropbtn">
@@ -300,16 +300,14 @@ error_log("Avatar Path: " . $avatar);
               <span class="material-icons dropdown-icon">arrow_drop_down</span>
             </button>
             <div class="dropdown-content">
-              <a href="home.php">Home</a>
-              <a href="genres.php">Genres</a>
+              <a href="/BRYANCODEX/home.php">Home</a>
+              <a href="/BRYANCODEX/search.php">Books</a>
             </div>
           </div>
         </nav>
     </div>
 
-    <div class="center-section">
-    <input type="text" class="search-bar" id="search-input" placeholder="Search" />
-    <div id="search-results"></div>
+
 </div>
 
     <div class="right-section">
@@ -321,8 +319,8 @@ error_log("Avatar Path: " . $avatar);
                 <img src="<?php echo htmlspecialchars($avatar); ?>" class="profile-avatar" alt="User Avatar" />
             </div>
             <div class="dropdown-content">
-                <a href="profile.php">Profile</a>
-                <a href="backend/logout.php">Logout</a>
+                <a href="/BRYANCODEX/profile.php">Profile</a>
+                <a href="/BRYANCODEX/backend/logout.php">Logout</a>
             </div>
         </div>
         <span class="user-type"><?php echo htmlspecialchars($userName); ?></span>
@@ -332,28 +330,27 @@ error_log("Avatar Path: " . $avatar);
 
 
 <script>
-$(document).ready(function() {
-    $('#search-input').on('input', function() {
-        var searchTerm = $(this).val().trim();
-
-        if (searchTerm.length > 2) { // Trigger search after typing 3 characters
-            $.ajax({
-                url: 'process/header/search.php', // Correct path to the search.php
-                method: 'GET',
-                data: { search: searchTerm },
-                success: function(response) {
-                    $('#search-results').html(response);  // Display search results inside the div
-                },
-                error: function() {
-                    $('#search-results').html("<p>An error occurred while fetching search results.</p>");
-                }
-            });
-        } else {
-            $('#search-results').html('');  // Clear results if input is too short
-        }
-    });
+// When the search input changes or the button is clicked, navigate to search.php with the query
+document.getElementById('search-button').addEventListener('click', function() {
+    const searchQuery = document.getElementById('search-input').value;
+    if (searchQuery) {
+        window.location.href = '/BRYANCODEX/search.php?q=' + encodeURIComponent(searchQuery);
+    } else {
+        alert('Please enter a search term.');
+    }
 });
 
+// Optionally, also allow pressing "Enter" to trigger the search
+document.getElementById('search-input').addEventListener('keypress', function(event) {
+    if (event.key === 'Enter') {
+        const searchQuery = document.getElementById('search-input').value;
+        if (searchQuery) {
+            window.location.href = '/BRYANCODEX/search.php?q=' + encodeURIComponent(searchQuery);
+        } else {
+            alert('Please enter a search term.');
+        }
+    }
+});
 
 </script>
 </body>

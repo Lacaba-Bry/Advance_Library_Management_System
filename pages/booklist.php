@@ -142,11 +142,12 @@ if ($book_count_result) {
         <form method="get" action="booklist.php" class="search-bar">
           <input type="text" class="form-control" name="search" placeholder="Search by title or author..." value="<?php echo htmlspecialchars($searchTerm); ?>">
         </form>
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addBookModal">
+    </div>
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addBookModal">
           Add New Book
         </button>
-    </div>
 
+  </div>
     <div class="table-container">
       <table class="table table-striped">
         <thead>
@@ -210,7 +211,7 @@ foreach ($books as $book) {
     echo '<td>
               <div class="action-buttons">
                   <a href="' . htmlspecialchars($previewPath) . '" class="btn btn-info btn-sm">View</a>  <!-- View button links to preview page -->
-                  <button class="btn btn-warning btn-sm" onclick="updateBook(\'' . $book['Book_ID'] . '\')">Restock</button>
+                 <button class="btn btn-warning btn-sm restock-button" data-book-id="' . $book['Book_ID'] . '">Restock</button>
                   <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteConfirmationModal" data-book-id="' . $book['Book_ID'] . '">Delete</button>
               </div>
           </td>';
@@ -231,6 +232,33 @@ function getBadgeClass($planType) {
       </table>
     </div>
 
+<!-- Restock Book Modal (Appears First) -->
+<div class="modal fade" id="restockModal" tabindex="-1" aria-labelledby="restockModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="restockModalLabel">Restock Book</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="restockForm" method="post">
+          <input type="hidden" name="book_id" id="restockBookId" />
+          <div class="mb-3">
+            <label for="restockQuantity" class="form-label">Enter Quantity to Restock:</label>
+            <input type="number" class="form-control" id="restockQuantity" name="restockQuantity" min="1" required />
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-primary">Restock</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+    
     <!-- Delete Confirmation Modal -->
     <div class="modal fade" id="deleteConfirmationModal" tabindex="-1" role="dialog" aria-labelledby="deleteConfirmationModalLabel" aria-hidden="true">
       <div class="modal-dialog" role="document">
@@ -334,6 +362,8 @@ function getBadgeClass($planType) {
   </div>
 </div>
 
+
+
    <script>
       $(document).ready(function() {
       let bookIdToDelete;
@@ -397,7 +427,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const formData = new FormData(addBookForm);
 
     try {
-      const response = await fetch('/process/addnewbook.php', {
+      const response = await fetch('process/addnewbook.php', {
         method: 'POST',
         body: formData
       });
@@ -413,6 +443,40 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
+
+document.addEventListener('DOMContentLoaded', function () {
+    const restockButtons = document.querySelectorAll('.restock-button');
+    restockButtons.forEach(button => {
+        button.addEventListener('click', function () {
+            const bookId = this.getAttribute('data-book-id');
+            document.getElementById('restockBookId').value = bookId; // Set the book ID for the restock form
+            $('#restockModal').modal('show'); // Show the restock modal
+        });
+    });
+
+    // Handle restocking when form is submitted
+    document.getElementById('restockForm').addEventListener('submit', function (event) {
+        event.preventDefault(); // Prevent the default form submission
+
+        const formData = new FormData(this);
+
+        fetch('/BryanCodeX/backend/reserve_book_notification.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.text())
+        .then(data => {
+            alert(data); // Show success or error message
+            $('#restockModal').modal('hide'); // Close the modal
+            location.reload(); // Reload the page to reflect the changes
+        })
+        .catch(error => {
+            console.error("Error restocking book:", error);
+            alert("An error occurred while restocking the book.");
+        });
+    });
+});
+
   </script>
 
 </body>

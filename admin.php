@@ -109,8 +109,7 @@
   <!-- Main content area -->
  <?php
   $page = $_GET['page'] ?? 'adminhome';
-  $allowed_pages = ['dashboard', 'adminhome','memberlist','banlist','booklist','paidbooks','bookrented','bookfeatures','transaction','logs','plans'];
-
+ $allowed_pages = ['dashboard', 'adminhome','memberlist','banlist','booklist','paidbooks','bookrented','bookfeatures','transaction','logs','plans'];
   if (in_array($page, $allowed_pages)) {
       $filepath = __DIR__ . "/pages/{$page}.php";
       if (file_exists($filepath)) {

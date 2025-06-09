@@ -22,9 +22,6 @@
         <span class="logo-section">
           <span class="logo">Home</span>
         </span>
-        <div class="search-bar">
-          <input type="text" placeholder="Search ..." aria-label="Search">
-        </div>
 
         <div class="user-info">
           <div class="user-profile">
@@ -177,6 +174,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Listen for changes in Plan type
   planSelect.addEventListener('change', handlePlanChange);
 });
+
 
 document.addEventListener('DOMContentLoaded', () => {
   const addBookForm = document.getElementById('addBookForm');

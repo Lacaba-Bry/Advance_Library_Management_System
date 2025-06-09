@@ -22,14 +22,11 @@ $Plan_type = $book['Plan_type'];
 $coverPath = "../../../Book/" . $Plan_type . "/Book_Cover/" . basename($book['Book_Cover']);
 $stock = $book['Stock'];
 
-
-// Get the user ID from the session if the user is logged in
-$userId = $_SESSION['user_id'] ?? null;  // Use null coalescing to handle an undefined session variable
+$userId = $_SESSION['user_id'] ?? null;
 
 
 $stock = $book['Stock'];
 $returnDate = $_GET['return_date'] ?? null;
-
 
 // Get live vote count from the votes table
 $voteCountStmt = $conn->prepare("SELECT COUNT(*) AS vote_count FROM votes WHERE Book_ID = ?");
@@ -41,7 +38,7 @@ $voteCountStmt->close();
 
 // Get read count (number of rentals and purchases)
 $readCountStmt = $conn->prepare("
-    SELECT COUNT(*) AS read_count 
+    SELECT COUNT(*) AS read_count
     FROM (
         -- Count rentals
         SELECT 1 FROM rent WHERE Book_ID = ? AND Account_ID = ? AND Status = 'ongoing' AND Return_Date > NOW()
@@ -59,6 +56,13 @@ $readResult = $readCountStmt->get_result()->fetch_assoc();
 $readCount = $readResult['read_count'] ?? 0;
 $readCountStmt->close();
 
+if (isset($_GET['reservation_success']) && $_GET['reservation_success'] == 1) {
+    // Alert (browser popup)
+    echo "<script>alert('Reservation successful! You will be notified when the book becomes available.');</script>";
+    
+    // Alternatively, you can display this message inline:
+    // echo "<div class='alert alert-success' role='alert'>Reservation successful! You will be notified when the book becomes available.</div>";
+}
 ?>
 
 <!DOCTYPE html>
@@ -97,79 +101,44 @@ $readCountStmt->close();
       </div>
 <div class="start-reading">
 <?php
-$hasChecked = false;  // Initialize it at the start
-$hasChecked = false;  // Initialize it at the start
+$canRead = false; // Initialize to false
 
-// Then inside your checks, you can set it to true after the rental check
 if ($userId) {
-
-$canRead = false;
-$hasChecked = false;
-
-
-// Then inside your checks, you can set it to true after the rental check
-if ($userId) {
-
-    // Prepare the query to check if the book is rented and status is ongoing
-
-    $checkStmt = $conn->prepare("SELECT * FROM rent WHERE Account_ID = ? AND Book_ID = ? AND Status = 'ongoing' AND Return_Date > NOW()");
-    $checkStmt->bind_param("ii", $userId, $Book_ID);
-    $checkStmt->execute();
-    $checkStmt->store_result();
-    $canRead = $checkStmt->num_rows > 0;
-    $checkStmt->close();
-
-
-    // After the rental check, mark that the check has been done
-    $hasChecked = true;
-
     // Check if the user has purchased the book
-    $purchasedStmt = $conn->prepare("SELECT * FROM transaction_book WHERE user_id = ? AND book_id = ?");
+    $purchasedStmt = $conn->prepare("SELECT 1 FROM transaction_book WHERE user_id = ? AND book_id = ?");
     $purchasedStmt->bind_param("ii", $userId, $Book_ID);
     $purchasedStmt->execute();
     $purchasedResult = $purchasedStmt->get_result();
-    if ($purchasedResult->num_rows > 0) {
-        $canRead = true;
-    }
-    $purchasedStmt->close();
-    // After the rental check, mark that the check has been done
-    $hasChecked = true;
 
-    // Check if the user has purchased the book
-    $purchasedStmt = $conn->prepare("SELECT * FROM transaction_book WHERE user_id = ? AND book_id = ?");
-    $purchasedStmt->bind_param("ii", $userId, $Book_ID);
-    $purchasedStmt->execute();
-    $purchasedResult = $purchasedStmt->get_result();
     if ($purchasedResult->num_rows > 0) {
-        $canRead = true;
+        $canRead = true; // User has purchased the book
     }
+
     $purchasedStmt->close();
 
-    $hasChecked = true;
+    // If not purchased, check if the user has rented the book and the rental is ongoing
+    if (!$canRead) {
+        $checkStmt = $conn->prepare("SELECT 1 FROM rent WHERE Account_ID = ? AND Book_ID = ? AND Status = 'ongoing' AND Return_Date > NOW()");
+        $checkStmt->bind_param("ii", $userId, $Book_ID);
+        $checkStmt->execute();
+        $checkResult = $checkStmt->get_result();
 
-    
-// Check if the user has already purchased the book (permanent access)
-$purchasedStmt = $conn->prepare("SELECT * FROM transaction_book WHERE user_id = ? AND book_id = ?");
-$purchasedStmt->bind_param("ii", $userId, $Book_ID);
-$purchasedStmt->execute();
-$purchasedResult = $purchasedStmt->get_result();
+        if ($checkResult->num_rows > 0) {
+            $canRead = true; // User has an active rental
+        }
 
-// If the user has purchased the book, enable the "Start Reading" button
-$canRead = $purchasedResult->num_rows > 0;
-$purchasedStmt->close();
- }
+        $checkStmt->close();
+    }
 }
 ?>
-
-<button 
-    class="start-btn" 
-    onclick="location.href='../../../Book/<?= $book['Plan_type'] ?>/Story/<?= $isbn ?>_story.php'" 
+<button
+    class="start-btn"
+    onclick="location.href='../../../Book/<?= $book['Plan_type'] ?>/Story/<?= $isbn ?>_story.php'"
     <?php echo ($canRead) ? '' : 'disabled style="opacity: 0.5; cursor: not-allowed;"'; ?>>
     ▶ Start Reading
 </button>
 
-
-<?php if (!$canRead && $hasChecked): ?>
+<?php if (!$canRead && $userId): ?>
     <?php if ($book['Plan_type'] === 'Free' || $book['Plan_type'] === 'Premium'): ?>
         <div class="button-container">
              <input type="hidden" name="isbn" value="<?= $isbn ?>">
@@ -180,26 +149,26 @@ $purchasedStmt->close();
                     <p style="color: #888;">This book is out of stock. You can only reserve it.</p>
                   <?php endif; ?>
                 </form>
-               <?php if ($stock === 0): ?>
-                  <!-- Reserve Button (Enabled when stock is 0) -->
-                  <form method="post" action="reserve_rent_book.php">
-                      <input type="hidden" name="isbn" value="<?= $isbn ?>">
-                      <button class="btn reserve-btn" type="submit">Reserve</button>
-                  </form>
-              <?php elseif ($stock > 0): ?>
-                  <!-- Reserve Button (Disabled when stock is more than 0) -->
-                  <form method="post" action="reserve_rent_book.php">
-                      <input type="hidden" name="isbn" value="<?= $isbn ?>">
-                      <button class="btn reserve-btn" type="submit" disabled style="opacity: 0.5; cursor: not-allowed;">Reserve</button>
-                  </form>
-              <?php endif; ?>
+              <?php if ($stock === 0): ?>
+                                      <!-- Reserve Button (Enabled when stock is 0) -->
+                                      <form method="post" action="../../../process/admin/reserve_book.php">
+                                          <input type="hidden" name="isbn" value="<?= $isbn ?>">
+                                          <button class="btn reserve-btn" type="submit">Reserve</button>
+                                      </form>
+                                  <?php else: ?>
+                                      <!-- Reserve Button (Disabled when stock is more than 0) -->
+                                      <form method="post" action="../../../process/admin/reserve_book.php">
+                                          <input type="hidden" name="isbn" value="<?= $isbn ?>">
+                                          <button class="btn reserve-btn" type="submit" disabled style="opacity: 0.5; cursor: not-allowed;">Reserve</button>
+                                      </form>
+                                  <?php endif; ?>
                  <!-- Add to Cart Button (Always available) -->
                   <form method="POST" action="../../../process/Book/add_cart.php" id="addToCartForm">
                     <input type="hidden" name="book_id" value="<?= $book['Book_ID'] ?>">
                     <button type="submit" class="btn add-btn">Add to Cart</button>
                   </form>
             </div>
-      
+
         <p style="color: #888;">Please rent or reserve this book to start reading.</p>
     <?php elseif ($book['Plan_type'] === 'Paid'): ?>
         <form method="post" action="../../../process/Book/paybook.php">
@@ -228,10 +197,10 @@ $purchasedStmt->close();
 
 <div class="reviews-section">
     <h3>Reviews</h3>
-    
+
     <?php
     // Query to fetch reviews, user data, and plan data
-    $reviewStmt = $conn->prepare("SELECT r.Review_Text, r.Created_At, u.Fullname, p.Plan_Name 
+    $reviewStmt = $conn->prepare("SELECT r.Review_Text, r.Created_At, u.Fullname, p.Plan_Name
                                   FROM reviews r
                                   JOIN profiles u ON r.Profile_ID = u.Profile_ID
                                   JOIN accountlist al ON u.Account_ID = al.Account_ID
@@ -303,7 +272,6 @@ $purchasedStmt->close();
   </div>
 </div>
 
-
 <!-- Payment Modal -->
 <div id="paymentModal" class="modal fade" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
   <div class="modal-dialog">
@@ -339,10 +307,7 @@ $purchasedStmt->close();
   </div>
 </div>
 
-
 <script>
-
-
 document.getElementById('paymentForm').addEventListener('submit', function (event) {
     event.preventDefault();
 
@@ -359,7 +324,7 @@ document.getElementById('paymentForm').addEventListener('submit', function (even
     .then(data => {
         if (data.success) {
             alert(data.message);  // Display success message
-            
+
             // Reload the page to show the updated state after payment
             window.location.reload(); // This will reload the current page
         } else {
